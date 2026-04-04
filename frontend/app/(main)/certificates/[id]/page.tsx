@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
-import PayoutCertificate from "@/components/certificates/PayoutCertificate";
+import CertificateRenderer from "@/components/certificates/CertificateRenderer";
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 
@@ -82,12 +82,15 @@ export default async function CertificatePage({ params }: PageProps) {
             </div>
 
             {/* Certificate Component */}
-            <PayoutCertificate
-                name={userName}
-                amount={parseFloat(payout.amount)}
-                date={payout.processed_at || payout.created_at}
-                transactionId={payout.transaction_id || payout.id}
-            />
+            <div className="w-full max-w-4xl">
+                <CertificateRenderer
+                    name={userName}
+                    amount={parseFloat(payout.amount)}
+                    date={payout.processed_at || payout.created_at}
+                    identifier={payout.transaction_id || payout.id}
+                    type="payout"
+                />
+            </div>
 
             {/* Footer Info */}
             <div className="mt-12 text-center text-gray-500 text-sm max-w-2xl">
