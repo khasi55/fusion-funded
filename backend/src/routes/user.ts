@@ -1,0 +1,515 @@
+import { Router, Response } from 'express';
+import { authenticate, AuthRequest, requireKYC } from '../middleware/auth';
+import { supabase, createEphemeralClient } from '../lib/supabase';
+import { getClientIP } from '../utils/ip';
+import { validateRequest, profileUpdateSchema, passwordUpdateSchema, emailUpdateSchema, walletUpdateSchema, requestFinancialOTPSchema } from '../middleware/validation';
+import { sensitiveLimiter, resourceIntensiveLimiter } from '../middleware/rate-limit';
+import { getRedis } from '../lib/redis';
+import { logSecurityEvent } from '../utils/security-logger';
+import { OTPService } from '../services/otp-service';
+import { EmailService } from '../services/email-service';
+
+const router = Router();
+
+// GET /api/user/profile - Get user profile
+router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('id, full_name, phone, country, address, pincode, display_name, avatar_url, wallet_balance, created_at')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            res.status(500).json({ error: 'Failed to fetch profile' });
+            return;
+        }
+
+        res.json({
+            profile: profile || null,
+            user: {
+                id: user.id,
+                email: user.email,
+            },
+        });
+
+    } catch (error: any) {
+        console.error('Profile GET error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PUT /api/user/profile - Update user profile
+router.put('/profile', authenticate, validateRequest(profileUpdateSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const updates = req.body;
+
+        // Update profile
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', user.id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating profile:', error);
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'UPDATE_PROFILE',
+                resource: 'profile',
+                payload: updates,
+                status: 'failure',
+                errorMessage: error.message,
+                ip: getClientIP(req)
+            });
+            res.status(500).json({ error: 'Failed to update profile' });
+            return;
+        }
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'UPDATE_PROFILE',
+            resource: 'profile',
+            payload: updates,
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({
+            success: true,
+            profile: data,
+        });
+
+    } catch (error: any) {
+        console.error('Profile PUT error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PUT /api/user/update-email - Update user email
+router.put('/update-email', authenticate, sensitiveLimiter, validateRequest(emailUpdateSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const { currentPassword, newEmail } = req.body;
+
+        // 🛡️ SECURITY LAYER: Verify current password
+        const tempClient = createEphemeralClient();
+        const { error: authError } = await tempClient.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword
+        });
+
+        if (authError) {
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'UPDATE_EMAIL_AUTH_FAIL',
+                resource: 'auth',
+                status: 'failure',
+                errorMessage: 'Invalid current password',
+                ip: getClientIP(req)
+            });
+            res.status(401).json({ error: 'Invalid current password' });
+            return;
+        }
+
+        // Cleanup temp session
+        await tempClient.auth.signOut();
+
+        // Update email via Supabase Auth
+        const { error } = await supabase.auth.admin.updateUserById(
+            user.id,
+            { email: newEmail }
+        );
+
+        if (error) {
+            console.error('Error updating email:', error);
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'UPDATE_EMAIL',
+                resource: 'auth',
+                payload: { newEmail },
+                status: 'failure',
+                errorMessage: error.message,
+                ip: getClientIP(req)
+            });
+            res.status(500).json({ error: 'Failed to update email' });
+            return;
+        }
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'UPDATE_EMAIL',
+            resource: 'auth',
+            payload: { newEmail },
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({ success: true, message: 'Email updated successfully. Please verify your new email.' });
+
+    } catch (error: any) {
+        console.error('Email update error', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PUT /api/user/update-password - Update user password
+router.put('/update-password', authenticate, sensitiveLimiter, validateRequest(passwordUpdateSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const { currentPassword, newPassword } = req.body;
+
+        // 🛡️ SECURITY LAYER: Verify current password
+        const tempClient = createEphemeralClient();
+        const { error: authError } = await tempClient.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword
+        });
+
+        if (authError) {
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'UPDATE_PASSWORD_AUTH_FAIL',
+                resource: 'auth',
+                status: 'failure',
+                errorMessage: 'Invalid current password',
+                ip: getClientIP(req)
+            });
+            res.status(401).json({ error: 'Invalid current password' });
+            return;
+        }
+
+        // Cleanup temp session
+        await tempClient.auth.signOut();
+
+        // Update password via Supabase Auth
+        const { error } = await supabase.auth.admin.updateUserById(
+            user.id,
+            { password: newPassword }
+        );
+
+        if (error) {
+            console.error('Error updating password:', error);
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'UPDATE_PASSWORD',
+                resource: 'auth',
+                status: 'failure',
+                errorMessage: error.message,
+                ip: getClientIP(req)
+            });
+            res.status(500).json({ error: 'Failed to update password' });
+            return;
+        }
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'UPDATE_PASSWORD',
+            resource: 'auth',
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({ success: true, message: 'Password updated successfully' });
+
+    } catch (error: any) {
+        console.error('Password update error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/user/request-financial-otp - Request OTP for wallet/bank change
+router.post('/request-financial-otp', authenticate, sensitiveLimiter, validateRequest(requestFinancialOTPSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const { type } = req.body;
+
+        // 🛡️ SECURITY LAYER: Cooldown Check (1 minute)
+        const redis = getRedis();
+        const cooldownKey = `otp:cooldown:${user.id}`;
+        const hasRecentRequest = await redis.get(cooldownKey);
+
+        if (hasRecentRequest) {
+            return res.status(429).json({ error: 'Please wait at least 60 seconds before requesting a new code.' });
+        }
+
+        // Generate OTP
+        const otp = await OTPService.generateOTP(user.id);
+
+        // Set cooldown
+        await redis.set(cooldownKey, '1', 'EX', 60);
+
+        // Fetch user profile for name
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+        // Send Email
+        await EmailService.sendFinancialOTP(user.email, profile?.full_name || 'Valued Trader', otp, type);
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'REQUEST_FINANCIAL_OTP',
+            resource: type,
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({ success: true, message: `Verification code sent to ${user.email.replace(/(.{2})(.*)(@.*)/, "$1***$3")}` });
+
+    } catch (error: any) {
+        console.error('Request OTP error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET /api/user/wallet - Get user wallet details
+router.get('/wallet', authenticate, async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+
+        const { data: wallet, error } = await supabase
+            .from('wallet_addresses')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error fetching wallet:', error);
+            res.status(500).json({ error: 'Failed to fetch wallet' });
+            return;
+        }
+
+        // Also fetch balance from profile as backup/display
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('wallet_balance')
+            .eq('id', user.id)
+            .single();
+
+        res.json({
+            wallet: wallet || null,
+            balance: profile?.wallet_balance || 0
+        });
+
+    } catch (error: any) {
+        console.error('Wallet GET error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/user/wallet - Save user wallet address
+router.post('/wallet', authenticate, requireKYC, sensitiveLimiter, validateRequest(walletUpdateSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const { walletAddress, otp } = req.body;
+
+        // 🛡️ SECURITY LAYER: Verify OTP
+        const isOtpValid = await OTPService.verifyOTP(user.id, otp);
+        if (!isOtpValid) {
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'SAVE_WALLET_OTP_FAIL',
+                resource: 'wallet',
+                status: 'failure',
+                errorMessage: 'Invalid or expired verification code',
+                ip: getClientIP(req)
+            });
+            res.status(401).json({ error: 'Invalid or expired verification code' });
+            return;
+        }
+
+        // Check if already locked
+        const { data: existing } = await supabase
+            .from('wallet_addresses')
+            .select('is_locked')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (existing?.is_locked) {
+            res.status(400).json({ error: 'Wallet address is locked and cannot be changed.' });
+            return;
+        }
+
+        // Upsert wallet address
+        const { supabaseAdmin } = await import('../lib/supabase');
+        const { data, error } = await supabaseAdmin
+            .from('wallet_addresses')
+            .upsert({
+                user_id: user.id,
+                wallet_address: walletAddress,
+                wallet_type: 'USDT_TRC20', // Default for now
+                is_locked: true, // Auto-lock on save as per UI
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' })
+            .select()
+            .single();
+
+        if (error) {
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'SAVE_WALLET',
+                resource: 'wallet',
+                payload: { walletAddress },
+                status: 'failure',
+                errorMessage: error.message,
+                ip: getClientIP(req)
+            });
+
+            if (error.code === '23503') {
+                res.status(401).json({ error: 'Session invalid. User account not found.' });
+            } else {
+                console.error('Error saving wallet:', error);
+                res.status(500).json({ error: 'Failed to save wallet address' });
+            }
+            return;
+        }
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'SAVE_WALLET',
+            resource: 'wallet',
+            payload: { walletAddress },
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({ success: true, wallet: data });
+
+    } catch (error: any) {
+        console.error('Wallet POST error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET /api/user/bank-details - Get user bank details
+router.get('/bank-details', authenticate, async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+
+        const { data: bankDetails, error } = await supabase
+            .from('bank_details')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error fetching bank details:', error);
+            res.status(500).json({ error: 'Failed to fetch bank details' });
+            return;
+        }
+
+        res.json({
+            bankDetails: bankDetails || null
+        });
+
+    } catch (error: any) {
+        console.error('BankDetails GET error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/user/bank-details - Save user bank details
+import { bankDetailsUpdateSchema } from '../middleware/validation';
+router.post('/bank-details', authenticate, requireKYC, sensitiveLimiter, validateRequest(bankDetailsUpdateSchema), async (req: AuthRequest, res: Response) => {
+    try {
+        const user = req.user!;
+        const { otp, ...updates } = req.body;
+
+        // 🛡️ SECURITY LAYER: Verify OTP
+        const isOtpValid = await OTPService.verifyOTP(user.id, otp);
+        if (!isOtpValid) {
+            await logSecurityEvent({
+                userId: user.id,
+                email: user.email,
+                action: 'SAVE_BANK_DETAILS_OTP_FAIL',
+                resource: 'bank_details',
+                status: 'failure',
+                errorMessage: 'Invalid or expired verification code',
+                ip: getClientIP(req)
+            });
+            res.status(401).json({ error: 'Invalid or expired verification code' });
+            return;
+        }
+
+        // Check if already locked
+        const { data: existing } = await supabase
+            .from('bank_details')
+            .select('is_locked')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (existing?.is_locked) {
+            res.status(400).json({ error: 'Bank details are locked and cannot be changed.' });
+            return;
+        }
+
+        // Upsert bank details
+        const { supabaseAdmin } = await import('../lib/supabase');
+        const { data, error } = await supabaseAdmin
+            .from('bank_details')
+            .upsert({
+                user_id: user.id,
+                ...updates,
+                is_locked: true, // Auto-lock on save
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error saving bank details:', error);
+            res.status(500).json({ error: 'Failed to save bank details' });
+            return;
+        }
+
+        await logSecurityEvent({
+            userId: user.id,
+            email: user.email,
+            action: 'SAVE_BANK_DETAILS',
+            resource: 'bank_details',
+            payload: updates,
+            status: 'success',
+            ip: getClientIP(req)
+        });
+
+        res.json({ success: true, bankDetails: data });
+
+    } catch (error: any) {
+        console.error('BankDetails POST error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+export default router;

@@ -1,0 +1,160 @@
+[2026-03-31T08:46:53.879Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T08:46:53.880Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T08:46:54.227Z] Found 500 active challenges
+[2026-03-31T08:46:54.228Z] Fetching profiles for 466 users
+[2026-03-31T08:46:54.233Z] Found 500 active challenges
+[2026-03-31T08:46:54.234Z] Fetching profiles for 466 users
+[2026-03-31T08:46:55.554Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T08:46:55.555Z] Mapped 0 profiles
+[2026-03-31T08:46:55.555Z] Fetching trades for 500 challenges
+[2026-03-31T08:46:55.558Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T08:46:55.558Z] Mapped 0 profiles
+[2026-03-31T08:46:55.558Z] Fetching trades for 500 challenges
+[2026-03-31T08:46:55.964Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T08:46:55.964Z] Found 0 trades
+[2026-03-31T08:46:55.965Z] Returning 100 leaderboard entries
+[2026-03-31T08:46:55.974Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T08:46:55.974Z] Found 0 trades
+[2026-03-31T08:46:55.975Z] Returning 100 leaderboard entries
+[2026-03-31T08:47:18.152Z] Serving 100 entries from cache
+[2026-03-31T08:47:18.154Z] Serving 100 entries from cache
+[2026-03-31T08:47:32.458Z] Serving 42 entries from cache
+[2026-03-31T08:47:33.808Z] Serving 100 entries from cache
+[2026-03-31T08:49:16.106Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T08:49:16.112Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T08:49:16.464Z] Found 500 active challenges
+[2026-03-31T08:49:16.465Z] Fetching profiles for 466 users
+[2026-03-31T08:49:16.468Z] Found 500 active challenges
+[2026-03-31T08:49:16.469Z] Fetching profiles for 466 users
+[2026-03-31T08:49:16.844Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T08:49:16.845Z] Mapped 0 profiles
+[2026-03-31T08:49:16.845Z] Fetching trades for 500 challenges
+[2026-03-31T08:49:16.864Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T08:49:16.864Z] Mapped 0 profiles
+[2026-03-31T08:49:16.864Z] Fetching trades for 500 challenges
+[2026-03-31T08:49:17.258Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T08:49:17.258Z] Found 0 trades
+[2026-03-31T08:49:17.259Z] Returning 100 leaderboard entries
+[2026-03-31T08:49:17.271Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T08:49:17.271Z] Found 0 trades
+[2026-03-31T08:49:17.272Z] Returning 100 leaderboard entries
+[2026-03-31T08:50:17.216Z] Serving 100 entries from cache
+[2026-03-31T08:50:17.219Z] Serving 100 entries from cache
+[2026-03-31T09:09:09.833Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T09:09:09.834Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T09:09:10.184Z] Found 500 active challenges
+[2026-03-31T09:09:10.185Z] Fetching profiles for 466 users
+[2026-03-31T09:09:10.187Z] Found 500 active challenges
+[2026-03-31T09:09:10.187Z] Fetching profiles for 466 users
+[2026-03-31T09:09:10.543Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T09:09:10.543Z] Mapped 0 profiles
+[2026-03-31T09:09:10.543Z] Fetching trades for 500 challenges
+[2026-03-31T09:09:10.546Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T09:09:10.546Z] Mapped 0 profiles
+[2026-03-31T09:09:10.546Z] Fetching trades for 500 challenges
+[2026-03-31T09:09:10.959Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T09:09:10.959Z] Found 0 trades
+[2026-03-31T09:09:10.959Z] Returning 100 leaderboard entries
+[2026-03-31T09:09:10.961Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T09:09:10.961Z] Found 0 trades
+[2026-03-31T09:09:10.962Z] Returning 100 leaderboard entries
+[2026-03-31T09:22:34.416Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T09:22:34.417Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T09:22:34.729Z] Found 500 active challenges
+[2026-03-31T09:22:34.729Z] Fetching profiles for 466 users
+[2026-03-31T09:22:34.731Z] Found 500 active challenges
+[2026-03-31T09:22:34.732Z] Fetching profiles for 466 users
+[2026-03-31T09:22:34.938Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T09:22:34.938Z] Mapped 0 profiles
+[2026-03-31T09:22:34.939Z] Fetching trades for 500 challenges
+[2026-03-31T09:22:35.083Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T09:22:35.084Z] Mapped 0 profiles
+[2026-03-31T09:22:35.084Z] Fetching trades for 500 challenges
+[2026-03-31T09:22:35.158Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T09:22:35.159Z] Found 0 trades
+[2026-03-31T09:22:35.159Z] Returning 100 leaderboard entries
+[2026-03-31T09:22:35.482Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T09:22:35.483Z] Found 0 trades
+[2026-03-31T09:22:35.483Z] Returning 100 leaderboard entries
+[2026-03-31T11:29:46.442Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T11:29:46.445Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T11:29:46.788Z] Found 500 active challenges
+[2026-03-31T11:29:46.789Z] Fetching profiles for 467 users
+[2026-03-31T11:29:46.800Z] Found 500 active challenges
+[2026-03-31T11:29:46.800Z] Fetching profiles for 467 users
+[2026-03-31T11:29:47.163Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T11:29:47.163Z] Mapped 0 profiles
+[2026-03-31T11:29:47.164Z] Fetching trades for 500 challenges
+[2026-03-31T11:29:47.166Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T11:29:47.166Z] Mapped 0 profiles
+[2026-03-31T11:29:47.166Z] Fetching trades for 500 challenges
+[2026-03-31T11:29:47.563Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T11:29:47.563Z] Found 0 trades
+[2026-03-31T11:29:47.564Z] Returning 100 leaderboard entries
+[2026-03-31T11:29:47.568Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T11:29:47.568Z] Found 0 trades
+[2026-03-31T11:29:47.568Z] Returning 100 leaderboard entries
+[2026-03-31T11:51:36.732Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T11:51:36.734Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T11:51:37.089Z] Found 500 active challenges
+[2026-03-31T11:51:37.090Z] Fetching profiles for 467 users
+[2026-03-31T11:51:37.095Z] Found 500 active challenges
+[2026-03-31T11:51:37.095Z] Fetching profiles for 467 users
+[2026-03-31T11:51:37.455Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T11:51:37.456Z] Mapped 0 profiles
+[2026-03-31T11:51:37.456Z] Fetching trades for 500 challenges
+[2026-03-31T11:51:37.461Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T11:51:37.462Z] Mapped 0 profiles
+[2026-03-31T11:51:37.462Z] Fetching trades for 500 challenges
+[2026-03-31T11:51:37.856Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T11:51:37.856Z] Found 0 trades
+[2026-03-31T11:51:37.857Z] Returning 100 leaderboard entries
+[2026-03-31T11:51:37.858Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T11:51:37.858Z] Found 0 trades
+[2026-03-31T11:51:37.859Z] Returning 100 leaderboard entries
+[2026-03-31T11:51:48.079Z] Serving 47 entries from cache
+[2026-03-31T11:51:48.951Z] Serving 31 entries from cache
+[2026-03-31T15:19:34.976Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T15:19:34.978Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T15:19:35.346Z] Found 500 active challenges
+[2026-03-31T15:19:35.346Z] Fetching profiles for 461 users
+[2026-03-31T15:19:35.428Z] Found 500 active challenges
+[2026-03-31T15:19:35.429Z] Fetching profiles for 461 users
+[2026-03-31T15:19:35.796Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T15:19:35.796Z] Mapped 0 profiles
+[2026-03-31T15:19:35.796Z] Fetching trades for 500 challenges
+[2026-03-31T15:19:35.820Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T15:19:35.820Z] Mapped 0 profiles
+[2026-03-31T15:19:35.820Z] Fetching trades for 500 challenges
+[2026-03-31T15:19:36.216Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T15:19:36.216Z] Found 0 trades
+[2026-03-31T15:19:36.217Z] Returning 100 leaderboard entries
+[2026-03-31T15:19:36.237Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T15:19:36.237Z] Found 0 trades
+[2026-03-31T15:19:36.237Z] Returning 100 leaderboard entries
+[2026-03-31T15:19:39.502Z] Serving 53 entries from cache
+[2026-03-31T15:19:40.505Z] Serving 28 entries from cache
+[2026-03-31T15:19:41.436Z] Serving 4 entries from cache
+[2026-03-31T15:19:42.398Z] Serving 100 entries from cache
+[2026-03-31T15:34:50.489Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T15:34:50.490Z] Fetching fresh ranking for accountSize: All
+[2026-03-31T15:34:50.818Z] Found 500 active challenges
+[2026-03-31T15:34:50.819Z] Fetching profiles for 461 users
+[2026-03-31T15:34:50.947Z] Found 500 active challenges
+[2026-03-31T15:34:50.948Z] Fetching profiles for 461 users
+[2026-03-31T15:34:51.170Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T15:34:51.170Z] Mapped 0 profiles
+[2026-03-31T15:34:51.170Z] Fetching trades for 500 challenges
+[2026-03-31T15:34:51.173Z] Profiles fetch error: TypeError: fetch failed
+[2026-03-31T15:34:51.173Z] Mapped 0 profiles
+[2026-03-31T15:34:51.173Z] Fetching trades for 500 challenges
+[2026-03-31T15:34:51.429Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T15:34:51.429Z] Found 0 trades
+[2026-03-31T15:34:51.430Z] Returning 100 leaderboard entries
+[2026-03-31T15:34:51.568Z] Trades fetch error: TypeError: fetch failed
+[2026-03-31T15:34:51.568Z] Found 0 trades
+[2026-03-31T15:34:51.568Z] Returning 100 leaderboard entries
+[2026-04-03T08:52:48.878Z] Fetching fresh ranking for accountSize: All
+[2026-04-03T08:52:48.897Z] Fetching fresh ranking for accountSize: All
+[2026-04-03T08:52:49.162Z] No active challenges found
+[2026-04-03T08:52:49.164Z] No active challenges found

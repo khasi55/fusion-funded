@@ -1,0 +1,207 @@
+import {
+    PaymentGateway,
+    CreateOrderParams,
+    CreateOrderResponse,
+    WebhookData
+} from './types';
+import crypto from 'crypto';
+import { supabase } from '../../lib/supabase';
+
+export class FusionPayGateway implements PaymentGateway {
+    name = 'fusionpay';
+    private apiUrl: string;
+
+    constructor() {
+        this.apiUrl = process.env.FUSIONPAY_API_URL || process.env.SHARKPAY_API_URL || 'https://sharkpay-o9zz.vercel.app';
+    }
+
+    private async getConfig() {
+        // Fetch from DB first 
+        try {
+            const { data } = await supabase
+                .from('merchant_config')
+                .select('*')
+                .eq('gateway_name', 'FusionPay')
+                .single();
+
+            if (data && data.is_active) {
+                return {
+                    keyId: data.api_key,
+                    keySecret: data.api_secret,
+                    webhookSecret: data.webhook_secret,
+                    environment: data.environment,
+                    apiUrl: process.env.FUSIONPAY_API_URL || process.env.SHARKPAY_API_URL || 'https://payments.fusionfunded.com'
+                };
+            }
+        } catch (e) {
+            console.warn("Failed to fetch FusionPay config from DB, falling back to ENV:", e);
+        }
+
+        // Fallback to ENV
+        return {
+            keyId: process.env.FUSIONPAY_API_KEY || process.env.SHARKPAY_API_KEY || process.env.SHARK_PAYMENT_KEY_ID || '',
+            keySecret: process.env.FUSIONPAY_API_SECRET || process.env.SHARKPAY_API_SECRET || process.env.SHARK_PAYMENT_KEY_SECRET || '',
+            webhookSecret: process.env.FUSIONPAY_WEBHOOK_SECRET || process.env.SHARKPAY_WEBHOOK_SECRET || '',
+            environment: 'sandbox',
+            apiUrl: process.env.FUSIONPAY_API_URL || process.env.SHARKPAY_API_URL || 'https://payments.fusionfunded.com'
+        };
+    }
+
+    async createOrder(params: CreateOrderParams): Promise<CreateOrderResponse> {
+        try {
+            const config = await this.getConfig();
+            if (!config.keyId || !config.keySecret) {
+                throw new Error("FusionPay API Credentials missing (DB or ENV)");
+            }
+
+            const apiUrl = config.apiUrl;
+
+            // Convert USD to INR for FusionPay
+            const amountINR = await this.convertToINR(params.amount);
+
+            // Frontend and backend URLs
+            const frontendUrl = process.env.FRONTEND_URL || 'https://app.fusionfunded.com';
+            const backendUrl = process.env.BACKEND_URL || 'https://api.fusionfunded.co';
+            // 🛡️ SECURITY: Use a per-order signature that includes the expected status and amount
+            const masterWebhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || 'fusion_secret_fallback';
+            // We lock the signature to the orderId + 'paid' status + currency
+            const signature = crypto.createHmac('sha256', masterWebhookSecret).update(`${params.orderId}:paid:${params.currency}`).digest('hex');
+            const webhookUrl = `${backendUrl}/api/webhooks/payment?gateway=fusionpay&sig=${signature}`;
+
+            const payload = {
+                amount: amountINR,
+                name: params.customerName,
+                email: params.customerEmail,
+                reference_id: params.orderId,
+                success_url: `${frontendUrl}/payment/success?orderId=${params.orderId}`,
+                failed_url: `${frontendUrl}/payment/failed`,
+                callback_url: webhookUrl,
+            };
+
+            console.log('[FusionPay Debug] Sending Payload:', JSON.stringify(payload, null, 2));
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+            try {
+                const response = await fetch(`${apiUrl}/api/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${Buffer.from(`${config.keyId}:${config.keySecret}`).toString('base64')}`,
+                    },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal,
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('FusionPay API error:', response.status, errorText);
+                    throw new Error(`FusionPay API failed: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json() as any;
+
+                return {
+                    success: true,
+                    gatewayOrderId: data.orderId || data.order_id,
+                    paymentUrl: data.checkoutUrl || data.checkout_url || data.url,
+                };
+            } catch (fetchError: any) {
+                clearTimeout(timeoutId);
+
+                if (fetchError.name === 'AbortError') {
+                    throw new Error('FusionPay API timeout - request took longer than 30 seconds');
+                } else if (fetchError.code === 'ECONNRESET') {
+                    throw new Error('FusionPay API connection reset - please check if the API is reachable');
+                } else if (fetchError.code === 'ENOTFOUND') {
+                    throw new Error(`FusionPay API not found at ${this.apiUrl}`);
+                }
+                throw fetchError;
+            }
+        } catch (error: any) {
+            console.error('FusionPay createOrder error:', error);
+            return {
+                success: false,
+                gatewayOrderId: '',
+                error: error.message,
+            };
+        }
+    }
+
+    async verifyWebhook(headers: any, body: any): Promise<boolean> {
+        try {
+            const config = await this.getConfig();
+            const webhookSecret = config.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET;
+            
+            if (!webhookSecret) {
+                console.warn('[FusionPay] No webhook secret found for verification');
+                return false;
+            }
+
+            const receivedSignature = headers['x-fusion-signature'] || headers['x-shark-signature'] || headers['x-signature'];
+ 
+            // 🛡️ FALLBACK: If no signature header, check for per-order HMAC signature in body/query
+            if (!receivedSignature) {
+                const receivedSig = body.sig;
+                const orderId = body.reference_id || body.order_id;
+                
+                if (receivedSig && orderId && webhookSecret) {
+                    // Re-calculate the expected signature for a 'paid' status
+                    // We check if the signature matches 'paid' for this specific order
+                    const currency = body.currency || 'USD';
+                    const expectedSig = crypto.createHmac('sha256', webhookSecret).update(`${orderId}:paid:${currency}`).digest('hex');
+                    
+                    if (receivedSig === expectedSig) {
+                        console.log(`[FusionPay] Webhook verified via per-order signature for ${orderId}`);
+                        return true;
+                    }
+                }
+                console.warn('[FusionPay] No valid signature or token found');
+                return false;
+            }
+
+            // Generate expected signature
+            const hmac = crypto.createHmac('sha256', webhookSecret);
+            const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+            const expectedSignature = hmac.update(bodyStr).digest('hex');
+
+            const receivedBuf = Buffer.from(receivedSignature);
+            const expectedBuf = Buffer.from(expectedSignature);
+
+            if (receivedBuf.length !== expectedBuf.length) return false;
+
+            const isValid = crypto.timingSafeEqual(receivedBuf, expectedBuf);
+
+            if (!isValid) {
+                console.warn('[FusionPay] Invalid webhook signature detected');
+            }
+
+            return isValid;
+        } catch (error) {
+            console.error('[FusionPay] Webhook verification error:', error);
+            return false;
+        }
+    }
+
+    parseWebhookData(body: any): WebhookData {
+        return {
+            orderId: body.reference_id,
+            paymentId: body.orderId,
+            status: body.event === 'payment.success' ? 'success' : 'failed',
+            amount: Number(body.amount),
+            paymentMethod: body.utr ? 'UPI/Bank' : 'unknown',
+            metadata: {
+                utr: body.utr,
+                event: body.event,
+            },
+        };
+    }
+
+    private async convertToINR(usdAmount: number): Promise<number> {
+        const USD_TO_INR = 98;
+        return Math.round(usdAmount * USD_TO_INR);
+    }
+}

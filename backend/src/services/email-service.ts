@@ -1,0 +1,662 @@
+import nodemailer from 'nodemailer';
+import QRCode from 'qrcode';
+import { EventEntryService } from './event-entry-service';
+import { supabase } from '../lib/supabase';
+
+export class EmailService {
+    // SMTP Credentials
+    private static SMTP_HOST = process.env.ELASTIC_EMAIL_SMTP_HOST || 'smtp.elasticemail.com';
+    private static SMTP_PORT = Number(process.env.ELASTIC_EMAIL_SMTP_PORT) || 587; // Changed from 2525 to 587 for better reliability
+    private static SMTP_USER = process.env.ELASTIC_EMAIL_SMTP_USER || 'noreply@fusionfunded.com';
+    // Using hardcoded password as fallback from user request if env is missing
+    private static SMTP_PASS = process.env.ELASTIC_EMAIL_SMTP_PASS || 'C26AD1121F3DDAFCE8CC1BD6F0F97F766132';
+
+    private static FROM_EMAIL = process.env.ELASTIC_EMAIL_FROM || 'noreply@fusionfunded.com';
+    private static FROM_NAME = 'Fusion Funded';
+
+    private static transporter = nodemailer.createTransport({
+        host: EmailService.SMTP_HOST,
+        port: EmailService.SMTP_PORT,
+        secure: false, // Port 587 uses STARTTLS
+        auth: {
+            user: EmailService.SMTP_USER,
+            pass: EmailService.SMTP_PASS
+        },
+        tls: {
+            // Do not fail on invalid certs in dev, but enforce STARTTLS
+            rejectUnauthorized: false,
+            ciphers: 'SSLv3'
+        }
+    });
+
+    /**
+     * Send an email using Nodemailer (SMTP)
+     */
+    static async sendEmail(to: string, subject: string, bodyHtml: string, bodyText: string = '') {
+        try {
+            // console.log(`📧 Attempting to send email via SMTP to ${to}...`);
+
+            const fromHeader = `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`;
+            // const DEBUG = process.env.DEBUG === 'true';
+            // if (DEBUG) console.log(`📧 Sender Header: ${fromHeader}`);
+
+            const info = await this.transporter.sendMail({
+                from: fromHeader,
+                to: to,
+                subject: subject,
+                text: bodyText,
+                html: bodyHtml
+            });
+
+            // console.log(` Email sent: ${info.messageId}`);
+            return info;
+        } catch (error: any) {
+            console.error(' Error sending email via SMTP:', error.message);
+            // Don't throw, just log. We don't want to break the main flow.
+        }
+    }
+
+    /**
+     * Send Custom HTML Email (e.g., for Promotional Campaigns)
+     */
+    static async sendCustomEmail(email: string, name: string, subject: string, customHtml: string) {
+        // Optional: Wrap customHtml in a branded standard template box for professionalism
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #333; border-bottom: 2px solid #0d47a1; padding-bottom: 10px; margin-bottom: 20px;">
+                    ${subject}
+                </h2>
+                
+                <div style="color: #444; font-size: 15px; line-height: 1.6;">
+                    ${customHtml}
+                </div>
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center;">
+                    <p>Sent by <strong>Fusion Funded</strong></p>
+                    <p>If you no longer wish to receive these emails, you can update your preferences in your dashboard.</p>
+                </div>
+            </div>
+        `;
+
+        // Create a basic text fallback by stripping HTML tags
+        const textFallback = customHtml.replace(/<[^>]*>?/gm, '');
+
+        await this.sendEmail(email, subject, html, textFallback);
+    }
+
+    /**
+     * Send Account Credentials (Login, Password, Server)
+     */
+    static async sendAccountCredentials(email: string, name: string, login: string, password: string, server: string, investorPassword?: string) {
+        const subject = `Your New Trading Account Credentials - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #333;">Welcome to ${this.FROM_NAME}</h2>
+                <p>Dear ${name},</p>
+                <p>Your new trading account has been successfully created. Here are your login details:</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p><strong>Login:</strong> ${login}</p>
+                    <p><strong>Password:</strong> ${password}</p>
+                    <p><strong>Server:</strong> AURO MARKETS</p>
+                    ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
+                </div>
+
+                <p>Please download the MT5 platform and login using these credentials.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    If you did not request this account, please contact our support team immediately.
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\\n\\nYour new trading account has been created.\\n\\nLogin: ${login}\\nPassword: ${password}\\nServer: AURO MARKETS\\n${investorPassword ? `Investor Password: ${investorPassword}\\n` : ''}\\n\\nPlease login to MT5 with these details.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Breach Notification
+     */
+    static async sendBreachNotification(email: string, name: string, login: string, reason: string, description: string, adminComment?: string) {
+        const subject = `Account Breach Notification - Account ${login}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcccc; border-radius: 10px;">
+                <h2 style="color: #cc0000;">Usage Violation Detected</h2>
+                <p>Dear ${name},</p>
+                <p>We regret to inform you that your trading account <strong>${login}</strong> has breached the risk management rules.</p>
+                
+                <div style="background-color: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #cc0000;">
+                    <p><strong>Violation Type:</strong> ${reason}</p>
+                    <p><strong>Details:</strong> ${description}</p>
+                    ${adminComment ? `<p><strong>Admin Note:</strong> ${adminComment}</p>` : ''}
+                </div>
+
+                <p>As a result, your account has been disabled / closed according to our terms of service.</p>
+                <p>If you believe this is an error, please contact support.</p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\\n\\nAccount ${login} has breached risk rules.\\n\\nReason: ${reason}\\nDetails: ${description}${adminComment ? `\\nAdmin Note: ${adminComment}` : ''}\\n\\nYour account has been disabled. Contact support for inquiries.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Reject Notification
+     */
+    static async sendRejectNotification(email: string, name: string, login: string, reason: string, adminComment?: string) {
+        const subject = `Account Upgrade Rejected - Account ${login}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcccc; border-radius: 10px;">
+                <h2 style="color: #cc0000;">Upgrade Request Rejected</h2>
+                <p>Dear ${name},</p>
+                <p>We regret to inform you that your upgrade request for account <strong>${login}</strong> has been rejected following a review of your trading activity.</p>
+                
+                <div style="background-color: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #cc0000;">
+                    <p><strong>Reason:</strong> ${reason}</p>
+                    ${adminComment ? `<p><strong>Details:</strong> ${adminComment}</p>` : ''}
+                </div>
+
+                <p>Consequently, your account has been marked as breached / ineligible for further trading.</p>
+                <p>If you have any questions, please contact our support team.</p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\\n\\nYour upgrade request for account ${login} has been rejected.\\n\\nReason: ${reason}${adminComment ? `\\nDetails: ${adminComment}` : ''}\\n\\nYour account has been marked as breached. Contact support for inquiries.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Pass Notification
+     */
+    static async sendPassNotification(email: string, name: string, login: string, phase: string) {
+        const subject = `Congratulations! You've Passed Your ${phase} Challenge - Account ${login}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #d4edda; border-radius: 10px;">
+                <h2 style="color: #155724;">Congratulations, ${name}!</h2>
+                <p>We are excited to inform you that your trading account <strong>${login}</strong> has successfully reached its profit target for the <strong>${phase}</strong>.</p>
+                
+                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <p><strong>Status:</strong> PASSED ✅</p>
+                    <p><strong>Next Steps:</strong> Our team will now review your account. Once verified, we will upgrade you to the next phase or funded stage.</p>
+                </div>
+
+                <p>You will receive your new credentials shortly via email if your challenge requires a new account creation.</p>
+                <p>Thank you for trading with AURO MARKETS!</p>
+            </div>
+        `;
+
+        const text = `Congratulations ${name}!\n\nYour account ${login} has passed the ${phase}.\n\nOur team will review and upgrade your account shortly. Thank you for trading with Fusion Funded!`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+
+    /**
+     * Send Competition Joined Confirmation
+     */
+    static async sendCompetitionJoined(email: string, name: string, competitionTitle: string) {
+        const subject = ` Entry Confirmed: Welcome to Shark Battle Ground – ${competitionTitle}`;
+
+        const html = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                <h2 style="color: #0d47a1; margin-bottom: 10px;">Welcome to the Battle Ground, ${name}!</h2>
+                
+                <p style="font-size: 15px; color: #333;">Your entry has been successfully confirmed for:</p>
+                
+                <div style="padding: 12px 16px; background: #f3f7ff; border-left: 4px solid #0d47a1; margin: 15px 0; font-weight: bold;">
+                    ${competitionTitle}
+                </div>
+
+                <p style="font-size: 14px; color: #444;">
+                    You are now officially part of the <strong>Shark Battle Ground</strong>.  
+                    Prepare your strategy, manage your risk, and compete with the best traders.
+                </p>
+
+                <div style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; margin: 15px 0; border: 1px solid #ffeeba;">
+                    <strong> Important:</strong> The competition starts this coming <strong>Monday (19th January 2026)</strong>. Trading begins on that day.
+                </div>
+
+                <p style="font-size: 14px; color: #444;">
+                    We wish you strong discipline, sharp execution, and a profitable journey ahead.
+                </p>
+
+                <p style="margin-top: 25px; font-size: 13px; color: #666;">
+                    Best regards,<br/>
+                    <strong>Fusion Funded Team</strong>
+                </p>
+            </div>
+        `;
+
+        const text = `
+Welcome to the Battle Ground, ${name}!
+
+Your entry has been successfully confirmed for:
+${competitionTitle}
+
+You are now officially part of the Shark Battle Ground.
+Prepare your strategy and compete with the best.
+
+IMPORTANT: The competition starts this coming Monday. Trading begins on that day.
+
+Best regards,
+Fusion Funded Team
+        `;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Top 32 Event Invitation
+     */
+    /**
+     * Get Top 32 Event Invitation HTML
+     */
+    static getEventInviteHtml(name: string, qrCodeCid?: string): string {
+        return `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        
+        <div style="background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); padding: 40px 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 800;">FUSION FUNDED COMMUNITY EVENT</h1>
+           
+        </div>
+
+        <div style="padding: 40px 30px;">
+            <h2>Dear ${name},</h2>
+
+            <p style="font-size: 16px; line-height: 1.6;">
+                We are delighted to invite you to the <strong>Fusion Funded Community Event</strong> — an exclusive
+                in-person gathering for our valued traders and partners.
+                <br><br>
+                This event is designed to help you connect with our team, interact with fellow traders, 
+                and gain insights into upcoming opportunities, platform updates, and future growth plans.
+            </p>
+
+            ${qrCodeCid ? `
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f8f9fa; border: 2px dashed #0d47a1; border-radius: 12px;">
+                <h3 style="margin-top: 0; color: #0d47a1;">YOUR ENTRY PASS</h3>
+                <p style="font-size: 14px; margin-bottom: 15px; color: #555;">Please scan this QR code at the venue entrance</p>
+                <img src="${qrCodeCid}" alt="Entry QR Code" style="width: 200px; height: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+                <p style="font-size: 12px; color: #888; margin-top: 10px;">Pass Type: Standard Entry</p>
+            </div>
+            ` : ''}
+
+            <div style="background-color: #f8f9fa; border-left: 5px solid #0d47a1; padding: 20px; margin: 25px 0;">
+                <h3 style="color: #0d47a1;">Event Details</h3>
+                <table style="width:100%;">
+                    <tr><td><strong>Date:</strong></td><td>30th January</td></tr>
+                    <tr><td><strong>Venue:</strong></td><td>Aurika Hotel, Mumbai</td></tr>
+                    <tr>
+                        <td><strong>Location:</strong></td>
+                        <td><a href="https://maps.app.goo.gl/FP1EnzicoJiRueDH8">View on Google Maps</a></td>
+                    </tr>
+                    <tr><td><strong>Time:</strong></td><td>1:00 PM Onwards</td></tr>
+                </table>
+            </div>
+
+            <div style="background-color:#e3f2fd; padding:15px; border-radius:8px;">
+                <strong>Important Note:</strong>
+                <p>Please carry a valid ID and this invitation (QR code) for smooth entry.</p>
+            </div>
+
+            <p style="text-align:center; margin-top:30px;">
+                We look forward to meeting you in person and welcoming you to an engaging and insightful session.
+            </p>
+
+            <hr>
+
+            <p style="text-align:center; font-size:13px;">
+                Warm Regards,<br>
+                <strong>Fusion Funded Team</strong><br>
+                <a href="https://fusionfunded.com">www.fusionfunded.com</a>
+            </p>
+        </div>
+    </div>`;
+    }
+
+    static async sendEventInvite(email: string, name: string) {
+        const subject = `Invitation to Fusion Funded Community Event – Mumbai`;
+
+        try {
+            // Create Unique Pass in DB
+            const uniqueCode = await EventEntryService.createPass(name, email);
+
+            // Generate QR Code
+            const qrData = JSON.stringify({
+                name: name,
+                email: email,
+                event: 'Fusion Funded Community Event',
+                date: '2026-01-30',
+                id: uniqueCode
+            });
+
+            // Generate Data URL for backup/reference if needed, but we used Buffer for proper attachment
+            const qrCodeBuffer = await QRCode.toBuffer(qrData, {
+                errorCorrectionLevel: 'H',
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#ffffff'
+                },
+                width: 300
+            });
+
+            const html = this.getEventInviteHtml(name, 'cid:event-qrcode');
+
+            const text = `
+Dear ${name},
+
+You are invited!
+
+We are pleased to invite you to the Fusion Funded Exclusive Event. This event brings together our community for an in-person trading meet up, networking, and reward ceremony.
+
+Date: 30th January  
+Venue: Aurika Hotel, Mumbai  
+Time: 1:00 PM Sharp  
+Location: https://maps.app.goo.gl/FP1EnzicoJiRueDH8  
+
+Requirement: Please bring your personal laptop. 
+
+** ENTRY PASS **
+Please show the QR code attached to this email at the entrance.
+
+Regards,  
+Fusion Funded Team
+`;
+
+            await this.transporter.sendMail({
+                from: `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`,
+                to: email,
+                subject: subject,
+                text: text,
+                html: html,
+                attachments: [
+                    {
+                        filename: 'entry-qr-code.png',
+                        content: qrCodeBuffer,
+                        cid: 'event-qrcode' // referenced in the HTML
+                    }
+                ]
+            });
+
+        } catch (error: any) {
+            console.error('Error generating/sending Event Invite with QR:', error);
+            // Fallback without QR if it fails (using empty CID or handling gracefully in HTML)
+            const html = this.getEventInviteHtml(name);
+            await this.sendEmail(email, subject, html, 'Your invite (QR generation failed, please contact support).');
+        }
+    }
+
+    /**
+     * Send Payout Requested Notification
+     */
+    static async sendPayoutRequestedNotice(email: string, name: string, amount: number, method: string) {
+        const subject = `Payout Request Received - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #333;">Payout Request Received</h2>
+                <p>Dear ${name},</p>
+                <p>We have received your payout request. Our team will review it shortly. Here are the details:</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+                    <p><strong>Method:</strong> ${method}</p>
+                    <p><strong>Status:</strong> Pending Review</p>
+                </div>
+
+                <p>Review typically takes 24-48 business hours. You will receive another email once your request has been processed.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    If you did not request this payout, please contact our support team immediately.
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nWe have received your payout request for $${amount.toFixed(2)} via ${method}. Status: Pending Review.\n\nOur team will review your request within 24-48 business hours.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Payout Approved Notification
+     */
+    static async sendPayoutApprovedNotice(email: string, name: string, amount: number, transactionId: string) {
+        const subject = `Payout Request Approved! - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #d4edda; border-radius: 10px;">
+                <h2 style="color: #155724;">Payout Approved</h2>
+                <p>Dear ${name},</p>
+                <p>Great news! Your payout request has been approved and processed.</p>
+                
+                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+                    <p><strong>Transaction ID:</strong> ${transactionId}</p>
+                    <p><strong>Status:</strong> Approved & Processed ✅</p>
+                </div>
+
+                <p>The funds should reach your designated account shortly depending on the payment method's processing time.</p>
+                <p>Thank you for trading with Fusion Funded!</p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nYour payout request for $${amount.toFixed(2)} has been approved and processed. Transaction ID: ${transactionId}.\n\nThank you for trading with Fusion Funded!`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Payout Rejected Notification
+     */
+    static async sendPayoutRejectedNotice(email: string, name: string, amount: number, reason: string) {
+        const subject = `Payout Request Update - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcccc; border-radius: 10px;">
+                <h2 style="color: #cc0000;">Payout Request Rejected</h2>
+                <p>Dear ${name},</p>
+                <p>We regret to inform you that your payout request for <strong>$${amount.toFixed(2)}</strong> has been rejected following a review.</p>
+                
+                <div style="background-color: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #cc0000;">
+                    <p><strong>Reason:</strong> ${reason}</p>
+                </div>
+
+                <p>If you believe this is an error or have any questions about the rejection reason, please contact our support team.</p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nYour payout request for $${amount.toFixed(2)} has been rejected.\n\nReason: ${reason}\n\nPlease contact support for more information.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Financial OTP Notification
+     */
+    static async sendFinancialOTP(email: string, name: string, otp: string, type: 'wallet' | 'bank' | 'payout' | 'affiliate_withdrawal') {
+        let actionName = '';
+        let verb = 'update your';
+
+        if (type === 'wallet') actionName = 'Wallet Address Update';
+        else if (type === 'bank') actionName = 'Bank Details Update';
+        else if (type === 'payout' || type === 'affiliate_withdrawal') {
+            actionName = type === 'payout' ? 'Payout Request Verification' : 'Affiliate Withdrawal Verification';
+            verb = 'authorize your';
+        }
+
+        const subject = `Verification Code for ${actionName} - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #333;">Action Required: Verify Your Identity</h2>
+                <p>Dear ${name},</p>
+                <p>You have requested to ${verb} <strong>${actionName.toLowerCase()}</strong>. Please use the following verification code to confirm this action:</p>
+                
+                <div style="background-color: #f4f4f4; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #0d47a1;">${otp}</span>
+                </div>
+
+                <p style="color: #666; font-size: 14px;">This code is valid for 5 minutes. If you did not request this, please ignore this email and secure your account immediately.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 15px;">
+                    This is an automated security notification. For your protection, never share this code with anyone.
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nYour verification code for ${actionName} is: ${otp}\n\nThis code is valid for 5 minutes. If you did not request this, please secure your account.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Bulk Custom HTML Emails
+     */
+    static async sendBulkCustomEmail(
+        userIds: string[],
+        subject: string,
+        htmlContent: string,
+        textContent?: string
+    ): Promise<{ sent: number; failed: number }> {
+        let sent = 0;
+        let failed = 0;
+
+        for (const userId of userIds) {
+            try {
+                // Get user email and name
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('email, full_name')
+                    .eq('id', userId)
+                    .single();
+
+                if (error || !profile?.email) {
+                    console.error(`User ${userId} not found or has no email`);
+                    failed++;
+                    continue;
+                }
+
+                // Wrap custom content in a basic branded template
+                const html = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #333; border-bottom: 2px solid #0d47a1; padding-bottom: 10px; margin-bottom: 20px;">
+                            ${subject}
+                        </h2>
+                        
+                        <div style="color: #444; font-size: 15px; line-height: 1.6;">
+                            ${htmlContent}
+                        </div>
+
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center;">
+                            <p>Sent by <strong>${this.FROM_NAME}</strong></p>
+                            <p>If you no longer wish to receive these emails, you can update your preferences in your dashboard.</p>
+                        </div>
+                    </div>
+                `;
+
+                const text = textContent || htmlContent.replace(/<[^>]*>?/gm, '');
+
+                await this.sendEmail(profile.email, subject, html, text);
+                sent++;
+
+                // Small delay to avoid hitting SMTP limits too hard
+                await new Promise(resolve => setTimeout(resolve, 50));
+            } catch (err) {
+                console.error(`Failed to send bulk email to ${userId}:`, err);
+                failed++;
+            }
+        }
+        return { sent, failed };
+    }
+
+    /**
+     * Send Pass Certificate Notification
+     */
+    static async sendPassCertificate(email: string, name: string, login: string, amount: number) {
+        const subject = `Achievement Unlocked: Your Challenge Pass Certificate - ${this.FROM_NAME}`;
+        
+        const html = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #eee;">
+                <div style="background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); padding: 30px 20px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800;">CONGRATULATIONS!</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">You have successfully passed your challenge</p>
+                </div>
+
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #333; margin-bottom: 5px;">Dear ${name},</h2>
+                    <p style="font-size: 16px; color: #666; line-height: 1.6;">
+                        This is a significant milestone in your trading journey. Your dedication and risk management have earned you the official <strong>Certificate of Capital Allocation</strong>.
+                    </p>
+
+                    <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e3f2fd;">
+                        <p style="margin: 0; color: #0d47a1; font-weight: bold; font-size: 14px; text-transform: uppercase;">Account Size</p>
+                        <p style="margin: 5px 0 0 0; font-size: 28px; font-weight: 800; color: #333;">$${amount.toLocaleString()}</p>
+                    </div>
+
+                    <p style="font-size: 14px; color: #888;">
+                        Your certificate is now available in your dashboard under the "Certificates" tab.
+                    </p>
+
+                    <a href="https://app.fusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
+                </div>
+
+                <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
+                    <p>Sent by <strong>Fusion Funded</strong></p>
+                </div>
+            </div>
+        `;
+
+        const text = `Congratulations ${name}!\n\nYou have passed your challenge (Account ${login}). Your $${amount.toLocaleString()} Certificate of Capital Allocation is now available in your dashboard.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Payout Certificate Notification
+     */
+    static async sendPayoutCertificate(email: string, name: string, amount: number) {
+        const subject = `Payout Confirmed: Your Achievement Certificate - ${this.FROM_NAME}`;
+        
+        const html = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #eee;">
+                <div style="background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); padding: 30px 20px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800;">PAYOUT SUCCESSFUL</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Your achievement certificate is ready</p>
+                </div>
+
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h2 style="color: #333; margin-bottom: 5px;">Excellent Trading, ${name}!</h2>
+                    <p style="font-size: 16px; color: #666; line-height: 1.6;">
+                        Your payout has been processed. We are proud to present you with your <strong>Certificate of Payout</strong> as a testament to your consistent risk management.
+                    </p>
+
+                    <div style="margin: 30px 0; padding: 20px; background: #f3f7ff; border-radius: 12px; border: 1px solid #d1d9ff;">
+                        <p style="margin: 0; color: #1a237e; font-weight: bold; font-size: 14px; text-transform: uppercase;">Payout Amount</p>
+                        <p style="margin: 5px 0 0 0; font-size: 28px; font-weight: 800; color: #333;">$${amount.toLocaleString()}</p>
+                    </div>
+
+                    <p style="font-size: 14px; color: #888;">
+                        You can download your payout certificate anytime from your member portal.
+                    </p>
+
+                    <a href="https://app.fusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
+                </div>
+
+                <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
+                    <p>Sent by <strong>Fusion Funded</strong></p>
+                </div>
+            </div>
+        `;
+
+        const text = `Great job ${name}!\n\nYour payout of $${amount.toLocaleString()} has been processed. Your Certificate of Payout is now available in your dashboard.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+}

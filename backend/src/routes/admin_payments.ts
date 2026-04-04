@@ -1,0 +1,187 @@
+import { Router, Response } from 'express';
+import { supabase } from '../lib/supabase';
+import { authenticate, AuthRequest, requireRole } from '../middleware/auth';
+
+import { paymentGatewayRegistry } from '../services/payment-gateways';
+
+const router = Router();
+
+router.post('/cregis/query', authenticate, requireRole(['super_admin', 'admin']), async (req: AuthRequest, res: Response) => {
+    try {
+        const { orderId } = req.body;
+        if (!orderId) {
+            return res.status(400).json({ error: 'Order ID is required' });
+        }
+
+        const gateway = paymentGatewayRegistry.getGateway('cregis');
+        if (!gateway || !gateway.queryOrder) {
+            return res.status(500).json({ error: 'Cregis gateway not configured correctly' });
+        }
+
+        const result = await gateway.queryOrder(orderId);
+        res.json(result);
+    } catch (err: any) {
+        console.error('Cregis order query error:', err);
+        res.status(500).json({ error: err.message || 'Internal server error' });
+    }
+});
+
+router.get('/', authenticate, requireRole(['super_admin', 'payouts_admin', 'admin', 'sub_admin']), async (req: AuthRequest, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 50;
+        const status = req.query.status as string;
+        const search = req.query.search as string;
+        const offset = (page - 1) * limit;
+
+        // 1. Build Query
+        let query = supabase
+            .from('payment_orders')
+            .select('*', { count: 'exact' });
+
+        // Apply filters BEFORE ordering and range
+        if (search) {
+            const searchLower = search.toLowerCase();
+            // Find user IDs matching search in profiles
+            const { data: matchedProfiles } = await supabase
+                .from('profiles')
+                .select('id')
+                .or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+
+            const matchedUserIds = matchedProfiles?.map(p => p.id) || [];
+
+            // Combine filters: order_id, payment_id, user_id, or metadata fields
+            // Note: metadata->>field is Postgres syntax for JSONB text search
+            let orFilter = `order_id.ilike.%${search}%,payment_id.ilike.%${search}%,metadata->>customerName.ilike.%${search}%,metadata->>customerEmail.ilike.%${search}%,metadata->>payer_name.ilike.%${search}%,metadata->>payer_email.ilike.%${search}%`;
+            
+            if (matchedUserIds.length > 0) {
+                orFilter += `,user_id.in.(${matchedUserIds.join(',')})`;
+            }
+            
+            // Also search in amount if search is numeric
+            if (!isNaN(parseFloat(search))) {
+                orFilter += `,amount.eq.${parseFloat(search)}`;
+            }
+
+            query = query.or(orFilter);
+        }
+
+        // Apply status filter BEFORE pagination
+        if (status && status !== 'all') {
+            query = query.eq('status', status);
+        }
+
+        // Apply ordering and pagination LAST
+        query = query.order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        // Execute Query
+        const { data: payments, count, error } = await query;
+
+        if (error) {
+            console.error('Error fetching admin payments:', error);
+            return res.status(500).json({ error: 'Failed to fetch payments' });
+        }
+
+        if (!payments || payments.length === 0) {
+            return res.json({
+                data: [],
+                meta: {
+                    total: 0,
+                    page,
+                    limit,
+                    totalPages: 0
+                }
+            });
+        }
+
+        // 2. Extract unique user IDs
+        const userIds = [...new Set(payments.map(p => p.user_id).filter(Boolean))];
+
+        // 3. Batch profile fetching (Chunk size 50 to avoid Header Overflow)
+        const profilesMap: Record<string, any> = {};
+        const CHUNK_SIZE = 50;
+
+        for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
+            const chunk = userIds.slice(i, i + CHUNK_SIZE);
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, full_name, email')
+                .in('id', chunk);
+
+            if (profilesError) {
+                console.error(`[Admin Payments] Error fetching profiles chunk ${i}-${i + CHUNK_SIZE}:`, profilesError);
+                continue;
+            }
+
+            profiles?.forEach(p => {
+                profilesMap[p.id] = p;
+            });
+        }
+
+        // 4. Merge data
+        const formattedPayments = payments.map(p => {
+            const profile = profilesMap[p.user_id];
+
+            // Robust extraction for older rows
+            let determinedModel = p.model;
+            if (!determinedModel && p.metadata) {
+                if (p.metadata.model) determinedModel = p.metadata.model;
+                else if (p.metadata.account_type) {
+                    const at = String(p.metadata.account_type).toLowerCase();
+                    if (at.includes('prime')) determinedModel = 'prime';
+                    else if (at.includes('lite')) determinedModel = 'lite';
+                }
+            }
+            if (!determinedModel && p.account_type_name) {
+                const atn = String(p.account_type_name).toLowerCase();
+                if (atn.includes('prime')) determinedModel = 'prime';
+                else if (atn.includes('lite')) determinedModel = 'lite';
+            }
+
+            // Enhanced name/email resolution for guest checkouts
+            let metadata = p.metadata || {};
+            if (typeof metadata.data === 'string') {
+                try {
+                    metadata = { ...metadata, ...JSON.parse(metadata.data) };
+                } catch (e) {}
+            }
+
+            const guestName = metadata.customerName || metadata.name || metadata.payer_name || metadata.customer_name;
+            const guestEmail = metadata.customerEmail || metadata.email || metadata.payer_email || metadata.customer_email;
+
+            return {
+                id: p.id,
+                order_id: p.order_id,
+                payment_id: p.payment_id,
+                amount: p.amount,
+                currency: p.currency,
+                status: p.status,
+                payment_method: p.payment_method || 'gateway',
+                payment_gateway: p.payment_gateway || 'Unknown',
+                account_size: parseInt(String(p.account_size || 0).replace(/[^0-9]/g, '')) || 0,
+                account_type: determinedModel ? determinedModel : (p.account_type_name !== 'Challenge' ? p.account_type_name : 'Challenge'),
+                coupon_code: p.coupon_code || '-',
+                created_at: p.created_at,
+                paid_at: p.paid_at,
+                user_name: profile?.full_name || profile?.email?.split('@')[0] || guestName || 'Guest User',
+                user_email: profile?.email || guestEmail || 'Unknown'
+            };
+        });
+
+        res.json({
+            data: formattedPayments,
+            meta: {
+                total: count || 0,
+                page,
+                limit,
+                totalPages: Math.ceil((count || 0) / limit)
+            }
+        });
+    } catch (err) {
+        console.error('Internal server error in admin payments:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+export default router;

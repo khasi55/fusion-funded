@@ -1,0 +1,128 @@
+import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+
+export const validateRequest = (schema: z.ZodSchema<any>) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await schema.parseAsync({
+                body: req.body,
+                query: req.query,
+                params: req.params,
+            });
+            return next();
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                console.error('❌ Validation Error Details:', JSON.stringify(error.issues, null, 2));
+                const fs = require('fs');
+                fs.appendFileSync('validation_debug.log', `[${new Date().toISOString()}] Validation Failed for ${req.path}: ${JSON.stringify(error.issues, null, 2)}\nBODY: ${JSON.stringify(req.body, null, 2)}\n\n`);
+                return res.status(400).json({
+                    error: 'Validation failed',
+                    details: error.issues.map((e: any) => ({
+                        path: e.path.join('.'),
+                        message: e.message
+                    }))
+                });
+            }
+            console.error('❌ Internal Validation Error:', error);
+            return res.status(500).json({ error: 'Internal server error during validation' });
+        }
+    };
+};
+
+// --- Common Schemas ---
+
+export const profileUpdateSchema = z.object({
+    body: z.object({
+        full_name: z.string().min(2).max(100).optional(),
+        phone: z.string().min(5).max(20).optional(),
+        country: z.string().min(2).max(50).optional(),
+        city: z.string().min(2).max(50).optional(),
+        address: z.string().min(2).max(200).optional(),
+        pincode: z.string().min(3).max(12).optional(),
+        display_name: z.string().min(2).max(50).optional(),
+        avatar_url: z.string().url().optional(),
+    }).strict()
+});
+
+export const passwordUpdateSchema = z.object({
+    body: z.object({
+        currentPassword: z.string().min(1, 'Current password is required'),
+        newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+    }).strict()
+});
+
+export const emailUpdateSchema = z.object({
+    body: z.object({
+        currentPassword: z.string().min(1, 'Current password is required'),
+        newEmail: z.string().email('Invalid email address'),
+    }).strict()
+});
+
+export const walletUpdateSchema = z.object({
+    body: z.object({
+        walletAddress: z.string().min(10, 'Wallet address is too short').max(200),
+        otp: z.string().length(6, 'Verification code must be 6 digits'),
+    }).strict()
+});
+
+export const bankDetailsUpdateSchema = z.object({
+    body: z.object({
+        account_holder_name: z.string().min(2).max(100),
+        bank_name: z.string().min(2).max(100),
+        account_number: z.string().min(5).max(50),
+        ifsc_code: z.string().min(4).max(20).optional().nullable().or(z.literal('')),
+        swift_code: z.string().min(4).max(20).optional().nullable().or(z.literal('')),
+        otp: z.string().length(6, 'Verification code must be 6 digits'),
+    }).strict()
+});
+
+export const requestFinancialOTPSchema = z.object({
+    body: z.object({
+        type: z.enum(['wallet', 'bank', 'payout', 'affiliate_withdrawal']),
+    }).strict()
+});
+
+export const payoutRequestSchema = z.object({
+    body: z.object({
+        amount: z.number().positive('Amount must be positive'),
+        walletAddress: z.string().min(10, 'Invalid wallet address').max(200).optional(),
+        method: z.enum(['crypto', 'bank']).optional().default('crypto'),
+        challenge_id: z.string().uuid('Invalid challenge ID'),
+        otp: z.string().length(6, 'Verification code must be 6 digits'),
+    }).strict()
+});
+
+export const mt5AccountCreateSchema = z.object({
+    body: z.object({
+        account_type: z.enum(['phase1', 'phase2', 'funded', 'instant']),
+        balance: z.number().positive(),
+        leverage: z.number().positive()
+    }).strict()
+});
+
+export const mt5BalanceAdjustSchema = z.object({
+    body: z.object({
+        login: z.number(),
+        amount: z.number(),
+        comment: z.string().max(100).optional()
+    })
+});
+
+export const mt5LeverageChangeSchema = z.object({
+    body: z.object({
+        login: z.number().positive(),
+        leverage: z.number().positive().max(500)
+    }).strict()
+});
+
+export const mt5AssignSchema = z.object({
+    body: z.object({
+        email: z.string().email(),
+        mt5Group: z.string().min(1),
+        accountSize: z.number().positive(),
+        planType: z.string().min(1),
+        note: z.string().min(1),
+        imageUrl: z.string().url(),
+        competitionId: z.string().uuid().optional().nullable()
+    }).strict()
+});
