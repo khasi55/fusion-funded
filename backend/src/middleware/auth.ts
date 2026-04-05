@@ -183,7 +183,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
                 }
             }
         } catch (jwtErr: any) {
-            if (supabaseJwtSecret) {
+            if (supabaseJwtSecret && jwtErr.message !== 'invalid algorithm') {
                 console.warn(`[Auth] Local JWT verification failed for ${req.originalUrl}: ${jwtErr.message}`);
                 // console.log(`[Auth] Token used: ${token.substring(0, 10)}...${token.substring(token.length - 10)}`);
             }
