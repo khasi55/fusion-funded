@@ -49,10 +49,8 @@ export function OrdersListClient() {
                 
                 // Filter down to manual orders likely waiting for approval
                 const manualOrders = (data || []).filter((o: PaymentOrder) => 
-                    o.payment_gateway === 'manual' ||
-                    o.payment_gateway === 'upi_manual' ||
-                    o.payment_gateway === 'crypto_manual' || 
-                    o.payment_method === 'manual_crypto' ||
+                    o.payment_gateway?.toLowerCase().includes('manual') ||
+                    o.payment_method?.toLowerCase().includes('manual') ||
                     o.payment_method === 'upi' ||
                     o.payment_method === 'crypto' ||
                     o.payment_gateway === 'upi' ||
@@ -261,19 +259,31 @@ export function OrdersListClient() {
                                         {/* Proof Upload */}
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex flex-col items-center gap-2">
-                                                {pendingProofs[order.order_id] ? (
-                                                    <div className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200">
-                                                        <Image src={pendingProofs[order.order_id]} alt="Proof" fill className="object-cover" />
-                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                                            <button 
-                                                                onClick={() => {
-                                                                    setPendingProofs(prev => { delete prev[order.order_id]; return {...prev}; });
-                                                                }}
-                                                                className="text-white bg-red-600 rounded-full p-1"
-                                                            >
-                                                                <X className="w-3 h-3" />
-                                                            </button>
-                                                        </div>
+                                                {(pendingProofs[order.order_id] || order.metadata?.proof_url) ? (
+                                                    <div className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200 group">
+                                                        <Image 
+                                                            src={pendingProofs[order.order_id] || order.metadata?.proof_url} 
+                                                            alt="Proof" 
+                                                            fill 
+                                                            className="object-cover cursor-pointer hover:scale-110 transition-transform" 
+                                                            onClick={() => window.open(pendingProofs[order.order_id] || order.metadata?.proof_url, '_blank')}
+                                                        />
+                                                        {pendingProofs[order.order_id] && (
+                                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        setPendingProofs(prev => { 
+                                                                            const next = {...prev};
+                                                                            delete next[order.order_id]; 
+                                                                            return next; 
+                                                                        });
+                                                                    }}
+                                                                    className="text-white bg-red-600 rounded-full p-1"
+                                                                >
+                                                                    <X className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     <div className="relative">

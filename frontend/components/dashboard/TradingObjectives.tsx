@@ -224,10 +224,13 @@ export default function TradingObjectives({ objectives: initialObjectives, accou
 
     // Sync with DashboardData
     useEffect(() => {
+        const isHFT = selectedAccount?.group?.toUpperCase().includes('GRP3') || selectedAccount?.group?.toUpperCase().includes('GRP4');
+        const defaultDailyDD = isHFT ? 7 : 5;
+
         if (initialObjectives) {
             console.log('[TradingObjectives] Using initialObjectives:', !!initialObjectives.daily_loss);
             setRules({
-                max_daily_loss_percent: initialObjectives.daily_loss?.max_allowed_percent ?? 5,
+                max_daily_loss_percent: initialObjectives.daily_loss?.max_allowed_percent ?? defaultDailyDD,
                 max_total_loss_percent: initialObjectives.total_loss?.max_allowed_percent ?? 10,
                 profit_target_percent: initialObjectives.profit_target?.target_percent ?? 8,
                 min_trading_days: 0,
@@ -253,7 +256,7 @@ export default function TradingObjectives({ objectives: initialObjectives, accou
 
             const data = dashboardData.objectives;
             setRules({
-                max_daily_loss_percent: data.rules?.max_daily_loss_percent ?? 5,
+                max_daily_loss_percent: data.rules?.max_daily_loss_percent ?? defaultDailyDD,
                 max_total_loss_percent: data.rules?.max_total_loss_percent ?? 10,
                 profit_target_percent: data.rules?.profit_target_percent ?? 8,
                 min_trading_days: 0,
@@ -269,7 +272,7 @@ export default function TradingObjectives({ objectives: initialObjectives, accou
                 payout_eligibility: data.payout_eligibility
             });
         }
-    }, [dashboardData.objectives, initialObjectives]);
+    }, [dashboardData.objectives, initialObjectives, selectedAccount]);
 
     if (dashboardLoading.global && !rules) {
         return (

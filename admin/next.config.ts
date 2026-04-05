@@ -59,6 +59,14 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'dqzafsvhqfdhgiqexdct.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
 
   experimental: {
@@ -130,6 +138,21 @@ const nextConfig: NextConfig = {
       {
         source: '/api/auth/:path*',
         destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3001'}/api/auth/:path*`,
+        basePath: false,
+      },
+      {
+        source: '/api/payments/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3001'}/api/payments/:path*`,
+        basePath: false,
+      },
+      {
+        source: '/api/config/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3001'}/api/config/:path*`,
+        basePath: false,
+      },
+      {
+        source: '/api/admin/orders/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3001'}/api/admin/orders/:path*`,
         basePath: false,
       },
     ];

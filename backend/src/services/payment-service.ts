@@ -175,11 +175,14 @@ export class PaymentService {
             .maybeSingle();
 
         const fullName = profile?.full_name || 'Trader';
-        const email = profile?.email || 'noemail@sharkfunded.com';
+        const email = profile?.email || 'noemail@fusionfunded.com';
 
         // MT5 Group Resolution (Enforced: only this group exists in current setup)
-        let mt5Group = 'AUS\\contest\\7012\\g1';
+        // MT5 Group Resolution
+        let mt5Group = order.metadata?.group || 'MBULGE\\contest\\grp3';
         let leverage = 100;
+
+        console.log(`[PaymentService] Creating MT5 account for ${email} in group ${mt5Group} with size ${order.account_size}...`);
 
         // Create MT5 Account
         const mt5Data = await createMT5Account({
@@ -190,6 +193,8 @@ export class PaymentService {
             balance: order.account_size,
             callback_url: `${process.env.BACKEND_URL || process.env.FRONTEND_URL}/api/webhooks/mt5`
         }) as any;
+        
+        console.log(`[PaymentService] MT5 account created successfully: ${mt5Data?.login}`);
 
         // Resolve Challenge Type
         const challengeType = this.mapChallengeType(order);
@@ -212,7 +217,11 @@ export class PaymentService {
                 platform: order.platform,
                 leverage: leverage,
                 group: mt5Group,
-                metadata: order.metadata || {},
+                metadata: {
+                    ...(order.metadata || {}),
+                    plan: 'HFT Phase 1',
+                    model: 'HFT'
+                }
             })
             .select()
             .single();
@@ -257,6 +266,12 @@ export class PaymentService {
 
         if (model && type) {
             const normalizedType = type.replace('-', '_').replace(' ', '_');
+            // Use specific HFT challenge types (requires DB constraint update)
+            if (model.includes('hft')) {
+                if (normalizedType.includes('phase1') || normalizedType.includes('phase_1')) return 'hft2_phase1';
+                if (normalizedType.includes('funded')) return 'hft2_funded';
+                return 'hft2_phase1';
+            }
             return normalizedType === '2_step' ? `${model}_2_step_phase_1` : `${model}_${normalizedType}`;
         }
 

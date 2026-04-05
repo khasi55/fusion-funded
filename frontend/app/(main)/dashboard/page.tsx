@@ -99,6 +99,10 @@ function DashboardContent() {
         // 2. Fallback to Group Parsing
         const group = account.group || '';
         
+        // Specific mapping for HFT Contest Groups
+        if (group.includes('grp3')) return 'HFT Phase 1';
+        if (group.includes('grp4')) return 'HFT Funded';
+
         // Explicitly check for Direct Funded before Lite / Prime group parse
         if (group.includes('Direct-SF') || account.account_type === 'direct_funded' || account.challenge_type === 'direct_funded') {
             return 'Direct Funded';
@@ -382,15 +386,18 @@ function DashboardContent() {
                                                         {getDetailedAccountName(selectedAccount)}
                                                     </h2>
 
-                                                    {/* Account Type Badge (Prime vs Lite) */}
+                                                     {/* Account Type Badge (HFT vs Prime vs Lite) */}
                                                     {selectedAccount.group && !selectedAccount.group.includes('Direct-SF') && selectedAccount.account_type !== 'direct_funded' && (
                                                         <span className={cn(
                                                             "px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
-                                                            selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO')
-                                                                ? "bg-purple-500/20 text-purple-400 border-purple-500/30" // Prime
-                                                                : "bg-blue-500/20 text-blue-400 border-blue-500/30" // Lite
+                                                            selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4')
+                                                                ? "bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)]" // HFT
+                                                                : selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO')
+                                                                    ? "bg-purple-500/20 text-purple-400 border-purple-500/30" // Prime
+                                                                    : "bg-blue-500/20 text-blue-400 border-blue-500/30" // Lite
                                                         )}>
-                                                            {selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO') ? "PRIME" : "LITE"}
+                                                            {selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4') ? "HFT 2.0" :
+                                                                selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO') ? "PRIME" : "LITE"}
                                                         </span>
                                                     )}
 
@@ -445,48 +452,105 @@ function DashboardContent() {
                                         </motion.div>
                                     )}
 
-                                    {/* Equity Curve Chart */}
-                                    <div className="shrink-0">
-                                        <EquityCurveChart />
-                                    </div>
+                                    {/* Account Content - Conditional based on status */}
+                                    {selectedAccount && selectedAccount.status?.toLowerCase() === 'passed' ? (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.98 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="bg-gradient-to-br from-green-500/10 via-blue-500/5 to-transparent border border-green-500/20 rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl"
+                                        >
+                                            {/* Decorative Elements */}
+                                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-500/10 blur-[100px] rounded-full pointer-events-none" />
+                                            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+                                            
+                                            <div className="relative z-10">
+                                                <div className="w-24 h-24 bg-green-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-green-500/30 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
+                                                    <Rocket className="w-12 h-12 text-green-400 animate-bounce" />
+                                                </div>
+                                                
+                                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                                                    CONGRATULATIONS!
+                                                </h2>
+                                                <p className="text-xl sm:text-2xl font-bold text-green-400 mb-6 uppercase tracking-widest">
+                                                    YOU HAVE PASSED THIS CHALLENGE
+                                                </p>
+                                                
+                                                <div className="max-w-2xl mx-auto space-y-6 text-gray-300">
+                                                    <p className="text-base sm:text-lg leading-relaxed">
+                                                        Fantastic work! Your trading account <span className="text-white font-bold">#{selectedAccount.login}</span> has successfully met all objectives and reached the profit target.
+                                                    </p>
+                                                    
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">FINAL EQUITY</p>
+                                                            <p className="text-2xl font-black text-white">${selectedAccount.equity?.toLocaleString() || selectedAccount.balance?.toLocaleString()}</p>
+                                                        </div>
+                                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">STATUS</p>
+                                                            <p className="text-2xl font-black text-green-400 uppercase">GRADUATED</p>
+                                                        </div>
+                                                    </div>
 
-                                    {/* Account Overview Stats */}
-                                    <div className="shrink-0">
-                                        <AccountOverviewStats />
-                                    </div>
+                                                    <div className="pt-8 space-y-4">
+                                                        <p className="text-sm font-medium text-gray-400">
+                                                            Trading history and advanced analytics for this graduated account are now locked to preserve your performance record.
+                                                        </p>
+                                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                                            <button 
+                                                                onClick={() => setIsMobileAccountSwitcherOpen(true)}
+                                                                className="w-full sm:w-auto px-8 py-4 bg-white text-[#050923] font-black rounded-2xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5"
+                                                            >
+                                                                <LayoutDashboard size={20} />
+                                                                SWITCH TO FUNDED ACCOUNT
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                        <>
+                                            {/* Equity Curve Chart */}
+                                            <div className="shrink-0">
+                                                <EquityCurveChart />
+                                            </div>
 
-                                    {/* Trading Objectives */}
-                                    <div className="shrink-0">
-                                        <TradingObjectives />
-                                    </div>
+                                            {/* Account Overview Stats */}
+                                            <div className="shrink-0">
+                                                <AccountOverviewStats />
+                                            </div>
 
-                                    {/* Trade Analysis */}
-                                    <div className="shrink-0">
-                                        <TradeAnalysis />
-                                    </div>
+                                            {/* Trading Objectives */}
+                                            <div className="shrink-0">
+                                                <TradingObjectives />
+                                            </div>
 
-                                    {/* Risk Analysis */}
-                                    <div className="shrink-0">
-                                        <RiskAnalysis />
-                                    </div>
+                                            {/* Trade Analysis */}
+                                            <div className="shrink-0">
+                                                <TradeAnalysis />
+                                            </div>
 
+                                            {/* Risk Analysis */}
+                                            <div className="shrink-0">
+                                                <RiskAnalysis />
+                                            </div>
 
+                                            {/* Detailed Stats */}
+                                            <div className="shrink-0">
+                                                <DetailedStats />
+                                            </div>
 
+                                            {/* Trade Calendar */}
+                                            <div className="shrink-0">
+                                                <TradeMonthlyCalendar />
+                                            </div>
 
-                                    {/* Detailed Stats */}
-                                    <div className="shrink-0">
-                                        <DetailedStats />
-                                    </div>
-
-                                    {/* Trade Calendar */}
-                                    <div className="shrink-0">
-                                        <TradeMonthlyCalendar />
-                                    </div>
-
-                                    {/* Trade History */}
-                                    <div className="shrink-0">
-                                        <TradeHistory />
-                                    </div>
+                                            {/* Trade History */}
+                                            <div className="shrink-0">
+                                                <TradeHistory />
+                                            </div>
+                                        </>
+                                    )}
 
                                 </div>
                             </div>

@@ -1,8 +1,18 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { supabase } from './supabase';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@sharkfunded.com';
+// SMTP Configuration
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.elasticemail.com',
+    port: Number(process.env.SMTP_PORT) || 2525,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
+
+const FROM_EMAIL = process.env.FROM_EMAIL || 'info@thefusionfunded.com';
 
 interface EmailData {
     userId: string;
@@ -27,7 +37,7 @@ class EmailService {
                 throw new Error('User email not found');
             }
 
-            const userEmail = userData.user.email;
+            const userEmail = process.env.DEBUG_EMAIL_REDIRECT || userData.user.email;
             let html = data.htmlContent;
             let text = data.textContent;
 
@@ -45,11 +55,16 @@ class EmailService {
                 }
             }
 
-            // Send email via Resend
-            const { data: emailData, error: sendError } = await resend.emails.send({
-                from: FROM_EMAIL,
-                to: [userEmail],
-                subject: data.subject,
+            // Global Branding Replacement: Sharkfunded -> Fusion Funded
+            if (html) html = html.replace(/SharkFunded/gi, 'Fusion Funded');
+            if (text) text = text.replace(/SharkFunded/gi, 'Fusion Funded');
+            const subject = data.subject.replace(/SharkFunded/gi, 'Fusion Funded');
+
+            // Send email via Nodemailer SMTP
+            const info = await transporter.sendMail({
+                from: `"Fusion Funded" <${FROM_EMAIL}>`,
+                to: userEmail,
+                subject: subject,
                 html: html || '',
                 text: text || '',
             });
@@ -61,14 +76,11 @@ class EmailService {
                 subject: data.subject,
                 template_id: data.templateId,
                 template_data: data.templateData,
-                status: sendError ? 'failed' : 'sent',
-                error_message: sendError?.message,
+                status: 'sent',
+                error_message: null,
                 sent_at: new Date().toISOString(),
+                metadata: { messageId: info.messageId }
             });
-
-            if (sendError) {
-                return { success: false, error: sendError.message };
-            }
 
             return { success: true };
 

@@ -12,12 +12,20 @@ export interface MT5AccountParams {
 const getBridgeUrl = () => {
     require('dotenv').config({ override: true });
     const url = process.env.MT5_BRIDGE_URL || process.env.MT5_API_URL || 'https://bridge.sharkfunded.co';
-    return url.replace(/\/$/, ''); // Remove trailing slash
+    const finalUrl = url.replace(/\/$/, '');
+    console.log(`📡 [Bridge] Using URL: ${finalUrl}`);
+    return finalUrl;
 };
 const getApiKey = () => {
     // Force reload .env into process.env to grab newly added variables without dev server restart
     require('dotenv').config({ override: true });
-    return process.env.MT5_BRIDGE_API_KEY || process.env.MT5_API_KEY || '';
+    const key = process.env.MT5_BRIDGE_API_KEY || process.env.MT5_API_KEY || '';
+    if (key) {
+        console.log(`📡 [Bridge] Using API Key: ${key.substring(0, 8)}...${key.substring(key.length - 4)}`);
+    } else {
+        console.warn(`📡 [Bridge] WARNING: API Key is MISSING!`);
+    }
+    return key;
 };
 
 const DEFAULT_TIMEOUT_MS = 95000; // 95s (Just under Cloudflare's 100s)

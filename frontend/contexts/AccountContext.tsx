@@ -41,35 +41,43 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         // Realtime Subscription for Account Updates
         const supabase = createClient();
+        let channel: any = null;
+        
+        const initRealtime = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        // Skip subscription if we are using placeholder keys (prevents console errors)
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
-            // Attempt to fetch once but don't subscribe
+            // Skip subscription if we are using placeholder keys
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+                fetchAccounts();
+                return;
+            }
+
             fetchAccounts();
-            return;
-        }
 
-        fetchAccounts();
+            channel = supabase
+                .channel(`user-accounts-${user.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'challenges',
+                        filter: `user_id=eq.${user.id}`
+                    },
+                    () => {
+                        console.log('🔄 Dashboard: Challenges updated for user. Reloading...');
+                        fetchAccounts();
+                    }
+                )
+                .subscribe();
+        };
 
-        const channel = supabase
-            .channel('realtime-accounts')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'challenges',
-                },
-                (payload) => {
-
-                    fetchAccounts(); // Refresh accounts when any change happens
-                }
-            )
-            .subscribe();
-
+        initRealtime();
+        
         return () => {
-            supabase.removeChannel(channel);
+            if (channel) supabase.removeChannel(channel);
         };
     }, []);
 
@@ -103,39 +111,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
                     share_token: challenge.share_token,
                 }));
 
-                const demoAccount = {
-                    id: 'mock-demo-id',
-                    challenge_id: 'mock-demo-challenge',
-                    user_id: 'client-demo-user',
-                    login: 8888888,
-                    password: 'demo_password123',
-                    server: 'FusionFunded-Demo',
-                    account_number: 'SF-DEMO-TRIAL',
-                    account_type: 'Phase 2',
-                    balance: 104500.50,
-                    equity: 104500.50,
-                    initial_balance: 100000,
-                    status: 'active',
-                    group: 'demo\\standard',
-                    metadata: { demo_mode: true },
-                    is_public: false,
-                    share_token: 'demo_share_123',
-                };
-
-                const allAccounts = [demoAccount, ...accountsData];
-
                 // Optimize: Only update state if data actually changed
                 // This prevents the whole dashboard from re-rendering every 15s if data is same
                 setAccounts(prev => {
-                    const isSame = JSON.stringify(prev) === JSON.stringify(allAccounts);
-                    return isSame ? prev : allAccounts;
+                    const isSame = JSON.stringify(prev) === JSON.stringify(accountsData);
+                    return isSame ? prev : accountsData;
                 });
                 // Auto-select first account if none selected
-                if (!selectedAccount) {
-                    setSelectedAccount(allAccounts[0]);
-                } else {
+                if (!selectedAccount && accountsData.length > 0) {
+                    setSelectedAccount(accountsData[0]);
+                } else if (selectedAccount) {
                     // Update currently selected account with fresh data
-                    const updatedCurrent = allAccounts.find((a: any) => a.id === selectedAccount.id);
+                    const updatedCurrent = accountsData.find((a: any) => a.id === selectedAccount.id);
                     if (updatedCurrent) {
                         // Only update if data changed to prevent excessive re-renders
                         // We compare key metrics: balance, equity, status

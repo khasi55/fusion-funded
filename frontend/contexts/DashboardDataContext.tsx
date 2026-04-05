@@ -68,66 +68,9 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
         const challengeId = selectedAccount.id;
 
         try {
-            let bulkData: any;
-
-            if (challengeId === 'mock-demo-id') {
-                // Return static mock data for demo account
-                bulkData = {
-                    objectives: {
-                        challenge: { initial_balance: 100000, max_drawdown: 10, max_daily_drawdown: 5, target_profit: 5 },
-                        daily_loss: { current: 0, allowed: 5000, remaining: 5000, start_of_day_equity: 104500.50, max_allowed: 95000 },
-                        total_loss: { current: 0, allowed: 10000, remaining: 10000, max_allowed: 90000 },
-                        profit_target: { current: 4500.5, target: 5000 },
-                        stats: { start_date: new Date(Date.now() - 5 * 86400000).toISOString(), days_traded: 4, win_rate: 68, profit_factor: 1.8 }
-                    },
-                    risk: {
-                        average_win: 450,
-                        average_loss: 250,
-                        expectancy: 120,
-                        avg_risk_per_trade: 0.5,
-                        win_rate: 68
-                    },
-                    consistency: {
-                        score: 92,
-                        volume_consistency: 88,
-                        profit_consistency: 95,
-                        days: [
-                            { date: new Date(Date.now() - 4 * 86400000).toISOString(), pnl: 1200 },
-                            { date: new Date(Date.now() - 3 * 86400000).toISOString(), pnl: 800 },
-                            { date: new Date(Date.now() - 2 * 86400000).toISOString(), pnl: -350 },
-                            { date: new Date(Date.now() - 1 * 86400000).toISOString(), pnl: 2850.50 }
-                        ]
-                    },
-                    calendar: {
-                        daily_pnl: {
-                            [new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0]]: 1200,
-                            [new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0]]: 800,
-                            [new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0]]: -350,
-                            [new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0]]: 2850.50
-                        }
-                    },
-                    trades: {
-                        trades: [
-                            { open_time: new Date(Date.now() - 5 * 86400000).toISOString(), close_time: new Date(Date.now() - 5 * 86400000 + 3600000).toISOString(), symbol: 'BTCUSD', type: 'Buy', volume: 0.5, open_price: 65000, close_price: 65500, profit_loss: 250, is_open: false, platform: 'MT5', _date: new Date(Date.now() - 5 * 86400000).toISOString() },
-                            { open_time: new Date(Date.now() - 4 * 86400000).toISOString(), close_time: new Date(Date.now() - 4 * 86400000 + 3600000).toISOString(), symbol: 'XAUUSD', type: 'Buy', volume: 2, open_price: 2020.5, close_price: 2026.5, profit_loss: 1200, is_open: false, platform: 'MT5', _date: new Date(Date.now() - 4 * 86400000).toISOString() },
-                            { open_time: new Date(Date.now() - 3 * 86400000).toISOString(), close_time: new Date(Date.now() - 3 * 86400000 + 7200000).toISOString(), symbol: 'EURUSD', type: 'Sell', volume: 5, open_price: 1.0850, close_price: 1.0834, profit_loss: 800, is_open: false, platform: 'MT5', _date: new Date(Date.now() - 3 * 86400000).toISOString() },
-                            { open_time: new Date(Date.now() - 2 * 86400000).toISOString(), close_time: new Date(Date.now() - 2 * 86400000 + 1800000).toISOString(), symbol: 'US30', type: 'Buy', volume: 1, open_price: 38500, close_price: 38465, profit_loss: -350, is_open: false, platform: 'MT5', _date: new Date(Date.now() - 2 * 86400000).toISOString() },
-                            { open_time: new Date(Date.now() - 1 * 86400000).toISOString(), close_time: new Date(Date.now() - 1 * 86400000 + 5400000).toISOString(), symbol: 'GBPUSD', type: 'Buy', volume: 4, open_price: 1.2600, close_price: 1.2671, profit_loss: 2840.50, commission: -10, is_open: false, swap: 20, platform: 'MT5', _date: new Date(Date.now() - 1 * 86400000).toISOString() }
-                        ]
-                    },
-                    analysis: {
-                        best_trade: 2850.50,
-                        worst_trade: -350,
-                        best_day: 2850.50,
-                        worst_day: -350
-                    }
-                };
-            } else {
-                // Consolidated bulk fetch
-                bulkData = await fetchFromBackend(`/api/dashboard/bulk?challenge_id=${challengeId}`, {
-                    credentials: 'include'
-                });
-            }
+            const bulkData = await fetchFromBackend(`/api/dashboard/bulk?challenge_id=${challengeId}`, {
+                credentials: 'include'
+            });
 
             console.log(`[DashboardData] ${isSilent ? 'Silent' : 'Full'} refresh received`);
 

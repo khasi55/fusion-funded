@@ -34,12 +34,15 @@ export class RulesService {
         // Try to get rule from cache
         let dbRule = this.RULES_CACHE.get(normalizedType);
 
+        console.log(`[RulesService] Resolved '${normalizedType}' for Group: ${groupName}, Type: ${challengeType}. DB Rule Found: ${!!dbRule}`);
+        
         // Defaults
         let maxDailyLossPercent = 5;
         let maxTotalLossPercent = 10;
         let profitTargetPercent = 0;
 
         if (dbRule) {
+            console.log(`[RulesService] Rule Content: Daily=${dbRule.daily_drawdown_percent}%, Max=${dbRule.max_drawdown_percent}%`);
             maxDailyLossPercent = (dbRule.daily_drawdown_percent !== undefined && dbRule.daily_drawdown_percent !== null)
                 ? Number(dbRule.daily_drawdown_percent)
                 : 5;
@@ -51,17 +54,7 @@ export class RulesService {
             profitTargetPercent = (dbRule.profit_target_percent !== undefined && dbRule.profit_target_percent !== null)
                 ? Number(dbRule.profit_target_percent)
                 : 0;
-        } else {
-            const DEBUG = process.env.DEBUG === 'true';
-            if (DEBUG) console.warn(`[RulesService] No DB rule found for mapped type '${normalizedType}' (Original: ${challengeType}), using defaults`);
         }
-
-        /* 
-        if (dbRule) {
-            const DEBUG = process.env.DEBUG === 'true';
-            if (DEBUG) console.log(`[RulesService] Resolved Rules for '${normalizedType}': Max=${maxTotalLossPercent}%, Daily=${maxDailyLossPercent}%, Profit=${profitTargetPercent}% (Source: DB)`);
-        }
-        */
 
         return {
             max_daily_loss_percent: maxDailyLossPercent,
@@ -77,6 +70,11 @@ export class RulesService {
     private static normalizeType(groupName: string, type: string): string {
         const t = (type || '').toLowerCase().trim();
         const g = (groupName || '').toUpperCase();
+
+        // 0. HFT Specific Mapping (Highest Priority) - Must come before searching CACHE by 't'
+        // because an HFT account might have a generic type like 'Phase 1' in the DB.
+        if (g.includes('GRP3')) return 'hft2_phase1';
+        if (g.includes('GRP4')) return 'hft2_funded';
 
         // Already standard types
         if (this.RULES_CACHE.has(t)) return t;

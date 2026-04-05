@@ -15,17 +15,33 @@ router.post('/update-manual-utr', async (req, res) => {
     }
 
     try {
+        // 1. Fetch existing order to get current metadata
+        const { data: existingOrder, error: fetchError } = await supabaseAdmin
+            .from('payment_orders')
+            .select('metadata')
+            .eq('order_id', orderId)
+            .single();
+
+        if (fetchError || !existingOrder) {
+            console.error('[Payments] Order not found for UTR update:', orderId);
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        // 2. Merge metadata
+        const updatedMetadata = {
+            ...(existingOrder.metadata || {}),
+            utr_submitted_at: new Date().toISOString(),
+            proof_url: proofUrl || (existingOrder.metadata?.proof_url) || null
+        };
+
         const { error } = await supabaseAdmin
             .from('payment_orders')
             .update({ 
                 payment_id: utr,
-                metadata: { 
-                    utr_submitted_at: new Date().toISOString(),
-                    proof_url: proofUrl || null
-                } 
+                metadata: updatedMetadata
             })
             .eq('order_id', orderId)
-            .in('payment_gateway', ['manual_crypto', 'upi', 'crypto', 'manual']);
+            .in('payment_gateway', ['manual_crypto', 'upi', 'crypto', 'manual', 'upi_manual', 'crypto_manual']);
 
         if (error) throw error;
 

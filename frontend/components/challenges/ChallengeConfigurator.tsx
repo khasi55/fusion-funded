@@ -233,16 +233,51 @@ const ManualPaymentModal = ({
         bank: 'IDFC First Bank'
     };
 
+    const uploadProof = async (file: File): Promise<string | null> => {
+        try {
+            setUploadingProof(true);
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${orderId}-${Math.random()}.${fileExt}`;
+            const { error: uploadError } = await supabase.storage
+                .from('proofs')
+                .upload(fileName, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage
+                .from('proofs')
+                .getPublicUrl(fileName);
+
+            return data.publicUrl;
+        } catch (error) {
+            console.error('Error uploading proof:', error);
+            alert('Failed to upload payment proof');
+            return null;
+        } finally {
+            setUploadingProof(false);
+        }
+    };
+
     const handleSubmit = async () => {
         if (!utr.trim()) return;
         setSubmitting(true);
         try {
+            let finalProofUrl = null;
+            if (proofFile) {
+                finalProofUrl = await uploadProof(proofFile);
+                if (!finalProofUrl) return; // Stop if upload failed
+            }
+
             const isBrowser = typeof window !== 'undefined';
             const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co');
             const res = await fetch(`${backendUrl}/api/payments/update-manual-utr`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId, utr })
+                body: JSON.stringify({ 
+                    orderId, 
+                    utr,
+                    proofUrl: finalProofUrl
+                })
             });
             if (res.ok) { setStep(3); }
             else { alert('Failed to submit transaction ID'); }
@@ -303,7 +338,7 @@ const ManualPaymentModal = ({
                                                 onClick={() => setSelectedNetwork(net)}
                                                 className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${selectedNetwork === net ? 'bg-primary text-primary-foreground shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
                                             >
-                                                {net.toUpperCase()}
+                                                {net === 'bsc' ? 'BEP20' : net.toUpperCase()}
                                             </button>
                                         ))}
                                     </div>
@@ -395,7 +430,7 @@ const ManualPaymentModal = ({
                                 value={utr}
                                 onChange={(e) => setUtr(e.target.value)}
                             />
-                            
+
                             <div className="relative">
                                 <input
                                     type="file"
@@ -448,7 +483,7 @@ export default function ChallengeConfigurator() {
 
     // State
     const [type] = useState("hft");
-    const [model] = useState("hft");
+    const [model] = useState("hft_funded");
     const [dynamicPricing, setDynamicPricing] = useState<any>(null);
 
     // Fetch dynamic pricing
@@ -560,7 +595,7 @@ export default function ChallengeConfigurator() {
                 return;
             }
 
-            const mt5Group = 'MBULGE\\contest\\grp1';
+            const mt5Group = 'MBULGE\\contest\\grp3';
             const isBrowser = typeof window !== 'undefined';
             const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co');
             const orderId = `FF${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

@@ -165,7 +165,8 @@ router.get('/', authenticate, requireRole(['super_admin', 'payouts_admin', 'admi
                 created_at: p.created_at,
                 paid_at: p.paid_at,
                 user_name: profile?.full_name || profile?.email?.split('@')[0] || guestName || 'Guest User',
-                user_email: profile?.email || guestEmail || 'Unknown'
+                user_email: profile?.email || guestEmail || 'Unknown',
+                metadata: p.metadata || {}
             };
         });
 

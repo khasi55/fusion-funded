@@ -2,8 +2,9 @@ import { EmailService } from './email-service';
 import { supabase, supabaseAdmin } from '../lib/supabase';
 import { RulesService } from './rules-service';
 import { getRedis } from '../lib/redis';
+import { AutomationService } from './automation-service';
 
-const BRIDGE_URL = process.env.BRIDGE_URL || 'https://bridge.sharkfunded.co';
+const BRIDGE_URL = process.env.MT5_BRIDGE_URL || 'https://fusion.sharkfunded.co';
 // console.log("🔍 [Risk Scheduler] Using BRIDGE_URL:", BRIDGE_URL);
 
 // --- CONFIGURATION ---
@@ -158,7 +159,7 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                 headers: {
                     'Content-Type': 'application/json',
                     'ngrok-skip-browser-warning': 'true',
-                    'X-API-Key': process.env.MT5_API_KEY || ''
+                    'X-API-Key': process.env.MT5_BRIDGE_API_KEY || ''
                 },
                 body: JSON.stringify(payload),
                 signal: controller.signal
@@ -233,16 +234,27 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                             const targetEquity = initialBalance * (1 + (rules.profit_target_percent / 100));
                             if (res.equity >= targetEquity) {
                                 console.log(`✅ [Risk Scheduler] PROFIT TARGET MET for ${res.login}. Equity: ${res.equity} >= Target: ${targetEquity}`);
-                                updateData.status = 'passed';
+                                
+                                // NEW: Automated Upgrade for grp3 -> grp4
+                                if ((challenge.group || '').toUpperCase().includes('GRP3')) {
+                                    console.log(`🤖 [Risk Scheduler] Triggering AUTOMATED UPGRADE for ${res.login} (grp3)`);
+                                    // Trigger asynchronously to avoid blocking the batch process
+                                    AutomationService.handleAutomatedUpgrade(res.login).catch(err => {
+                                        console.error(`❌ [Risk Scheduler] Automation failure for ${res.login}:`, err.message);
+                                    });
+                                } else {
+                                    // Regular manual pass logic for other groups
+                                    updateData.status = 'passed';
 
-                                // Send email asynchronously (using supabase admin to bypass RLS for auth.users)
-                                supabaseAdmin.auth.admin.getUserById(challenge.user_id).then(({ data }) => {
-                                    const email = data?.user?.email;
-                                    const fullName = data?.user?.user_metadata?.full_name || 'Trader';
-                                    if (email) {
-                                        EmailService.sendPassNotification(email, fullName, String(res.login), challenge.challenge_type || 'Challenge').catch(console.error);
-                                    }
-                                });
+                                    // Send email asynchronously (using supabase admin to bypass RLS for auth.users)
+                                    supabaseAdmin.auth.admin.getUserById(challenge.user_id).then(({ data }) => {
+                                        const email = data?.user?.email;
+                                        const fullName = data?.user?.user_metadata?.full_name || 'Trader';
+                                        if (email) {
+                                            EmailService.sendPassNotification(email, fullName, String(res.login), challenge.challenge_type || 'Challenge').catch(console.error);
+                                        }
+                                    });
+                                }
                             }
                         }
                     } catch (targetErr) {

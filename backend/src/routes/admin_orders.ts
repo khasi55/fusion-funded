@@ -68,7 +68,7 @@ router.post('/:orderId/deny', authenticate, requireRole(['super_admin', 'payouts
 
         const { data: order, error: fetchError } = await supabaseAdmin
             .from('payment_orders')
-            .select('status, metadata')
+            .select('status, metadata, user_id')
             .eq('order_id', orderId)
             .single();
 
@@ -97,6 +97,19 @@ router.post('/:orderId/deny', authenticate, requireRole(['super_admin', 'payouts
 
         if (updateError) {
             throw updateError;
+        }
+
+        // Send Email Notification
+        try {
+            const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name').eq('id', order.user_id).single();
+            if (profile?.email) {
+                const { EmailService } = await import('../services/email-service');
+                await EmailService.sendOrderRejectedNotice(profile.email, profile.full_name || 'Trader', orderId, reason).catch(err => {
+                    console.error('[Order Email] Failed to send rejection email:', err);
+                });
+            }
+        } catch (err) {
+            console.error('[Order Email] Profile fetch failed:', err);
         }
 
         res.json({

@@ -702,7 +702,7 @@ router.post('/admin/:id/reject', authenticate, requireRole(['super_admin', 'admi
         }
 
         // Send notification
-        import('../services/notification-service').then(({ NotificationService }) => {
+        import('../services/notification-service').then(async ({ NotificationService }) => {
             NotificationService.createNotification(
                 'KYC Rejected',
                 `Your KYC verification has been rejected. Reason: ${reason}`,
@@ -710,6 +710,15 @@ router.post('/admin/:id/reject', authenticate, requireRole(['super_admin', 'admi
                 data.user_id,
                 { session_id: id, reason }
             );
+
+            // Send Email Notification
+            const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', data.user_id).single();
+            if (profile?.email) {
+                const { EmailService } = await import('../services/email-service');
+                await EmailService.sendKYCRejectedNotice(profile.email, profile.full_name || 'Trader', reason).catch(err => {
+                    console.error('[KYC Email] Failed to send rejection email:', err);
+                });
+            }
         });
 
         res.json({

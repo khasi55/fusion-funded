@@ -97,14 +97,11 @@ const SectionHeader = ({ title, sub }: { title: string, sub: string }) => (
 // Constants
 const EXCHANGE_RATE_INR = 98;
 const CHALLENGE_TYPES = [
-    { id: "1-step", label: "One Step", desc: "Single phase evaluation" },
-    { id: "2-step", label: "Two Step", desc: "Standard verification", recommended: true },
-    { id: "Instant", label: "Instant", desc: "Lower risk, lower cost" }
+    { id: "hft", label: "HFT Phase 1", desc: "Fast-track contest evaluation", recommended: true }
 ];
 
 const MODELS = [
-    { id: "prime", label: "SharkFunded Prime", desc: "Higher leverage" },
-    { id: "lite", label: "SharkFunded Lite", desc: "Classic model" }
+    { id: "hft_funded", label: "HFT Funded", desc: "Official funded contest account" }
 ];
 
 const PLATFORMS = [
@@ -115,8 +112,8 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
 
     // Configurator State
-    const [type, setType] = useState("2-step");
-    const [model, setModel] = useState("lite");
+    const [type, setType] = useState("hft");
+    const [model, setModel] = useState("hft_funded");
     const [size, setSize] = useState(100000);
     const [platform, setPlatform] = useState("mt5");
     const [coupon, setCoupon] = useState("");
@@ -239,8 +236,13 @@ function CheckoutContent() {
         try {
             // 1. Determine MT5 Group based on Brand
             let mt5Group = '';
+            
+            // HFT Branding (Specific requirement grp3)
+            if (type === 'hft') {
+                mt5Group = 'MBULGE\\contest\\grp3';
+            }
             // Lite (S folders)
-            if (model === 'lite') {
+            else if (model === 'lite') {
                 if (type === 'Instant') mt5Group = 'demo\\S\\0-SF';
                 else if (type === '1-step') mt5Group = 'demo\\S\\1-SF';
                 else if (type === '2-step') mt5Group = 'demo\\S\\2-SF';
@@ -253,7 +255,9 @@ function CheckoutContent() {
             }
 
             // Call backend payment API
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.sharkfunded.co';
+            const isBrowser = typeof window !== 'undefined';
+            const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co');
+            
             // EPay requires alphanumeric orderID (no hyphens or special chars)
             const orderId = `SF${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
             const response = await fetch(`${backendUrl}/api/payments/create-order`, {

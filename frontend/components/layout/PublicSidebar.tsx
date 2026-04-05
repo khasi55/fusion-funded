@@ -166,6 +166,40 @@ export default function PublicSidebar({ isOpen = true, onClose }: SidebarProps) 
                                 {!isCollapsed && "Sign Up"}
                             </div>
                         </Link>
+
+                        {/* Social Links */}
+                        <div className="pt-2 space-y-2">
+                            <a
+                                href="https://www.instagram.com/thefusionfunded"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={cn(
+                                    "flex items-center justify-center w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-90 text-white transition-all duration-300 shadow-lg",
+                                    isCollapsed ? "p-3 rounded-xl" : "py-2.5 px-4 rounded-xl gap-3"
+                                )}
+                            >
+                                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                </svg>
+                                {!isCollapsed && <span className="text-xs font-bold">Instagram</span>}
+                            </a>
+                            <a
+                                href="https://t.me/thefusionfunded"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={cn(
+                                    "flex items-center justify-center w-full bg-[#0088cc] hover:bg-[#0077b5] text-white transition-all duration-300 shadow-lg",
+                                    isCollapsed ? "p-3 rounded-xl" : "py-2.5 px-4 rounded-xl gap-3"
+                                )}
+                            >
+                                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+                                </svg>
+                                {!isCollapsed && <span className="text-xs font-bold">Telegram</span>}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </motion.aside>

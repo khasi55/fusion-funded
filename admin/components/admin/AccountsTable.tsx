@@ -131,6 +131,10 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
         const groupStr = (account.mt5_group || account.group || '').toLowerCase();
         const typeStr = (account.challenge_type || '').toLowerCase();
 
+        // Specific mapping for HFT Contest Groups
+        if (groupStr.includes('grp3')) return 'HFT Phase 1';
+        if (groupStr.includes('grp4')) return 'HFT Funded';
+
         // 1. Type-First Detection: Trust the database challenge_type IF explicit
         let plan = '';
         if (typeStr.includes('prime')) plan = 'Prime';
@@ -156,6 +160,16 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
         if (steps) return `Lite - ${steps}`;
 
         return plan || 'Lite';
+    };
+
+    /**
+     * Helper for Type Badge Display
+     */
+    const getTypeDisplay = (account: any) => {
+        const groupStr = (account.mt5_group || account.group || '').toLowerCase();
+        if (groupStr.includes('grp3')) return 'HFT Phase 1';
+        if (groupStr.includes('grp4')) return 'HFT Funded';
+        return account.challenge_type;
     };
 
     return (
@@ -230,7 +244,7 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700 capitalize tracking-wide">
-                                            {account.challenge_type}
+                                            {getTypeDisplay(account)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">

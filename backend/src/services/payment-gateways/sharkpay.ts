@@ -7,12 +7,12 @@ import {
 import crypto from 'crypto';
 import { supabase } from '../../lib/supabase';
 
-export class SharkPayGateway implements PaymentGateway {
+export class FusionPayGateway implements PaymentGateway {
     name = 'fusionpay';
     private apiUrl: string;
 
     constructor() {
-        this.apiUrl = process.env.SHARKPAY_API_URL || 'https://sharkpay-o9zz.vercel.app';
+        this.apiUrl = process.env.FUSIONPAY_API_URL || 'https://sharkpay-o9zz.vercel.app';
     }
 
     private async getConfig() {
@@ -30,20 +30,20 @@ export class SharkPayGateway implements PaymentGateway {
                     keySecret: data.api_secret,
                     webhookSecret: data.webhook_secret,
                     environment: data.environment,
-                    apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.sharkfunded.com'
+                    apiUrl: process.env.FUSIONPAY_API_URL || 'https://payments.fusionfunded.com'
                 };
             }
         } catch (e) {
-            console.warn("Failed to fetch SharkPay config from DB, falling back to ENV:", e);
+            console.warn("Failed to fetch FusionPay config from DB, falling back to ENV:", e);
         }
 
         // Fallback to ENV
         return {
-            keyId: process.env.SHARKPAY_API_KEY || process.env.SHARK_PAYMENT_KEY_ID || '',
-            keySecret: process.env.SHARKPAY_API_SECRET || process.env.SHARK_PAYMENT_KEY_SECRET || '',
-            webhookSecret: process.env.SHARKPAY_WEBHOOK_SECRET || '',
+            keyId: process.env.FUSIONPAY_API_KEY || process.env.FUSION_PAYMENT_KEY_ID || '',
+            keySecret: process.env.FUSIONPAY_API_SECRET || process.env.FUSION_PAYMENT_KEY_SECRET || '',
+            webhookSecret: process.env.FUSIONPAY_WEBHOOK_SECRET || '',
             environment: 'sandbox',
-            apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.sharkfunded.com'
+            apiUrl: process.env.FUSIONPAY_API_URL || 'https://payments.fusionfunded.com'
         };
     }
 
@@ -51,19 +51,19 @@ export class SharkPayGateway implements PaymentGateway {
         try {
             const config = await this.getConfig();
             if (!config.keyId || !config.keySecret) {
-                throw new Error("SharkPay API Credentials missing (DB or ENV)");
+                throw new Error("FusionPay API Credentials missing (DB or ENV)");
             }
 
             const apiUrl = config.apiUrl;
 
-            // Convert USD to INR for SharkPay
+            // Convert USD to INR for FusionPay
             const amountINR = await this.convertToINR(params.amount);
 
             // Frontend and backend URLs
-            const frontendUrl = process.env.FRONTEND_URL || 'https://app.sharkfunded.com';
-            const backendUrl = process.env.BACKEND_URL || 'https://api.sharkfunded.co';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://app.fusionfunded.com';
+            const backendUrl = process.env.BACKEND_URL || 'https://api.fusionfunded.co';
             // 🛡️ SECURITY: Use a per-order signature that includes the expected status and amount
-            const masterWebhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || 'shark_secret_fallback';
+            const masterWebhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || 'fusion_secret_fallback';
             // We lock the signature to the orderId + 'paid' status + currency
             const signature = crypto.createHmac('sha256', masterWebhookSecret).update(`${params.orderId}:paid:${params.currency}`).digest('hex');
             const webhookUrl = `${backendUrl}/api/webhooks/payment?gateway=fusionpay&sig=${signature}`;
@@ -78,7 +78,7 @@ export class SharkPayGateway implements PaymentGateway {
                 callback_url: webhookUrl,
             };
 
-            console.log('[SharkPay Debug] Sending Payload:', JSON.stringify(payload, null, 2));
+            console.log('[FusionPay Debug] Sending Payload:', JSON.stringify(payload, null, 2));
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -141,8 +141,8 @@ export class SharkPayGateway implements PaymentGateway {
                 return false;
             }
 
-            const receivedSignature = headers['x-shark-signature'] || headers['x-signature'];
- 
+            const receivedSignature = headers['x-fusion-signature'] || headers['x-signature'];
+
             // 🛡️ FALLBACK: If no signature header, check for per-order HMAC signature in body/query
             if (!receivedSignature) {
                 const receivedSig = body.sig;
@@ -155,11 +155,11 @@ export class SharkPayGateway implements PaymentGateway {
                     const expectedSig = crypto.createHmac('sha256', webhookSecret).update(`${orderId}:paid:${currency}`).digest('hex');
                     
                     if (receivedSig === expectedSig) {
-                        console.log(`[SharkPay] Webhook verified via per-order signature for ${orderId}`);
+                        console.log(`[FusionPay] Webhook verified via per-order signature for ${orderId}`);
                         return true;
                     }
                 }
-                console.warn('[SharkPay] No valid signature or token found');
+                console.warn('[FusionPay] No valid signature or token found');
                 return false;
             }
 
@@ -176,12 +176,12 @@ export class SharkPayGateway implements PaymentGateway {
             const isValid = crypto.timingSafeEqual(receivedBuf, expectedBuf);
 
             if (!isValid) {
-                console.warn('[SharkPay] Invalid webhook signature detected');
+                console.warn('[FusionPay] Invalid webhook signature detected');
             }
 
             return isValid;
         } catch (error) {
-            console.error('[SharkPay] Webhook verification error:', error);
+            console.error('[FusionPay] Webhook verification error:', error);
             return false;
         }
     }

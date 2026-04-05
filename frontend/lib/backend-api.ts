@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/client';
 
 const isBrowser = typeof window !== 'undefined';
-const BACKEND_URL = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.sharkfunded.co');
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.sharkfunded.co';
 
 /**
  * Fetch wrapper for Backend APIs (authenticated)

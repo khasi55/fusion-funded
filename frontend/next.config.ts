@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.sharkfunded.co';
+    const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co';
     const ADMIN_URL = (process.env.ADMIN_URL || 'https://admin.sharkfunded.com').replace(/\/$/, '');
     return [
       {
@@ -116,6 +116,18 @@ const nextConfig: NextConfig = {
       {
         source: '/api/auth/:path*',
         destination: `${BACKEND_URL}/api/auth/:path*`,
+      },
+      {
+        source: '/api/payments/:path*',
+        destination: `${BACKEND_URL}/api/payments/:path*`,
+      },
+      {
+        source: '/api/config/:path*',
+        destination: `${BACKEND_URL}/api/config/:path*`,
+      },
+      {
+        source: '/api/coupons/:path*',
+        destination: `${BACKEND_URL}/api/coupons/:path*`,
       },
       {
         source: '/socket.io/:path*',

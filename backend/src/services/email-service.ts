@@ -5,13 +5,12 @@ import { supabase } from '../lib/supabase';
 
 export class EmailService {
     // SMTP Credentials
-    private static SMTP_HOST = process.env.ELASTIC_EMAIL_SMTP_HOST || 'smtp.elasticemail.com';
-    private static SMTP_PORT = Number(process.env.ELASTIC_EMAIL_SMTP_PORT) || 587; // Changed from 2525 to 587 for better reliability
-    private static SMTP_USER = process.env.ELASTIC_EMAIL_SMTP_USER || 'noreply@fusionfunded.com';
-    // Using hardcoded password as fallback from user request if env is missing
-    private static SMTP_PASS = process.env.ELASTIC_EMAIL_SMTP_PASS || 'C26AD1121F3DDAFCE8CC1BD6F0F97F766132';
+    private static SMTP_HOST = process.env.SMTP_HOST || 'smtp.elasticemail.com';
+    private static SMTP_PORT = Number(process.env.SMTP_PORT) || 2525;
+    private static SMTP_USER = process.env.SMTP_USER || 'info@thefusionfunded.com';
+    private static SMTP_PASS = process.env.SMTP_PASS || '71996BAF006E6B187B73F684FCE6B7819578';
 
-    private static FROM_EMAIL = process.env.ELASTIC_EMAIL_FROM || 'noreply@fusionfunded.com';
+    private static FROM_EMAIL = process.env.FROM_EMAIL || 'info@thefusionfunded.com';
     private static FROM_NAME = 'Fusion Funded';
 
     private static transporter = nodemailer.createTransport({
@@ -37,12 +36,11 @@ export class EmailService {
             // console.log(`📧 Attempting to send email via SMTP to ${to}...`);
 
             const fromHeader = `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`;
-            // const DEBUG = process.env.DEBUG === 'true';
-            // if (DEBUG) console.log(`📧 Sender Header: ${fromHeader}`);
-
+            const recipient = process.env.DEBUG_EMAIL_REDIRECT || to;
+            
             const info = await this.transporter.sendMail({
                 from: fromHeader,
-                to: to,
+                to: recipient,
                 subject: subject,
                 text: bodyText,
                 html: bodyHtml
@@ -202,7 +200,7 @@ export class EmailService {
      * Send Competition Joined Confirmation
      */
     static async sendCompetitionJoined(email: string, name: string, competitionTitle: string) {
-        const subject = ` Entry Confirmed: Welcome to Shark Battle Ground – ${competitionTitle}`;
+        const subject = ` Entry Confirmed: Welcome to Fusion Battle Ground – ${competitionTitle}`;
 
         const html = `
             <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
@@ -215,7 +213,7 @@ export class EmailService {
                 </div>
 
                 <p style="font-size: 14px; color: #444;">
-                    You are now officially part of the <strong>Shark Battle Ground</strong>.  
+                    You are now officially part of the <strong>Fusion Battle Ground</strong>.  
                     Prepare your strategy, manage your risk, and compete with the best traders.
                 </p>
 
@@ -240,7 +238,7 @@ Welcome to the Battle Ground, ${name}!
 Your entry has been successfully confirmed for:
 ${competitionTitle}
 
-You are now officially part of the Shark Battle Ground.
+You are now officially part of the Fusion Battle Ground.
 Prepare your strategy and compete with the best.
 
 IMPORTANT: The competition starts this coming Monday. Trading begins on that day.
@@ -656,6 +654,71 @@ Fusion Funded Team
         `;
 
         const text = `Great job ${name}!\n\nYour payout of $${amount.toLocaleString()} has been processed. Your Certificate of Payout is now available in your dashboard.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Order Rejected Notification
+     */
+    static async sendOrderRejectedNotice(email: string, name: string, orderId: string, reason: string) {
+        const subject = `Order Update: Payment Not Verified - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcccc; border-radius: 10px;">
+                <h2 style="color: #cc0000;">Order Payment Rejected</h2>
+                <p>Dear ${name},</p>
+                <p>We regret to inform you that your payment for Order <strong>#${orderId}</strong> could not be verified and has been rejected.</p>
+                
+                <div style="background-color: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #cc0000;">
+                    <p><strong>Reason:</strong> ${reason}</p>
+                </div>
+
+                <p>If you have already sent the funds, please reply to this email with your transaction receipt so we can investigate further.</p>
+                <p>Otherwise, you are welcome to place a new order using any of our available payment methods.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    Best regards,<br/>
+                    <strong>The Fusion Funded Team</strong>
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nYour payment for Order #${orderId} was rejected.\n\nReason: ${reason}\n\nIf you believe this is an error, please contact support with your receipt.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send KYC Rejected Notification
+     */
+    static async sendKYCRejectedNotice(email: string, name: string, reason: string) {
+        const subject = `Verification Update: KYC Recognition Failed - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcccc; border-radius: 10px;">
+                <h2 style="color: #cc0000;">Identity Verification Update</h2>
+                <p>Dear ${name},</p>
+                <p>We were unable to verify your identity documents during the KYC process.</p>
+                
+                <div style="background-color: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #cc0000;">
+                    <p><strong>Rejection Reason:</strong> ${reason}</p>
+                </div>
+
+                <p>To continue using our services, please log in to your dashboard and re-submit your verification documents carefully.</p>
+                <p><strong>Tips for success:</strong> Ensure the photos are clear, all corners of the ID are visible, and there is no glare on the document.</p>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://app.fusionfunded.com/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
+                </div>
+
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    If you have any questions, please contact our support team.
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nYour KYC verification was rejected.\n\nReason: ${reason}\n\nPlease log in to your dashboard at Fusion Funded to retry verification with clearer documents.`;
 
         await this.sendEmail(email, subject, html, text);
     }
