@@ -120,10 +120,14 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/static', express.static(path.join(__dirname, '../public')));
 
 app.use((req, res, next) => {
-    const log = `[${new Date().toISOString()}] ${req.method} ${req.path} - RAW\n`;
-    fs.appendFileSync('backend_request_debug.log', log);
-    if (process.env.NODE_ENV === 'development' || true) {
-        console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const origin = req.headers.origin || req.headers.referer || 'Unknown Origin';
+    
+    // Filter out Next.js static asset polling to reduce spam
+    if (!req.path.includes('/_next') && !req.path.includes('/static')) {
+        if (DEBUG || true) {
+            console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | IP: ${clientIp} | Origin: ${origin}`);
+        }
     }
     next();
 });
