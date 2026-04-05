@@ -33,14 +33,14 @@ export const validateRequest = (schema: z.ZodSchema<any>) => {
 
 export const profileUpdateSchema = z.object({
     body: z.object({
-        full_name: z.string().min(2).max(100).optional(),
-        phone: z.string().min(5).max(20).optional(),
-        country: z.string().min(2).max(50).optional(),
-        city: z.string().min(2).max(50).optional(),
-        address: z.string().min(2).max(200).optional(),
-        pincode: z.string().min(3).max(12).optional(),
-        display_name: z.string().min(2).max(50).optional(),
-        avatar_url: z.string().url().optional(),
+        full_name: z.string().max(100).optional(),
+        phone: z.string().max(20).optional(),
+        country: z.string().max(50).optional(),
+        city: z.string().max(50).optional(),
+        address: z.string().max(200).optional(),
+        pincode: z.string().max(12).optional(),
+        display_name: z.string().max(50).optional(),
+        avatar_url: z.string().max(500).optional().nullable().or(z.literal('')),
     }).strict()
 });
 
