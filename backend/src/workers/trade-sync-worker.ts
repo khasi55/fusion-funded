@@ -34,7 +34,10 @@ export async function startTradeSyncWorker() {
             const { data: existingTrades } = await supabaseAdmin
                 .from('trades')
                 .select('ticket, type, close_time, profit_loss, commission, swap')
-                .eq('challenge_id', challengeId);
+                .eq('challenge_id', challengeId)
+                // OPTIMIZATION: Only fetch trades from the last week or open trades to compare.
+                // This prevents 100k+ DB request spikes by avoiding full table scans.
+                .or(`close_time.gte.${new Date(oneWeekAgo * 1000).toISOString()},close_time.is.null`);
 
             const existingTradesMap = new Map<string, any>();
             existingTrades?.forEach((t: any) => existingTradesMap.set(String(t.ticket), t));

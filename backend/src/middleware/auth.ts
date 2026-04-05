@@ -7,8 +7,11 @@ export interface AuthRequest extends Request {
     user?: any;
 }
 
-const CACHE_TTL = 300000; // 5 minutes (Increased from 30s)
+const CACHE_TTL = 300000; // 5 minutes
 const authCache = new Map<string, { user: any; expires: number }>();
+// Secondary cache for successful network fallbacks (stops the DB request storm)
+const fallbackCache = new Map<string, { user: any; expires: number }>();
+
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
     console.error("[Auth] CRITICAL: JWT_SECRET environment variable is missing!");
@@ -160,24 +163,24 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
         try {
             if (!supabaseJwtSecret) throw new Error("Missing SUPABASE_JWT_SECRET");
-            
-            // Try as-is first
+
+            // --- LOCAL VERIFICATION ---
             try {
+                // Try HS256 (Supabase Default for most projects)
                 decodedToken = jwt.verify(token, supabaseJwtSecret, { algorithms: ['HS256'] });
             } catch (firstErr: any) {
-                // If it fails with "invalid algorithm", log the header for debugging
+                // If it fails with "invalid algorithm", it's likely ES256 (New Supabase standard)
                 if (firstErr.message === 'invalid algorithm') {
-                    const parts = token.split('.');
-                    if (parts.length === 3) {
-                        try {
-                            const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
-                            console.warn(`[Auth] JWT Header: ${JSON.stringify(header)}`);
-                        } catch (e) {
-                            console.warn(`[Auth] Could not parse JWT header`);
-                        }
+                    // Check if we already have a successful fallback cached for this token
+                    const cachedFallback = fallbackCache.get(token);
+                    if (cachedFallback && cachedFallback.expires > Date.now()) {
+                        decodedToken = cachedFallback.user;
+                    } else {
+                        throw firstErr; // Proceed to network fallback below
                     }
+                } else {
+                    throw firstErr;
                 }
-                throw firstErr;
             }
         } catch (jwtErr: any) {
             if (supabaseJwtSecret) {
@@ -193,15 +196,28 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
                 return;
             }
 
-            // Fallback strictly ONLY if local verification failed but we actually had a secret (maybe revoked token)
-            // Still, this is a heavy operation.
+            // Fallback strictly ONLY if local verification failed but we actually had a secret
+            // We use the fallbackCache to prevent the 100k+ request storms seen when local check fails (ES256).
             const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(token);
             if (authError || !supabaseUser) {
-                console.warn(`[Auth] Supabase API fallback also failed: ${authError?.message || 'No user'}`);
+                console.warn(`[Auth] Supabase API fallback also failed for ${req.originalUrl}: ${authError?.message || 'No user'}`);
                 res.status(401).json({ error: 'Invalid or expired token' });
                 return;
             }
+
             decodedToken = { sub: supabaseUser.id, email: supabaseUser.email };
+
+            // Cache the successful fallback result for this token to prevent redundant API calls
+            fallbackCache.set(token, { user: decodedToken, expires: Date.now() + CACHE_TTL });
+            
+            // Log once for visibility (avoid spam)
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                try {
+                    const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
+                    console.log(`[Auth] Verified ${supabaseUser.id} via Supabase API (Local check failed: ${jwtErr.message}. Algorithm: ${header.alg})`);
+                } catch (e) {}
+            }
         }
 
         const supabaseUserId = decodedToken.sub;
