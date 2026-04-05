@@ -5,14 +5,19 @@ import { createClient } from '@/utils/supabase/client';
 import { fetchFromBackend } from '@/lib/backend-api';
 import PageLoader from '@/components/ui/PageLoader';
 
+// Global promise to track in-flight session synchronization
+let globalSyncPromise: Promise<void> | null = null;
+
 export default function SessionGuard({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
     const [isSynced, setIsSynced] = useState(false);
-    const syncInProgress = useRef(false);
 
     useEffect(() => {
         const syncSession = async (force = false) => {
-            if (syncInProgress.current && !force) return;
+            if (globalSyncPromise && !force) {
+                await globalSyncPromise;
+                return;
+            }
 
             try {
                 // Optimized: Skip sync if already synced in this browser tab
@@ -22,26 +27,27 @@ export default function SessionGuard({ children }: { children: React.ReactNode }
                     return;
                 }
 
-                syncInProgress.current = true;
-                const { data: { session } } = await supabase.auth.getSession();
+                globalSyncPromise = (async () => {
+                    const { data: { session } } = await supabase.auth.getSession();
 
-                if (session) {
-                    try {
-                        await fetchFromBackend('/api/auth/session', {
-                            method: 'POST',
-                        });
-                        // Mark as synced for this browser session only on success
-                        sessionStorage.setItem('sf_backend_synced', 'true');
-                    } catch (syncErr) {
-                        console.error('[SessionGuard] Backend session sync failed:', syncErr);
-                        // We allow it to proceed to the dashboard anyway, as the backend 
-                        // now supports JWT-only auth as a fallback.
+                    if (session) {
+                        try {
+                            await fetchFromBackend('/api/auth/session', {
+                                method: 'POST',
+                            });
+                            // Mark as synced for this browser session only on success
+                            sessionStorage.setItem('sf_backend_synced', 'true');
+                        } catch (syncErr) {
+                            console.error('[SessionGuard] Backend session sync failed:', syncErr);
+                        }
                     }
-                }
+                })();
+
+                await globalSyncPromise;
             } catch (err) {
                 console.error('[SessionGuard] Critical guard error:', err);
             } finally {
-                syncInProgress.current = false;
+                globalSyncPromise = null;
                 setIsSynced(true);
             }
         };
@@ -49,7 +55,7 @@ export default function SessionGuard({ children }: { children: React.ReactNode }
         syncSession();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
             if (event === 'SIGNED_IN' && session) {
                 // Clear sync flag on new login to force a re-sync
                 const wasSynced = sessionStorage.getItem('sf_backend_synced') === 'true';
