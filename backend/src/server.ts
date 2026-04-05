@@ -101,7 +101,7 @@ app.use(cors({
             process.env.ADMIN_URL?.replace(/\/$/, '')
         ].filter(Boolean) as string[];
 
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.ngrok-free.app')) {
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.ngrok-free.app') || origin.endsWith('.vercel.app')) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));

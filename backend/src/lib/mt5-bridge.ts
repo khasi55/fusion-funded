@@ -13,7 +13,7 @@ const getBridgeUrl = () => {
     require('dotenv').config({ override: true });
     const url = process.env.MT5_BRIDGE_URL || process.env.MT5_API_URL || 'https://bridge.sharkfunded.co';
     const finalUrl = url.replace(/\/$/, '');
-    console.log(`📡 [Bridge] Using URL: ${finalUrl}`);
+    // console.log(`📡 [Bridge] Using URL: ${finalUrl}`);
     return finalUrl;
 };
 const getApiKey = () => {
@@ -21,7 +21,7 @@ const getApiKey = () => {
     require('dotenv').config({ override: true });
     const key = process.env.MT5_BRIDGE_API_KEY || process.env.MT5_API_KEY || '';
     if (key) {
-        console.log(`📡 [Bridge] Using API Key: ${key.substring(0, 8)}...${key.substring(key.length - 4)}`);
+        // console.log(`📡 [Bridge] Using API Key: ${key.substring(0, 8)}...${key.substring(key.length - 4)}`);
     } else {
         console.warn(`📡 [Bridge] WARNING: API Key is MISSING!`);
     }

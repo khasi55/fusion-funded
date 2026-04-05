@@ -30,7 +30,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Correct path based on server.ts mounting
         const isBrowser = typeof window !== 'undefined';
-        const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.sharkfunded.co');
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fusionback.sharkfunded.co';
         // The following line `const response = await fetch(...)` is syntactically incorrect
         // within a `useEffect` callback (cannot use `await` directly) and also references
         // an undefined variable `token`. It has been commented out to maintain a syntactically

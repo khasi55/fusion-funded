@@ -34,7 +34,7 @@ export class RulesService {
         // Try to get rule from cache
         let dbRule = this.RULES_CACHE.get(normalizedType);
 
-        console.log(`[RulesService] Resolved '${normalizedType}' for Group: ${groupName}, Type: ${challengeType}. DB Rule Found: ${!!dbRule}`);
+        // console.log(`[RulesService] Resolved '${normalizedType}' for Group: ${groupName}, Type: ${challengeType}. DB Rule Found: ${!!dbRule}`);
         
         // Defaults
         let maxDailyLossPercent = 5;
@@ -42,7 +42,7 @@ export class RulesService {
         let profitTargetPercent = 0;
 
         if (dbRule) {
-            console.log(`[RulesService] Rule Content: Daily=${dbRule.daily_drawdown_percent}%, Max=${dbRule.max_drawdown_percent}%`);
+            // console.log(`[RulesService] Rule Content: Daily=${dbRule.daily_drawdown_percent}%, Max=${dbRule.max_drawdown_percent}%`);
             maxDailyLossPercent = (dbRule.daily_drawdown_percent !== undefined && dbRule.daily_drawdown_percent !== null)
                 ? Number(dbRule.daily_drawdown_percent)
                 : 5;

@@ -72,7 +72,7 @@ async function runTradeSync() {
         // Bulk add for maximum performance
         await syncQueue.addBulk(jobs);
 
-        if (DEBUG || true) console.log(`✅ [Trade Sync] Successfully dispatched ${challenges.length} jobs to Sync Worker.`);
+        if (DEBUG) console.log(`✅ [Trade Sync] Successfully dispatched ${challenges.length} jobs to Sync Worker.`);
 
     } catch (e: any) {
         if (!e.message?.includes('Connection is closed')) {
