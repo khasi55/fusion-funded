@@ -208,7 +208,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
             decodedToken = { sub: supabaseUser.id, email: supabaseUser.email };
 
             // Cache the successful fallback result for this token to prevent redundant API calls
-            setCachedAuth(token, { id: supabaseUser.id, email: supabaseUser.email });
+            setCachedAuth(token, { id: supabaseUser.id, email: supabaseUser.email || '' });
             
             // Log once for visibility (avoid spam)
             const parts = token.split('.');
