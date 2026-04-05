@@ -38,6 +38,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Debounce ref to collapse burst Realtime events into a single fetch
+    const realtimeDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
     useEffect(() => {
         // Realtime Subscription for Account Updates
         const supabase = createClient();
@@ -67,8 +70,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
                         filter: `user_id=eq.${user.id}`
                     },
                     () => {
-                        console.log('🔄 Dashboard: Challenges updated for user. Reloading...');
-                        fetchAccounts();
+                        // Debounce: collapse multiple rapid updates into a single fetch
+                        // (e.g., when risk-scheduler batch-updates multiple accounts at once)
+                        if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
+                        realtimeDebounceRef.current = setTimeout(() => {
+                            console.log('🔄 Dashboard: Challenges updated for user. Reloading...');
+                            fetchAccounts();
+                        }, 750); // 750ms debounce window
                     }
                 )
                 .subscribe();
@@ -77,6 +85,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         initRealtime();
         
         return () => {
+            if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
             if (channel) supabase.removeChannel(channel);
         };
     }, []);

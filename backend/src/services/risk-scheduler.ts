@@ -187,6 +187,12 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
             const violationLogs: any[] = [];
             const systemLogs: any[] = [];
 
+            // DELTA OPTIMIZATION: Skip DB write if equity/balance haven't changed significantly.
+            // This is the #1 fix for the Supabase Realtime feedback loop.
+            // Each upsert triggers a Realtime event → AccountContext refetch → DashboardData refetch.
+            // With 100+ accounts updating every 60s, this was generating 2M+ requests per day.
+            const EQUITY_CHANGE_THRESHOLD = 1.00; // $1.00 minimum change to trigger a DB write
+
             for (const res of results) {
                 const challenge = challengeMap.get(res.login);
                 if (!challenge) continue;
@@ -200,6 +206,16 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                     if (DEBUG) console.warn(` IGNORED Zero Equity Glitch for ${res.login}. Equity: ${res.equity}, Balance: ${res.balance}`);
                     continue;
                 }
+
+                // DELTA CHECK: Skip if equity and balance haven't changed enough to warrant a DB write
+                const prevEquity = Number(challenge.current_equity || 0);
+                const prevBalance = Number(challenge.current_balance || 0);
+                const equityDelta = Math.abs(res.equity - prevEquity);
+                const balanceDelta = Math.abs(res.balance - prevBalance);
+                
+                // Skip this account if neither equity nor balance changed significantly
+                // EXCEPT: always write if this is a status change (handled below)
+                const hasSignificantChange = equityDelta > EQUITY_CHANGE_THRESHOLD || balanceDelta > EQUITY_CHANGE_THRESHOLD;
 
                 const updateData: any = {
                     id: challenge.id, // Required for upsert to match correct row
@@ -262,7 +278,11 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                     }
                 }
 
-                updatesToUpsert.push(updateData);
+                // Only push to upsert queue if values changed significantly OR status changed
+                // This is critical to prevent triggering Supabase Realtime for unchanged accounts
+                if (hasSignificantChange || updateData.status) {
+                    updatesToUpsert.push(updateData);
+                }
             }
 
             // 1. Bulk Upsert Challenges (Split into Status Updates vs Equity Only)

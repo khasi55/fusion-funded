@@ -383,13 +383,20 @@ async function processTradeEvent(data: { login: number, trades: any[], event?: s
         console.error('Failed advanced risk checks:', err);
     }
 
-    
-    
-    await supabaseAdmin.from('challenges').update(updateData).eq('id', challenge.id);
+    // DELTA CHECK: Only write to DB if balance/equity changed meaningfully.
+    // Each write triggers a Supabase Realtime event → frontend refetch storm.
+    const prevBalance = Number((challenge as any).current_balance || challenge.initial_balance);
+    const prevEquity = Number((challenge as any).current_equity || challenge.initial_balance);
+    const balanceDelta = Math.abs(newBalance - prevBalance);
+    const equityDelta = Math.abs(newEquity - prevEquity);
 
-    // --- CACHE INVALIDATION ---
-    const redis = getRedis();
-    await redis.del(`dashboard:bulk:${challenge.id}`).catch(() => {});
+    if (balanceDelta > 1.00 || equityDelta > 1.00) {
+        await supabaseAdmin.from('challenges').update(updateData).eq('id', challenge.id);
+
+        // --- CACHE INVALIDATION ---
+        const redis = getRedis();
+        await redis.del(`dashboard:bulk:${challenge.id}`).catch(() => {});
+    }
 
     // console.log(`✅ Processed event for ${login} in ${Date.now() - startTime}ms`);
 }
