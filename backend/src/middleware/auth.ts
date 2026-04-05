@@ -7,10 +7,10 @@ export interface AuthRequest extends Request {
     user?: any;
 }
 
+import { getCachedAuth, setCachedAuth } from '../lib/auth-cache';
+
 const CACHE_TTL = 300000; // 5 minutes
 const authCache = new Map<string, { user: any; expires: number }>();
-// Secondary cache for successful network fallbacks (stops the DB request storm)
-const fallbackCache = new Map<string, { user: any; expires: number }>();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -172,9 +172,9 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
                 // If it fails with "invalid algorithm", it's likely ES256 (New Supabase standard)
                 if (firstErr.message === 'invalid algorithm') {
                     // Check if we already have a successful fallback cached for this token
-                    const cachedFallback = fallbackCache.get(token);
-                    if (cachedFallback && cachedFallback.expires > Date.now()) {
-                        decodedToken = cachedFallback.user;
+                    const cachedFallback = getCachedAuth(token);
+                    if (cachedFallback) {
+                        decodedToken = { sub: cachedFallback.id, email: cachedFallback.email };
                     } else {
                         throw firstErr; // Proceed to network fallback below
                     }
@@ -208,7 +208,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
             decodedToken = { sub: supabaseUser.id, email: supabaseUser.email };
 
             // Cache the successful fallback result for this token to prevent redundant API calls
-            fallbackCache.set(token, { user: decodedToken, expires: Date.now() + CACHE_TTL });
+            setCachedAuth(token, { id: supabaseUser.id, email: supabaseUser.email });
             
             // Log once for visibility (avoid spam)
             const parts = token.split('.');

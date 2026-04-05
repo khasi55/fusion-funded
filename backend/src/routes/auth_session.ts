@@ -4,6 +4,8 @@ import { getClientIP } from '../utils/ip';
 import { supabase, supabaseAdmin } from '../lib/supabase';
 import crypto from 'crypto';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { getCachedAuth, setCachedAuth } from '../lib/auth-cache';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
@@ -27,13 +29,21 @@ router.post('/session', async (req, res) => {
         
         if (supabaseJwtSecret) {
             try {
-                const importJwt = await import('jsonwebtoken');
-                const decoded = importJwt.default.verify(token, supabaseJwtSecret, { algorithms: ['HS256'] }) as any;
-                if (decoded && decoded.sub) {
-                    user = { id: decoded.sub, email: decoded.email };
+                // Check cache first
+                const cached = getCachedAuth(token);
+                if (cached) {
+                    user = { id: cached.id, email: cached.email };
+                } else {
+                    // Try HS256 local verify
+                    const decoded = jwt.verify(token, supabaseJwtSecret, { algorithms: ['HS256'] }) as any;
+                    if (decoded && decoded.sub) {
+                        user = { id: decoded.sub, email: decoded.email };
+                    }
                 }
             } catch (jwtErr: any) {
-                console.warn(`[Auth Session] Local JWT verification failed: ${jwtErr.message}`);
+                if (jwtErr.message !== 'invalid algorithm') {
+                    console.warn(`[Auth Session] Local JWT verification failed: ${jwtErr.message}`);
+                }
             }
         }
 
@@ -42,7 +52,9 @@ router.post('/session', async (req, res) => {
             if (error || !supabaseUser) {
                 return res.status(401).json({ error: 'Invalid or expired token' });
             }
-            user = supabaseUser;
+            user = { id: supabaseUser.id, email: supabaseUser.email };
+            // Cache successful network fallback
+            setCachedAuth(token, user);
         }
 
         // 2. Optimized Logic: Check if valid session already exists
