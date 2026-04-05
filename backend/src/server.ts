@@ -6,6 +6,10 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import cookieParser from 'cookie-parser';
+import dns from 'dns';
+
+// Fix Node 18+ IPv6 fetch timeout issues on VPS
+dns.setDefaultResultOrder('ipv4first');
 
 // 1. Load environment variables FIRST before any other internal imports
 const envPath = path.resolve(__dirname, '../.env');
