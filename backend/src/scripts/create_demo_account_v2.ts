@@ -19,11 +19,11 @@ async function run() {
     console.log('🚀 Starting Demo Account Creation...');
 
     // 1. Get or Create User
-    console.log('📡 Fetching profile for admin@sharkfunded.com...');
+    console.log('📡 Fetching profile for khasireddy3@gmail.com...');
     let { data: profile, error: pError } = await supabase
         .from('profiles')
         .select('id, email, full_name')
-        .eq('email', 'admin@sharkfunded.com')
+        .eq('email', 'khasireddy3@gmail.com')
         .single();
 
     if (pError) {

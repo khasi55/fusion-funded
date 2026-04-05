@@ -1,3 +1,6 @@
+import dns from 'dns';
+// Fix Node 18+ IPv6 fetch timeout issues on VPS
+dns.setDefaultResultOrder('ipv4first');
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -6,12 +9,6 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import cookieParser from 'cookie-parser';
-import dns from 'dns';
-
-// Fix Node 18+ IPv6 fetch timeout issues on VPS
-dns.setDefaultResultOrder('ipv4first');
-
-// 1. Load environment variables FIRST before any other internal imports
 const envPath = path.resolve(__dirname, '../.env');
 const dotenvResult = dotenv.config({ path: envPath });
 
@@ -20,8 +17,6 @@ if (dotenvResult.error) {
 } else {
     console.log(`[Server] .env loaded successfully.`);
 }
-
-// 2. Now import components that depend on process.env
 import { CoreRiskEngine } from './engine/risk-engine-core';
 import { AdvancedRiskEngine } from './engine/risk-engine-advanced';
 import { authenticate, requireRole } from './middleware/auth';

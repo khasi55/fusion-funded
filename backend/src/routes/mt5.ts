@@ -61,7 +61,7 @@ router.get('/accounts', authenticate, requireRole(['super_admin', 'admin', 'sub_
         }
 
         if (group && group !== 'all') {
-            query = query.ilike('mt5_group', `%${group}%`);
+            query = query.ilike('group', `%${group}%`);
         }
 
         if (phase && phase !== 'all') {

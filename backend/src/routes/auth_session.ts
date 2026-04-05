@@ -21,11 +21,28 @@ router.post('/session', async (req, res) => {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        // 1. Verify token with Supabase
-        const { data: { user }, error } = await supabase.auth.getUser(token);
+        // 1. Verify token with Supabase (Optimized: Local verification first)
+        let user: any = null;
+        const supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET;
+        
+        if (supabaseJwtSecret) {
+            try {
+                const importJwt = await import('jsonwebtoken');
+                const decoded = importJwt.default.verify(token, supabaseJwtSecret, { algorithms: ['HS256'] }) as any;
+                if (decoded && decoded.sub) {
+                    user = { id: decoded.sub, email: decoded.email };
+                }
+            } catch (jwtErr: any) {
+                console.warn(`[Auth Session] Local JWT verification failed: ${jwtErr.message}`);
+            }
+        }
 
-        if (error || !user) {
-            return res.status(401).json({ error: 'Invalid or expired token' });
+        if (!user) {
+            const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token);
+            if (error || !supabaseUser) {
+                return res.status(401).json({ error: 'Invalid or expired token' });
+            }
+            user = supabaseUser;
         }
 
         // 2. Optimized Logic: Check if valid session already exists

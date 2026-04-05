@@ -160,10 +160,29 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
         try {
             if (!supabaseJwtSecret) throw new Error("Missing SUPABASE_JWT_SECRET");
-            decodedToken = jwt.verify(token, supabaseJwtSecret);
+            
+            // Try as-is first
+            try {
+                decodedToken = jwt.verify(token, supabaseJwtSecret, { algorithms: ['HS256'] });
+            } catch (firstErr: any) {
+                // If it fails with "invalid algorithm", log the header for debugging
+                if (firstErr.message === 'invalid algorithm') {
+                    const parts = token.split('.');
+                    if (parts.length === 3) {
+                        try {
+                            const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
+                            console.warn(`[Auth] JWT Header: ${JSON.stringify(header)}`);
+                        } catch (e) {
+                            console.warn(`[Auth] Could not parse JWT header`);
+                        }
+                    }
+                }
+                throw firstErr;
+            }
         } catch (jwtErr: any) {
             if (supabaseJwtSecret) {
                 console.warn(`[Auth] Local JWT verification failed for ${req.originalUrl}: ${jwtErr.message}`);
+                // console.log(`[Auth] Token used: ${token.substring(0, 10)}...${token.substring(token.length - 10)}`);
             }
 
             // CRITICAL OPTIMIZATION: Do not use supabase.auth.getUser as a fallback if the secret is missing.

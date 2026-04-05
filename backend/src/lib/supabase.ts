@@ -1,6 +1,12 @@
+import dns from 'dns';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import path from 'path';
+
+// Force IPv4 preference to prevent ConnectTimeoutError on VPS with broken IPv6 routing
+if (typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 // Force load env from multiple possible locations to be 100% sure
 const possibleEnvPaths = [
