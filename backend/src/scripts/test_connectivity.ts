@@ -97,7 +97,7 @@ async function testConnectivity() {
         const decoded = jwt.verify(dummyToken, secret, { algorithms: ['HS256'] });
         console.log('   ✅ JWT Test (local sign/verify): Success');
     } catch (err) {
-        console.error('   ❌ JWT Test (local): Failed', err.message);
+        console.error('   ❌ JWT Test (local): Failed', (err as any).message);
     }
   }
 }
