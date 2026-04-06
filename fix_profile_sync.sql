@@ -55,11 +55,11 @@ DO $$
 BEGIN
     UPDATE public.profiles p
     SET 
-        phone_number = COALESCE(p.phone_number, (u.raw_user_meta_data->>'phone_number')),
+        phone = COALESCE(p.phone, (u.raw_user_meta_data->>'phone_number')),
         country = COALESCE(p.country, (u.raw_user_meta_data->>'country'))
     FROM auth.users u
     WHERE p.id = u.id
-    AND (p.phone_number IS NULL OR p.country IS NULL);
+    AND (p.phone IS NULL OR p.country IS NULL);
     
     RAISE NOTICE 'Backfill for existing users completed.';
 END $$;
