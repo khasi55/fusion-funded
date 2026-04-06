@@ -242,6 +242,8 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             'payout_requests',
             'kyc_requests',
             'challenges',
+            'challenges_evaluation', // Added
+            'challenges_rapid',      // Added
             'payment_orders',
             'bank_details',
             'wallet_addresses',
@@ -250,7 +252,8 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             'risk_violations',
             'daily_stats',
             'trades',
-            'trade_consistency_snapshot'
+            'trade_consistency_snapshot',
+            'coupon_usage'           // Added
         ];
 
         // 1. Special case: remove self-referencing referral links in profiles
