@@ -98,7 +98,7 @@ export function initializeSocket(httpServer: HTTPServer) {
 }
 
 // --- MT5 BRIDGE WEBSOCKET RELAY ---
-const BRIDGE_WS_URL = process.env.MT5_BRIDGE_WS_URL || 'wss://bridge.fusionfunded.co/ws/stream/0';
+const BRIDGE_WS_URL = process.env.MT5_BRIDGE_WS_URL || 'wss://fusion.sharkfunded.co/ws/stream/0';
 let bridgeWs: WebSocket | null = null;
 const loginToChallengeMap = new Map<number, string>();
 const failedLoginMap = new Map<number, number>(); // Stores the timestamp of failed lookup
