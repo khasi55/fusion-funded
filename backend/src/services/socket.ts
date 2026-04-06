@@ -101,6 +101,9 @@ export function initializeSocket(httpServer: HTTPServer) {
 const BRIDGE_WS_URL = process.env.MT5_BRIDGE_WS_URL || 'wss://bridge.sharkfunded.co/ws/stream/0';
 let bridgeWs: WebSocket | null = null;
 const loginToChallengeMap = new Map<number, string>();
+const failedLoginMap = new Map<number, number>(); // Stores the timestamp of failed lookup
+const NEGATIVE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 let bridgeStatus: 'connected' | 'disconnected' | 'connecting' | 'error' = 'disconnected';
 let lastBridgeError: string | null = null;
 
@@ -109,19 +112,29 @@ async function getChallengeIdByLogin(login: number): Promise<string | null> {
         return loginToChallengeMap.get(login)!;
     }
 
+    // Check negative cache to prevent request storms
+    const failureTimestamp = failedLoginMap.get(login);
+    if (failureTimestamp && (Date.now() - failureTimestamp < NEGATIVE_CACHE_TTL)) {
+        return null;
+    }
+
     try {
         const { data, error } = await supabase
             .from('challenges')
             .select('id')
             .eq('login', login)
-            .single();
+            .maybeSingle();
 
         if (data && !error) {
             loginToChallengeMap.set(login, data.id);
+            failedLoginMap.delete(login); // Clean up if previously marked as failed
             // if (DEBUG) console.log(`🔗 Mapped Login ${login} -> Challenge ${data.id}`);
             return data.id;
+        } else {
+            failedLoginMap.set(login, Date.now());
         }
     } catch (err) {
+        failedLoginMap.set(login, Date.now());
         console.error(`❌ WS Relay: DB Lookup failed for login ${login}:`, err);
     }
     return null;
