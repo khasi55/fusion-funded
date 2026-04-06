@@ -20,12 +20,12 @@ if (!JWT_SECRET) {
     console.error("CRITICAL: JWT_SECRET environment variable is missing!");
 }
 
-const RP_NAME = "SharkFunded Admin";
+const RP_NAME = "Fusion Funded Admin";
 
 // Helper to dynamically get RP_ID and ORIGIN per request avoiding cached "localhost"
 async function getDynamicConfig() {
     const headersList = await cookies(); // In server actions we can just get origin headers securely, but simple string match is fine
-    const origin = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.sharkfunded.com";
+    const origin = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.fusionfunded.com";
 
     let rpId = "localhost";
     try {

@@ -31,7 +31,7 @@ async function run() {
     }
 
     if (!profile) {
-        console.log('⚠️ admin@sharkfunded.com not found, picking first available user...');
+        console.log('⚠️ admin@fusionfunded.com not found, picking first available user...');
         const { data: firstProfile, error: fError } = await supabase
             .from('profiles')
             .select('id, email, full_name')
@@ -65,7 +65,7 @@ async function run() {
                 group: mt5Group,
                 leverage: 100,
                 balance: accountSize,
-                callback_url: `${process.env.BACKEND_URL || 'https://api.sharkfunded.co'}/api/mt5/trades/webhook`
+                callback_url: `${process.env.BACKEND_URL || 'https://api.fusionfunded.co'}/api/mt5/trades/webhook`
             }) as any;
 
             console.log(`✅ Bridge Response for ${mt5Group}:`, JSON.stringify(mt5Data, null, 2));
@@ -88,7 +88,7 @@ async function run() {
                     login: mt5Login,
                     master_password: masterPassword,
                     investor_password: investorPassword,
-                    server: 'AURO MARKETS',
+                    server: 'BULGE GROUP INVESTMENT',
                     platform: 'MT5',
                     group: mt5Group,
                     leverage: 100,

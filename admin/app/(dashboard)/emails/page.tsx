@@ -163,7 +163,7 @@ export default function EmailsPage() {
                     ${htmlContent || '<p class="text-gray-400">Email body preview will appear here...</p>'}
                 </div>
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center;">
-                    <p>Sent by <strong>SharkFunded</strong></p>
+                    <p>Sent by <strong>Fusion Funded</strong></p>
                     <p>If you no longer wish to receive these emails, you can update your preferences in your dashboard.</p>
                 </div>
             </div>

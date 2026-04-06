@@ -38,7 +38,7 @@ async function run() {
     // 2. Fetch Profile
     const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', order.user_id).single();
     const fullName = profile?.full_name || 'Trader';
-    const email = profile?.email || 'noemail@sharkfunded.com';
+    const email = profile?.email || 'noemail@fusionfunded.com';
 
     // 3. Logic to determine params (Copied from webhooks.ts)
     const accountTypeName = (order.account_type_name || '').toLowerCase();
@@ -102,7 +102,7 @@ async function run() {
                 login: mt5Data.login,
                 master_password: mt5Data.password,
                 investor_password: mt5Data.investor_password || '',
-                server: mt5Data.server || 'AURO MARKETS',
+                server: mt5Data.server || 'BULGE GROUP INVESTMENT',
                 platform: order.platform,
                 leverage: leverage,
                 group: mt5Group,

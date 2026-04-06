@@ -87,7 +87,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
                     req.user = {
                         id: decoded.id,
-                        email: email || 'admin@sharkfunded.com',
+                        email: email || 'admin@fusionfunded.com',
                         role: decoded.role || 'admin',
                         permissions: decoded.permissions || []
                     };
@@ -110,7 +110,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         if (adminKey && envAdminKey && adminKey === envAdminKey) {
             const adminEmail = req.headers['x-admin-email'] as string;
             // console.log(`   🔑 [Auth] API Key valid for ${adminEmail}`);
-            req.user = { id: 'admin-system', email: adminEmail || 'admin@sharkfunded.com', role: 'super_admin' };
+            req.user = { id: 'admin-system', email: adminEmail || 'admin@fusionfunded.com', role: 'super_admin' };
             next();
             return;
         }

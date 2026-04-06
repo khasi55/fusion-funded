@@ -25,8 +25,8 @@ export class PaymidGateway implements PaymentGateway {
             const [firstName, ...lastNameParts] = params.customerName.split(' ');
             const lastName = lastNameParts.join(' ') || 'N/A';
 
-            const frontendUrl = process.env.FRONTEND_URL || 'https://app.sharkfunded.com';
-            const backendUrl = process.env.BACKEND_URL || 'https://api.sharkfunded.co';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://app.fusionfunded.com';
+            const backendUrl = process.env.BACKEND_URL || 'https://api.fusionfunded.co';
 
             const payload = {
                 firstName: firstName,

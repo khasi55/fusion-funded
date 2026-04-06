@@ -36,15 +36,15 @@ export class EPayGateway implements PaymentGateway {
                 orderCurrency: params.currency || 'USD',
                 // EPay requires valid public URLs (no localhost)
                 // Redirect URLs: These should point to app.sharkfunded.com
-                success_url: `https://app.sharkfunded.com/payment/success?orderId=${params.orderId}`,
-                failure_url: `https://app.sharkfunded.com/payment/failed?orderId=${params.orderId}`,
+                success_url: `https://app.fusionfunded.com/payment/success?orderId=${params.orderId}`,
+                failure_url: `https://app.fusionfunded.com/payment/failed?orderId=${params.orderId}`,
 
                 // Webhook/Notification URLs: Point to the backend endpoint
                 // Sending multiple variants to ensure compatibility with all EPay versions
-                webhook_url: `https://api.sharkfunded.co/api/webhooks/payment`,
-                notification_url: `https://api.sharkfunded.co/api/webhooks/payment`,
-                notificationUrl: `https://api.sharkfunded.co/api/webhooks/payment`,
-                callback_url: `https://api.sharkfunded.co/api/webhooks/payment`
+                webhook_url: `https://api.fusionfunded.co/api/webhooks/payment`,
+                notification_url: `https://api.fusionfunded.co/api/webhooks/payment`,
+                notificationUrl: `https://api.fusionfunded.co/api/webhooks/payment`,
+                callback_url: `https://api.fusionfunded.co/api/webhooks/payment`
             };
 
             const endpoint = `${this.apiUrl}/create-new-order`;

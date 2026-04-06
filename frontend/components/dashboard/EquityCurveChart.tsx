@@ -185,7 +185,9 @@ export default function EquityCurveChart({ account, trades: initialTrades, initi
 
     // Derived stats for display consistency
     const initialBal = selectedAccount?.initial_balance || 100000;
-    const currentEquityVal = (selectedAccount?.equity && selectedAccount.equity > 0) ? selectedAccount.equity : stats.currentEquity;
+    // Live Equity from Socket Data (DashboardDataContext) takes priority
+    const liveEquity = dashboardData.objectives?.stats?.equity || dashboardData.stats?.equity;
+    const currentEquityVal = liveEquity ?? (selectedAccount?.equity && selectedAccount.equity > 0 ? selectedAccount.equity : stats.currentEquity);
     const currentPnL = currentEquityVal - initialBal;
     const currentPercent = (currentPnL / initialBal) * 100;
 

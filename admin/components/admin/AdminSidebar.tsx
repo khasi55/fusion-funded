@@ -25,7 +25,8 @@ import {
     Send,
     AlertTriangle,
     Zap,
-    ChevronLeft
+    ChevronLeft,
+    ShoppingBag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAdmin } from "@/app/actions/admin-auth";
@@ -35,11 +36,13 @@ const navigation = [
     { name: "Users", href: "/users", icon: Users, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
     { name: "Accounts List", href: "/accounts", icon: List, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
     { name: "Pending Upgrades", href: "/passed-accounts", icon: Trophy, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
+    { name: "Funded Stage", href: "/accounts?tab=funded&sort=profit", icon: Trophy, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
     { name: "MT5 Accounts", href: "/mt5", icon: Server, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
     { name: "MT5 Actions", href: "/mt5/actions", icon: Zap, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },
     { name: "Risk Settings", href: "/mt5-risk", icon: Gauge, roles: ['super_admin', 'admin', 'risk_admin'] },
     { name: "Risk Violations", href: "/risk-violations", icon: AlertTriangle, roles: ['super_admin', 'admin', 'risk_admin'] },
     { name: "Payments", href: "/payments", icon: CreditCard, roles: ['super_admin', 'admin', 'sub_admin'] },
+    { name: "Orders", href: "/orders", icon: ShoppingBag, roles: ['super_admin', 'admin', 'sub_admin'] },
     { name: "Cregis Check", href: "/payments/cregis", icon: Shield, roles: ['super_admin', 'admin'] },
     { name: "Settings", href: "/settings/security", icon: Settings, roles: ['super_admin', 'admin'] },
     { name: "Assign Account", href: "/mt5/assign", icon: UserPlus, roles: ['super_admin', 'admin', 'sub_admin', 'risk_admin'] },

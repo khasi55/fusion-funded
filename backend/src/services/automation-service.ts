@@ -19,6 +19,11 @@ export class AutomationService {
                 .single();
 
             if (fetchError || !account) return;
+            
+            if (account.status !== 'active') {
+                console.log(`ℹ️ [AutomationService] Account ${login} is already ${account.status}. Skipping upgrade.`);
+                return;
+            }
 
             // Specific Rule: grp3 (Phase 1) -> grp4 (Funded)
             const currentGroup = (account.group || '').toUpperCase();
@@ -57,6 +62,10 @@ export class AutomationService {
                 .single();
 
             if (fetchError || !account) throw new Error('Account not found');
+
+            if (account.status !== 'active') {
+                return { success: false, message: `Account ${account.login} is already in state: ${account.status}` };
+            }
 
             // 2. Determine upgrade path if not provided
             let nextType = customType;
@@ -103,7 +112,7 @@ export class AutomationService {
             const newLogin = mt5Data.login;
             const newPassword = mt5Data.password;
             const newInvestorPassword = mt5Data.investor_password || '';
-            const newServer = mt5Data.server || 'AURO MARKETS';
+            const newServer = mt5Data.server || 'BULGE GROUP INVESTMENT';
 
             // 5. Insert new challenge
             const { data: newChallenge, error: createError } = await supabase

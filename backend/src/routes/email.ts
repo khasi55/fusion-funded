@@ -184,7 +184,7 @@ router.post('/send-account-credentials', authenticate, requireRole(['super_admin
                         </tr>
                         <tr>
                             <td style="padding: 8px 0;"><strong>Server:</strong></td>
-                            <td style="padding: 8px 0;">AURO MARKETS</td>
+                            <td style="padding: 8px 0;">BULGE GROUP INVESTMENT</td>
                         </tr>
                         <tr>
                             <td style="padding: 8px 0;"><strong>MT5 Group:</strong></td>
@@ -223,7 +223,7 @@ Account Details:
 - MT5 Login: ${login}
 - Master Password: ${masterPassword}
 - Investor Password: ${investorPassword}
-- Server: AURO MARKETS
+- Server: BULGE GROUP INVESTMENT
 - MT5 Group: ${mt5Group}
 
 IMPORTANT: Keep your master password secure. Never share it with anyone.
@@ -245,7 +245,7 @@ Fusion Funded Team
             name,
             login,
             masterPassword,
-            'AURO MARKETS',
+            'BULGE GROUP INVESTMENT',
             investorPassword
         );
 

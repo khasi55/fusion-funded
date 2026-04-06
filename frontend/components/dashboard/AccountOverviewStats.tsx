@@ -77,7 +77,9 @@ export default function AccountOverviewStats() {
 
     // Display PnL: Calculate directly from Equity/Balance relative to Initial Balance
     // This ensures consistency with the Equity Curve and avoids dependency on potentially stale objective stats
-    const currentEquity = selectedAccount.equity ?? selectedAccount.balance ?? initialBalance;
+    // Prioritize Live Socket Equity from DashboardDataContext for the "Real-time" feel
+    const liveEquity = dashboardData.objectives?.stats?.equity || dashboardData.stats?.equity;
+    const currentEquity = liveEquity ?? selectedAccount.equity ?? selectedAccount.balance ?? initialBalance;
     const displayPnL = currentEquity - initialBalance;
 
     const isPnlNegative = displayPnL < 0;

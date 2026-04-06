@@ -61,6 +61,7 @@ export const emailUpdateSchema = z.object({
 export const walletUpdateSchema = z.object({
     body: z.object({
         walletAddress: z.string().min(10, 'Wallet address is too short').max(200),
+        network: z.enum(['USDT_TRC20', 'USDT_BEP20']).optional().default('USDT_TRC20'),
         otp: z.string().length(6, 'Verification code must be 6 digits'),
     }).strict()
 });

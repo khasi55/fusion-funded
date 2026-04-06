@@ -111,7 +111,7 @@ async function main() {
             group: mt5Group,
             leverage: leverage,
             balance: finalSize,
-            callback_url: `${process.env.BACKEND_URL || 'https://api.sharkfunded.com'}/api/webhooks/mt5`
+            callback_url: `${process.env.BACKEND_URL || 'https://api.fusionfunded.com'}/api/webhooks/mt5`
         }) as any;
 
         console.log(`✅ MT5 Account Created: ${mt5Data.login}`);
@@ -130,7 +130,7 @@ async function main() {
                 login: mt5Data.login,
                 master_password: mt5Data.password,
                 investor_password: mt5Data.investor_password || '',
-                server: mt5Data.server || 'AURO MARKETS',
+                server: mt5Data.server || 'BULGE GROUP INVESTMENT',
                 platform: order.platform || 'MT5',
                 leverage: leverage,
                 group: mt5Group,
@@ -165,7 +165,7 @@ async function main() {
             fullName,
             String(mt5Data.login),
             mt5Data.password,
-            mt5Data.server || 'ALFX Limited',
+            mt5Data.server || 'BULGE GROUP INVESTMENT',
             mt5Data.investor_password
         );
         console.log('✅ Email Sent.');

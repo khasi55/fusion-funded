@@ -198,16 +198,32 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
         let finalGroup = mt5Group || 'MBULGE\\contest\\grp1';
 
         // Logic matched with payment webhook
-        const lowerPlan = planType.toLowerCase();
+        const lowerPlan = (planType || '').toLowerCase();
 
-        if (lowerPlan.includes('direct funded')) {
+        // 1. HFT 2.0 Mapping (High Priority)
+        if (lowerPlan.includes('hft')) {
+            if (lowerPlan.includes('funded')) {
+                challengeType = 'hft2_funded';
+                finalGroup = mt5Group || 'MBULGE\\contest\\grp4';
+            } else {
+                challengeType = 'hft2_phase1';
+                finalGroup = mt5Group || 'MBULGE\\contest\\grp3';
+            }
+        } 
+        // 2. Direct Funded
+        else if (lowerPlan.includes('direct funded')) {
             challengeType = 'direct_funded';
-        } else if (lowerPlan.includes('pro') || lowerPlan.includes('prime')) {
+            finalGroup = mt5Group || 'demo\\S\\0-Direct-SF';
+        } 
+        // 3. Prime / Pro Challenges
+        else if (lowerPlan.includes('pro') || lowerPlan.includes('prime')) {
             if (lowerPlan.includes('instant')) challengeType = 'prime_instant';
             else if (lowerPlan.includes('1 step') || lowerPlan.includes('1-step')) challengeType = 'prime_1_step';
             else if (lowerPlan.includes('2 step') || lowerPlan.includes('2-step')) challengeType = 'prime_2_step';
             else challengeType = 'prime_2_step';
-        } else if (lowerPlan.includes('instant funding') || lowerPlan.includes('instant')) {
+        } 
+        // 4. Lite / Evaluation
+        else if (lowerPlan.includes('instant funding') || lowerPlan.includes('instant')) {
             challengeType = 'lite_instant';
         } else if (lowerPlan.includes('1 step') || lowerPlan.includes('1-step')) {
             challengeType = 'lite_1_step';
@@ -221,7 +237,6 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
             // Fallbacks
             if (lowerPlan.includes('evaluation')) challengeType = 'Evaluation';
             else {
-                // Secondary check for Prime if not caught above
                 challengeType = lowerPlan.includes('prime') ? 'prime_2_step' : 'Phase 1';
             }
         }
@@ -267,7 +282,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                 login: mt5Login,
                 master_password: masterPassword,
                 investor_password: investorPassword,
-                server: 'AURO MARKETS',
+                server: 'BULGE GROUP INVESTMENT',
                 platform: 'MT5',
                 group: finalGroup, // Save the assigned group
                 leverage: 100,
@@ -321,7 +336,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                 profile.full_name || 'Trader',
                 String(mt5Login),
                 masterPassword,
-                'AURO MARKETS',
+                'BULGE GROUP INVESTMENT',
                 investorPassword
             ).catch(err => console.error("Async Email Error:", err));
         }

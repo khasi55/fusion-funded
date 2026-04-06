@@ -26,7 +26,7 @@ export class KlaviyoService {
                         last_name: lastName,
                         phone_number: phone,
                         properties: {
-                            source: 'SharkFunded CRM'
+                            source: 'Fusion Funded CRM'
                         }
                     }
                 }

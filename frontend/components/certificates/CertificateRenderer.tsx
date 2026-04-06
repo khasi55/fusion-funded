@@ -31,7 +31,7 @@ const CertificateRenderer = forwardRef<CertificateRendererRef, CertificateRender
             const canvas = canvasRef.current;
             if (canvas) {
                 const link = document.createElement("a");
-                link.download = `SharkFunded-${type.toUpperCase()}-${identifier}.png`;
+                link.download = `FusionFunded-${type.toUpperCase()}-${identifier}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             }

@@ -117,21 +117,21 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
 
     // 1. Get MT5 Group String
     const getMt5Group = () => {
-        if (category === 'funded') return "SF Funded Live";
-        if (category === 'direct_funded') return "demo\\S\\0-Direct-SF"; // Updated to correct MT5 group
+        if (category === 'funded') return "MBULGE\\contest\\grp4";
+        if (category === 'direct_funded') return "demo\\S\\0-Direct-SF";
         if (category === 'competition') return "demo\\SF\\0-Demo\\comp";
 
-        return "MBULGE\\contest\\grp1";
+        return "MBULGE\\contest\\grp3"; // Default HFT Challenge Group
     };
 
     // 2. Get Plan Type Display Name
     const getPlanTypeName = () => {
-        if (category === 'funded') return "Funded Live Account";
+        if (category === 'funded') return "HFT Funded Account";
         if (category === 'direct_funded') return "Fusion Funded Direct Funded";
         if (category === 'competition') return "Competition Account";
 
         // Challenge Name
-        return `HFT 2.0 1-Step Challenge`;
+        return `HFT Phase 1 Challenge`;
     };
 
     // 3. Get Available Sizes
@@ -318,8 +318,8 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
                             <label className="block text-sm font-medium text-gray-700 mb-3">Category</label>
                             <div className="flex flex-wrap gap-3">
                                 {[
-                                    { id: 'challenge', label: 'Evaluation Challenge' },
-                                    { id: 'funded', label: 'Funded Live Account' },
+                                    { id: 'challenge', label: 'HFT Challenge' },
+                                    { id: 'funded', label: 'HFT Funded' },
                                     { id: 'direct_funded', label: 'Direct Funded' },
                                     { id: 'competition', label: 'Competition Account' }
                                 ].map(c => (

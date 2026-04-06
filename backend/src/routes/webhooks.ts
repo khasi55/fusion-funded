@@ -120,7 +120,7 @@ router.get('/payment', async (req: Request, res: Response) => {
             req.query.orderid as string;
         const statusParam = req.query.status as string;
         // Use consistent Frontend URL logic
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.sharkfunded.com';
+        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.fusionfunded.com';
 
         if (internalOrderId) {
             if (statusParam === 'failed') {
@@ -306,7 +306,7 @@ async function handlePaymentWebhook(req: Request, res: Response) {
         }
 
         // Use consistent Frontend URL logic
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.sharkfunded.com';
+        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.fusionfunded.com';
 
         if (!internalOrderId) {
             console.error('❌ Missing order ID in webhook. BodyKeys:', Object.keys(body), 'Body:', body);

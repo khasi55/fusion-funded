@@ -26,7 +26,7 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
             try {
                 setLoading(true);
                 // Correct path based on server.ts mounting
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.sharkfunded.co';
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co';
                 const response = await fetch(`${backendUrl}/api/public-performance/performance/${token}`);
                 if (!response.ok) throw new Error('Shared dashboard not found');
                 const result = await response.json();
@@ -58,13 +58,13 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-3">Private Dashboard</h1>
                     <p className="text-gray-400 text-sm md:text-base max-w-sm mx-auto leading-relaxed">
-                        This trading performance is private or the link has expired. Join SharkFunded to start your journey.
+                        This trading performance is private or the link has expired. Join Fusion Funded to start your journey.
                     </p>
                     <a
-                        href="https://sharkfunded.com"
+                        href="https://fusionfunded.com"
                         className="inline-block mt-10 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-600/20"
                     >
-                        Visit sharkfunded.com
+                        Visit fusionfunded.com
                     </a>
 
                     {/* Background decorative glow */}
@@ -87,7 +87,7 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
                                 <Image src="/shark-icon.svg" alt="logo" width={40} height={40} className="w-full h-full object-contain" />
                             </div>
                             <span className="text-xl font-black text-slate-900 tracking-tight">
-                                SharkFunded
+                                Fusion Funded
                             </span>
                         </Link>
                         <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
@@ -111,7 +111,7 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
                             Login
                         </Link>
                         <Link
-                            href="https://app.sharkfunded.com/checkoutpage"
+                            href="https://app.fusionfunded.com/checkoutpage"
                             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg shadow-blue-500/20 transition-all active:scale-95"
                         >
                             Get Started
@@ -139,7 +139,7 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
 
                         <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
                             <QRCodeSVG
-                                value={`https://app.sharkfunded.com/signup?ref=${account.referral_code}`}
+                                value={`https://app.fusionfunded.com/signup?ref=${account.referral_code}`}
                                 size={64}
                                 level="M"
                                 includeMargin={false}
@@ -204,8 +204,8 @@ export default function PublicDashboardPage({ params }: { params: Promise<{ toke
 
             <footer className="border-t border-slate-200 py-12 text-center text-slate-500">
                 <div className="max-w-7xl mx-auto px-4">
-                    <p className="text-sm mb-4">Verification provided by <span className="font-bold text-slate-900">SharkFunded Performance Labs</span></p>
-                    <p className="text-xs uppercase tracking-widest font-bold text-blue-600">Become a Funded Shark</p>
+                    <p className="text-sm mb-4">Verification provided by <span className="font-bold text-slate-900">Fusion Funded Performance Labs</span></p>
+                    <p className="text-xs uppercase tracking-widest font-bold text-blue-600">Become a Funded Fusion Trader</p>
                 </div>
             </footer>
         </div>

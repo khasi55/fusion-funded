@@ -16,7 +16,7 @@ export class SharkPayGateway implements PaymentGateway {
         try {
             const keyId = process.env.SHARK_PAYMENT_KEY_ID || process.env.SHARKPAY_API_KEY || '';
             const keySecret = process.env.SHARK_PAYMENT_KEY_SECRET || process.env.SHARKPAY_API_SECRET || '';
-            const apiUrl = process.env.SHARKPAY_API_URL || 'https://payments.sharkfunded.com';
+            const apiUrl = process.env.SHARKPAY_API_URL || 'https://payments.fusionfunded.com';
 
             // Convert USD to INR for SharkPay
             const amountINR = await this.convertToINR(params.amount);

@@ -52,8 +52,8 @@ async function createAdmin(email: string, password: string, fullName: string) {
 }
 
 // GET ARGUMENTS FROM COMMAND LINE or use defaults
-const email = process.argv[2] || 'admin@sharkfunded.com';
-const password = process.argv[3] || 'Sharkfunded123!';
+const email = process.argv[2] || 'admin@fusionfunded.com';
+const password = process.argv[3] || 'Fusionfunded123!';
 const fullName = process.argv[4] || 'Super Admin';
 
 createAdmin(email, password, fullName);

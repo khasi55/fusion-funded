@@ -29,7 +29,7 @@ export class SharkPayGateway implements PaymentGateway {
                     keySecret: data.api_secret,
                     webhookSecret: data.webhook_secret,
                     environment: data.environment,
-                    apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.sharkfunded.com'
+                    apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.fusionfunded.com'
                 };
             }
         } catch (e) {
@@ -42,7 +42,7 @@ export class SharkPayGateway implements PaymentGateway {
             keySecret: process.env.SHARKPAY_API_SECRET || process.env.SHARK_PAYMENT_KEY_SECRET || '',
             webhookSecret: process.env.SHARKPAY_WEBHOOK_SECRET || '',
             environment: 'sandbox',
-            apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.sharkfunded.com'
+            apiUrl: process.env.SHARKPAY_API_URL || 'https://payments.fusionfunded.com'
         };
     }
 

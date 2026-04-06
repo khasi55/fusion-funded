@@ -9,12 +9,13 @@ import { AccountsTable } from "@/components/admin/AccountsTable";
 export default async function AccountsListPage({
     searchParams,
 }: {
-    searchParams: { query?: string; page?: string; group?: string; status?: string; tab?: string };
+    searchParams: { query?: string; page?: string; group?: string; status?: string; tab?: string; sort?: string };
 }) {
     const query = (await searchParams)?.query || "";
     const page = parseInt((await searchParams)?.page || "1");
     const groupFilter = (await searchParams)?.group || "";
     const statusFilter = (await searchParams)?.status || ""; // Add status filter extraction
+    const sort = (await searchParams)?.sort || ""; // Extract sort param
     const PAGE_SIZE = 50;
 
     const supabase = createAdminClient();
@@ -34,9 +35,16 @@ export default async function AccountsListPage({
     // 1. Build Query for Challenges
     let challengeQuery = supabase
         .from("challenges")
-        .select("*", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+        .select("*", { count: "exact" });
+
+    // Apply Sorting
+    if (sort === 'profit') {
+        challengeQuery = challengeQuery.order("net_profit", { ascending: false });
+    } else {
+        challengeQuery = challengeQuery.order("created_at", { ascending: false });
+    }
+
+    challengeQuery = challengeQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
     if (groupFilter) {
         challengeQuery = challengeQuery.eq('group', groupFilter);

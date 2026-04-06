@@ -292,11 +292,10 @@ router.get('/wallet', authenticate, async (req: AuthRequest, res: Response) => {
             return;
         }
 
-        const { data: wallet, error } = await supabase
+        const { data: fetchWallets, error } = await supabase
             .from('wallet_addresses')
             .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
+            .eq('user_id', user.id);
 
         if (error) {
             console.error('Error fetching wallet:', error);
@@ -312,7 +311,7 @@ router.get('/wallet', authenticate, async (req: AuthRequest, res: Response) => {
             .single();
 
         res.json({
-            wallet: wallet || null,
+            wallets: fetchWallets || [],
             balance: profile?.wallet_balance || 0
         });
 
@@ -326,7 +325,7 @@ router.get('/wallet', authenticate, async (req: AuthRequest, res: Response) => {
 router.post('/wallet', authenticate, requireKYC, sensitiveLimiter, validateRequest(walletUpdateSchema), async (req: AuthRequest, res: Response) => {
     try {
         const user = req.user!;
-        const { walletAddress, otp } = req.body;
+        const { walletAddress, network, otp } = req.body;
 
         // 🛡️ SECURITY LAYER: Verify OTP
         const isOtpValid = await OTPService.verifyOTP(user.id, otp);
@@ -344,15 +343,18 @@ router.post('/wallet', authenticate, requireKYC, sensitiveLimiter, validateReque
             return;
         }
 
-        // Check if already locked
+        const walletTargetType = network || 'USDT_TRC20';
+
+        // Check if already locked for this specific network
         const { data: existing } = await supabase
             .from('wallet_addresses')
             .select('is_locked')
             .eq('user_id', user.id)
+            .eq('wallet_type', walletTargetType)
             .maybeSingle();
 
         if (existing?.is_locked) {
-            res.status(400).json({ error: 'Wallet address is locked and cannot be changed.' });
+            res.status(400).json({ error: `${walletTargetType} wallet address is locked and cannot be changed.` });
             return;
         }
 
@@ -363,10 +365,10 @@ router.post('/wallet', authenticate, requireKYC, sensitiveLimiter, validateReque
             .upsert({
                 user_id: user.id,
                 wallet_address: walletAddress,
-                wallet_type: 'USDT_TRC20', // Default for now
+                wallet_type: walletTargetType, 
                 is_locked: true, // Auto-lock on save as per UI
                 updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' })
+            }, { onConflict: 'user_id, wallet_type' })
             .select()
             .single();
 

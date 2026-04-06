@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
             // 1. Try to get existing user by email
             const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
                 email: customerEmail,
-                password: password || 'SharkFunded123!', // Fallback password if not provided
+                password: password || 'FusionFunded123!', // Fallback password if not provided
                 email_confirm: true,
                 user_metadata: {
                     full_name: customerName || 'Trader',
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
             }
 
             const amount = 9; // Hardcoded as per user request
-            const orderId = `SFCOM${Date.now()}${require('crypto').randomBytes(4).toString('hex')}`;
+            const orderId = `FFCOM${Date.now()}${require('crypto').randomBytes(4).toString('hex')}`;
 
 
             const { data: order, error: orderError } = await dbClient
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
                 orderId: order.order_id,
                 amount: amount,
                 currency: 'USD',
-                customerEmail: user.email || 'noemail@sharkfunded.com',
+                customerEmail: user.email || 'noemail@fusionfunded.com',
                 customerName: 'Trader',
                 metadata: {
                     competition_id: finalCompetitionId,
@@ -338,7 +338,7 @@ export async function POST(request: NextRequest) {
 
         // Generate ID Locally to save 1 Round Trip (US -> AUS)
         // EPay Docs: "orderID must be alphanumeric"
-        const orderId = `SFORD${Date.now()}${require('crypto').randomBytes(4).toString('hex')}`;
+        const orderId = `FFORD${Date.now()}${require('crypto').randomBytes(4).toString('hex')}`;
 
 
         // Create payment order (store everything in USD)
@@ -388,7 +388,7 @@ export async function POST(request: NextRequest) {
             orderId: order.order_id,
             amount: finalAmount, // USD amount - gateway converts if needed
             currency: 'USD', // Always pass USD
-            customerEmail: customerEmail || user.email || profile?.email || 'noemail@sharkfunded.com',
+            customerEmail: customerEmail || user.email || profile?.email || 'noemail@fusionfunded.com',
             customerName: customerName || profile?.full_name || 'Trader',
             metadata: {
                 account_type: accountTypeName,

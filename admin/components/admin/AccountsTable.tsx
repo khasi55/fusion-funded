@@ -9,7 +9,8 @@ import { toast } from "sonner";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { disableAccountsByGroup } from "@/app/actions/mt5-actions";
-import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, TrendingUp, TrendingDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AccountsTableProps {
     accounts: any[];
@@ -205,6 +206,7 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Plan / Group</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Balance</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Equity</th>
+                            <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Profit</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Status</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Created</th>
                         </tr>
@@ -284,6 +286,21 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                                         <span className="text-[13px] font-semibold text-blue-600">
                                             ${account.current_equity?.toLocaleString() ?? '-'}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {(() => {
+                                            const profit = (account.current_balance || 0) - (account.initial_balance || 0);
+                                            const isPositive = profit >= 0;
+                                            return (
+                                                <div className={cn(
+                                                    "flex items-center gap-1 text-[13px] font-bold",
+                                                    isPositive ? "text-emerald-600" : "text-red-600"
+                                                )}>
+                                                    {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                                    <span>{isPositive ? '+' : ''}${Math.abs(profit).toLocaleString()}</span>
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <StatusBadge status={account.status} upgradedTo={account.upgraded_to} />

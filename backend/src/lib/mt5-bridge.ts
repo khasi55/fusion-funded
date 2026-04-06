@@ -11,7 +11,7 @@ export interface MT5AccountParams {
 
 const getBridgeUrl = () => {
     require('dotenv').config({ override: true });
-    const url = process.env.MT5_BRIDGE_URL || process.env.MT5_API_URL || 'https://bridge.sharkfunded.co';
+    const url = process.env.MT5_BRIDGE_URL || process.env.MT5_API_URL || 'https://bridge.fusionfunded.co';
     const finalUrl = url.replace(/\/$/, '');
     // console.log(`📡 [Bridge] Using URL: ${finalUrl}`);
     return finalUrl;
@@ -106,9 +106,9 @@ async function callBridge(endpoint: string, body: any, method = 'POST', options:
 
 export async function createMT5Account(params: MT5AccountParams, signal?: AbortSignal) {
     const data = await callBridge('/create-account', params, 'POST', { signal }) as any;
-    // Force AURO MARKETS branding regardless of bridge response
+    // Force BULGE GROUP INVESTMENT branding regardless of bridge response
     if (data) {
-        data.server = 'AURO MARKETS';
+        data.server = 'BULGE GROUP INVESTMENT';
     }
     return data;
 }

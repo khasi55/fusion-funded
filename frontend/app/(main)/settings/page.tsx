@@ -98,11 +98,11 @@ export default function SettingsPage() {
         confirmPass: ""
     });
 
-    const [wallet, setWallet] = useState({
-        id: "",
-        address: "",
-        network: "USDT_TRC20",
-        isLocked: false
+    const [walletTrc20, setWalletTrc20] = useState({
+        id: "", address: "", network: "USDT_TRC20", isLocked: false
+    });
+    const [walletBep20, setWalletBep20] = useState({
+        id: "", address: "", network: "USDT_BEP20", isLocked: false
     });
 
     const [bank, setBank] = useState({
@@ -117,9 +117,11 @@ export default function SettingsPage() {
 
     const [isKycVerified, setIsKycVerified] = useState(false);
 
-    // OTP States
-    const [showOtpWallet, setShowOtpWallet] = useState(false);
+    const [showOtpWalletTrc20, setShowOtpWalletTrc20] = useState(false);
+    const [showOtpWalletBep20, setShowOtpWalletBep20] = useState(false);
     const [showOtpBank, setShowOtpBank] = useState(false);
+    const [otpCodeTrc20, setOtpCodeTrc20] = useState("");
+    const [otpCodeBep20, setOtpCodeBep20] = useState("");
     const [otpCode, setOtpCode] = useState("");
 
     // Fetch User Data on Mount
@@ -141,15 +143,28 @@ export default function SettingsPage() {
                     avatarUrl: profileData.profile?.avatar_url || ""
                 });
 
-                // Fetch wallet from API
-                const walletData = await fetchFromBackend('/api/user/wallet');
-                if (walletData.wallet) {
-                    setWallet({
-                        id: walletData.wallet.id || "",
-                        address: walletData.wallet.wallet_address || "",
-                        network: walletData.wallet.wallet_type || "USDT_TRC20",
-                        isLocked: walletData.wallet.is_locked || false
-                    });
+                // Fetch wallets from API
+                const data = await fetchFromBackend('/api/user/wallet');
+                if (data.wallets && Array.isArray(data.wallets)) {
+                    const trc = data.wallets.find((w: any) => w.wallet_type === "USDT_TRC20");
+                    const bep = data.wallets.find((w: any) => w.wallet_type === "USDT_BEP20");
+                    
+                    if (trc) {
+                        setWalletTrc20({
+                            id: trc.id || "",
+                            address: trc.wallet_address || "",
+                            network: "USDT_TRC20",
+                            isLocked: trc.is_locked || false
+                        });
+                    }
+                    if (bep) {
+                        setWalletBep20({
+                            id: bep.id || "",
+                            address: bep.wallet_address || "",
+                            network: "USDT_BEP20",
+                            isLocked: bep.is_locked || false
+                        });
+                    }
                 }
 
                 // Fetch bank details from API
@@ -534,144 +549,176 @@ export default function SettingsPage() {
                             <div className="space-y-8">
                                 <SectionHeader title="Payout Methods" sub="Manage your withdrawal destinations" />
 
-                                {/* Wallet Section */}
-                                <div className="space-y-6 max-w-2xl mb-12">
+                                {/* TRC-20 Wallet Section */}
+                                <div className="space-y-6 max-w-2xl mb-8">
                                     <h4 className="text-sm font-bold text-primary flex items-center gap-2">
-                                        <Wallet size={16} /> Crypto Wallet (USDT TRC-20)
+                                        <Wallet size={16} /> Tether USDT (TRC-20)
                                     </h4>
 
-                                    {wallet.isLocked && (
+                                    {walletTrc20.isLocked && (
                                         <div className="p-4 rounded-xl border border-green-500/20 bg-green-500/10 flex items-start gap-4">
                                             <div className="mt-1 p-2 bg-green-500/10 rounded text-green-500"><CheckCircle size={18} /></div>
                                             <div>
-                                                <h4 className="font-bold text-sm text-green-500">Wallet Address Saved & Locked</h4>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    Your withdrawal wallet is securely locked. Contact support if you need to change it.
-                                                </p>
+                                                <h4 className="font-bold text-sm text-green-500">Wallet Saved & Locked</h4>
+                                                <p className="text-xs text-muted-foreground mt-1">TRC-20 wallet is securely locked.</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    {!wallet.isLocked && (
+                                    {!walletTrc20.isLocked && (
                                         <div className="p-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 flex items-start gap-4">
                                             <div className="mt-1 p-2 bg-yellow-500/10 rounded text-yellow-500"><AlertTriangle size={18} /></div>
                                             <div>
-                                                <h4 className="font-bold text-sm text-yellow-500">Important: Wallet Cannot Be Changed</h4>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    Once saved, your wallet address will be permanently locked for security.
-                                                </p>
+                                                <h4 className="font-bold text-sm text-yellow-500">Wallet Cannot Be Changed Once Saved</h4>
                                             </div>
                                         </div>
                                     )}
 
                                     <div className="space-y-6">
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Withdrawal Network</label>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                <div
-                                                    className={cn(
-                                                        "p-4 rounded-xl border flex items-center gap-3",
-                                                        "bg-primary/10 border-primary",
-                                                        wallet.isLocked ? "opacity-60 cursor-not-allowed" : ""
-                                                    )}
-                                                >
-                                                    <div className="w-4 h-4 rounded-full border border-primary bg-primary flex items-center justify-center">
-                                                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-bold text-sm">USDT (TRC-20)</span>
-                                                        <p className="text-xs text-muted-foreground">TRON Network - Low fees, fast transfers</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <TerminalInput
                                             label="USDT TRC-20 Wallet Address"
-                                            value={wallet.address}
-                                            onChange={(e: any) => !wallet.isLocked && setWallet({ ...wallet, address: e.target.value })}
-                                            readOnly={wallet.isLocked}
+                                            value={walletTrc20.address}
+                                            onChange={(e: any) => !walletTrc20.isLocked && setWalletTrc20({ ...walletTrc20, address: e.target.value })}
+                                            readOnly={walletTrc20.isLocked}
                                             icon={Wallet}
                                             placeholder="T... (TRON wallet address)"
                                         />
 
-                                        {!wallet.isLocked && (
-                                            <div className="flex flex-col items-end gap-4 pt-4">
-                                                {showOtpWallet && (
-                                                    <div className="w-full max-w-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                                        {!walletTrc20.isLocked && (
+                                            <div className="flex flex-col items-end gap-4 pt-2">
+                                                {showOtpWalletTrc20 && (
+                                                    <div className="w-full max-w-sm">
                                                         <TerminalInput
                                                             label="Verification Code"
-                                                            value={otpCode}
-                                                            onChange={(e: any) => setOtpCode(e.target.value)}
+                                                            value={otpCodeTrc20}
+                                                            onChange={(e: any) => setOtpCodeTrc20(e.target.value)}
                                                             placeholder="Enter 6-digit OTP"
                                                             icon={Shield}
                                                         />
-                                                        <p className="text-[10px] text-muted-foreground mt-2">
-                                                            Check your email for a verification code.
-                                                        </p>
                                                     </div>
                                                 )}
 
                                                 <button
                                                     onClick={async () => {
-                                                        if (!wallet.address || wallet.address.length < 30) {
-                                                            setSaveMessage({ type: 'error', text: 'Please enter a valid TRON wallet address' });
-                                                            return;
+                                                        if (!walletTrc20.address || walletTrc20.address.length < 30) {
+                                                            setSaveMessage({ type: 'error', text: 'Please enter a valid TRON address' }); return;
                                                         }
-
-                                                        if (!showOtpWallet) {
+                                                        if (!showOtpWalletTrc20) {
+                                                            setIsLoading(true);
                                                             try {
-                                                                setIsLoading(true);
-                                                                await fetchFromBackend('/api/user/request-financial-otp', {
-                                                                    method: 'POST',
-                                                                    body: JSON.stringify({ type: 'wallet' }),
-                                                                });
-                                                                setShowOtpWallet(true);
-                                                                setSaveMessage({ type: 'success', text: 'Verification code sent to your email.' });
-                                                            } catch (err: any) {
-                                                                setSaveMessage({ type: 'error', text: err.message || 'Failed to send OTP' });
-                                                            } finally {
-                                                                setIsLoading(false);
-                                                            }
+                                                                await fetchFromBackend('/api/user/request-financial-otp', { method: 'POST', body: JSON.stringify({ type: 'wallet' }) });
+                                                                setShowOtpWalletTrc20(true);
+                                                                setSaveMessage({ type: 'success', text: 'OTP sent to email.' });
+                                                            } catch (err: any) { setSaveMessage({ type: 'error', text: err.message }); } 
+                                                            finally { setIsLoading(false); }
                                                             return;
                                                         }
-
-                                                        if (otpCode.length !== 6) {
-                                                            setSaveMessage({ type: 'error', text: 'Please enter a 6-digit verification code' });
-                                                            return;
-                                                        }
-
+                                                        if (otpCodeTrc20.length !== 6) { setSaveMessage({ type: 'error', text: 'Enter 6-digit OTP' }); return; }
+                                                        
                                                         setIsLoading(true);
-                                                        setSaveMessage(null);
-
                                                         try {
                                                             await fetchFromBackend('/api/user/wallet', {
                                                                 method: 'POST',
-                                                                body: JSON.stringify({
-                                                                    walletAddress: wallet.address,
-                                                                    otp: otpCode
-                                                                }),
+                                                                body: JSON.stringify({ walletAddress: walletTrc20.address, network: 'USDT_TRC20', otp: otpCodeTrc20 }),
                                                             });
-
-                                                            setWallet({ ...wallet, isLocked: true });
-                                                            setShowOtpWallet(false);
-                                                            setOtpCode("");
-                                                            setSaveMessage({ type: 'success', text: 'Wallet saved and locked successfully!' });
-                                                        } catch (err: any) {
-                                                            console.error("Wallet save error:", err);
-                                                            setSaveMessage({ type: 'error', text: err.message || 'Failed to save wallet' });
-                                                        } finally {
-                                                            setIsLoading(false);
-                                                        }
+                                                            setWalletTrc20({ ...walletTrc20, isLocked: true });
+                                                            setShowOtpWalletTrc20(false); setOtpCodeTrc20("");
+                                                            setSaveMessage({ type: 'success', text: 'TRC-20 Wallet locked successfully!' });
+                                                        } catch (err: any) { setSaveMessage({ type: 'error', text: err.message }); } 
+                                                        finally { setIsLoading(false); }
                                                     }}
-                                                    disabled={isLoading || !wallet.address}
-                                                    className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm flex items-center gap-2 disabled:opacity-50"
+                                                    disabled={isLoading || !walletTrc20.address}
+                                                    className="px-6 py-2 bg-primary text-white font-bold rounded-lg text-sm"
                                                 >
-                                                    {isLoading ? (
-                                                        <><Loader2 className="w-4 h-4 animate-spin" /> {showOtpWallet ? 'Verifying...' : 'Sending...'}</>
-                                                    ) : (
-                                                        <>{showOtpWallet ? <><CheckCircle size={16} /> Verify & Lock</> : <><Lock size={16} /> Save & Request OTP</>}</>
-                                                    )}
+                                                    {isLoading ? 'Processing...' : (showOtpWalletTrc20 ? 'Verify & Lock' : 'Save TRC-20 & Send OTP')}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* BEP-20 Wallet Section */}
+                                <div className="space-y-6 max-w-2xl mb-12">
+                                    <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+                                        <Wallet size={16} /> Tether USDT (BEP-20)
+                                    </h4>
+
+                                    {walletBep20.isLocked && (
+                                        <div className="p-4 rounded-xl border border-green-500/20 bg-green-500/10 flex items-start gap-4">
+                                            <div className="mt-1 p-2 bg-green-500/10 rounded text-green-500"><CheckCircle size={18} /></div>
+                                            <div>
+                                                <h4 className="font-bold text-sm text-green-500">Wallet Saved & Locked</h4>
+                                                <p className="text-xs text-muted-foreground mt-1">BEP-20 wallet is securely locked.</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {!walletBep20.isLocked && (
+                                        <div className="p-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 flex items-start gap-4">
+                                            <div className="mt-1 p-2 bg-yellow-500/10 rounded text-yellow-500"><AlertTriangle size={18} /></div>
+                                            <div>
+                                                <h4 className="font-bold text-sm text-yellow-500">Wallet Cannot Be Changed Once Saved</h4>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-6">
+                                        <TerminalInput
+                                            label="USDT BEP-20 Wallet Address"
+                                            value={walletBep20.address}
+                                            onChange={(e: any) => !walletBep20.isLocked && setWalletBep20({ ...walletBep20, address: e.target.value })}
+                                            readOnly={walletBep20.isLocked}
+                                            icon={Wallet}
+                                            placeholder="0x... (Binance Smart Chain address)"
+                                        />
+
+                                        {!walletBep20.isLocked && (
+                                            <div className="flex flex-col items-end gap-4 pt-2">
+                                                {showOtpWalletBep20 && (
+                                                    <div className="w-full max-w-sm">
+                                                        <TerminalInput
+                                                            label="Verification Code"
+                                                            value={otpCodeBep20}
+                                                            onChange={(e: any) => setOtpCodeBep20(e.target.value)}
+                                                            placeholder="Enter 6-digit OTP"
+                                                            icon={Shield}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!walletBep20.address || walletBep20.address.length < 30) {
+                                                            setSaveMessage({ type: 'error', text: 'Please enter a valid BSC address' }); return;
+                                                        }
+                                                        if (!showOtpWalletBep20) {
+                                                            setIsLoading(true);
+                                                            try {
+                                                                await fetchFromBackend('/api/user/request-financial-otp', { method: 'POST', body: JSON.stringify({ type: 'wallet' }) });
+                                                                setShowOtpWalletBep20(true);
+                                                                setSaveMessage({ type: 'success', text: 'OTP sent to email.' });
+                                                            } catch (err: any) { setSaveMessage({ type: 'error', text: err.message }); } 
+                                                            finally { setIsLoading(false); }
+                                                            return;
+                                                        }
+                                                        if (otpCodeBep20.length !== 6) { setSaveMessage({ type: 'error', text: 'Enter 6-digit OTP' }); return; }
+                                                        
+                                                        setIsLoading(true);
+                                                        try {
+                                                            await fetchFromBackend('/api/user/wallet', {
+                                                                method: 'POST',
+                                                                body: JSON.stringify({ walletAddress: walletBep20.address, network: 'USDT_BEP20', otp: otpCodeBep20 }),
+                                                            });
+                                                            setWalletBep20({ ...walletBep20, isLocked: true });
+                                                            setShowOtpWalletBep20(false); setOtpCodeBep20("");
+                                                            setSaveMessage({ type: 'success', text: 'BEP-20 Wallet locked successfully!' });
+                                                        } catch (err: any) { setSaveMessage({ type: 'error', text: err.message }); } 
+                                                        finally { setIsLoading(false); }
+                                                    }}
+                                                    disabled={isLoading || !walletBep20.address}
+                                                    className="px-6 py-2 bg-primary text-white font-bold rounded-lg text-sm"
+                                                >
+                                                    {isLoading ? 'Processing...' : (showOtpWalletBep20 ? 'Verify & Lock' : 'Save BEP-20 & Send OTP')}
                                                 </button>
                                             </div>
                                         )}

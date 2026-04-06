@@ -14,9 +14,9 @@ export function initializeSocket(httpServer: HTTPServer) {
                 const allowedOrigins = [
                     'http://localhost:3000',
                     'http://localhost:3002',
-                    'https://app.sharkfunded.com', // Explicit Add
-                    'https://admin.sharkfunded.com', // Explicit Add
-                    'https://api.sharkfunded.co', // Explicit Add
+                    'https://app.fusionfunded.com', // Explicit Add
+                    'https://admin.fusionfunded.com', // Explicit Add
+                    'https://api.fusionfunded.co', // Explicit Add
                     process.env.FRONTEND_URL,
                     process.env.ADMIN_URL
                 ].filter(Boolean) as string[];
@@ -98,7 +98,7 @@ export function initializeSocket(httpServer: HTTPServer) {
 }
 
 // --- MT5 BRIDGE WEBSOCKET RELAY ---
-const BRIDGE_WS_URL = process.env.MT5_BRIDGE_WS_URL || 'wss://bridge.sharkfunded.co/ws/stream/0';
+const BRIDGE_WS_URL = process.env.MT5_BRIDGE_WS_URL || 'wss://bridge.fusionfunded.co/ws/stream/0';
 let bridgeWs: WebSocket | null = null;
 const loginToChallengeMap = new Map<number, string>();
 const failedLoginMap = new Map<number, number>(); // Stores the timestamp of failed lookup
@@ -111,8 +111,6 @@ async function getChallengeIdByLogin(login: number): Promise<string | null> {
     if (loginToChallengeMap.has(login)) {
         return loginToChallengeMap.get(login)!;
     }
-
-    // Check negative cache to prevent request storms
     const failureTimestamp = failedLoginMap.get(login);
     if (failureTimestamp && (Date.now() - failureTimestamp < NEGATIVE_CACHE_TTL)) {
         return null;
