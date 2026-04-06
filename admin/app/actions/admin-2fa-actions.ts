@@ -25,7 +25,7 @@ const RP_NAME = "Fusion Funded Admin";
 // Helper to dynamically get RP_ID and ORIGIN per request avoiding cached "localhost"
 async function getDynamicConfig() {
     const headersList = await cookies(); // In server actions we can just get origin headers securely, but simple string match is fine
-    const origin = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.fusionfunded.com";
+    const origin = process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.thefusionfunded.com";
 
     let rpId = "localhost";
     try {

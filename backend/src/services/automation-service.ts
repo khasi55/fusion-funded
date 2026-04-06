@@ -101,7 +101,7 @@ export class AutomationService {
             // 4. Create new MT5 account
             const mt5Data = await createMT5Account({
                 name: profile.full_name || 'Trader',
-                email: profile.email || 'noemail@fusionfunded.com',
+                email: profile.email || 'noemail@thefusionfunded.com',
                 group: mt5Group,
                 leverage: account.leverage || 100,
                 balance: account.initial_balance,

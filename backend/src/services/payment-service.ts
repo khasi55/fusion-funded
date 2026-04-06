@@ -175,7 +175,7 @@ export class PaymentService {
             .maybeSingle();
 
         const fullName = profile?.full_name || 'Trader';
-        const email = profile?.email || 'noemail@fusionfunded.com';
+        const email = profile?.email || 'noemail@thefusionfunded.com';
 
         // MT5 Group Resolution (Enforced: only this group exists in current setup)
         // MT5 Group Resolution

@@ -36,8 +36,8 @@ export class EPayGateway implements PaymentGateway {
                 orderCurrency: params.currency || 'USD',
                 // EPay requires valid public URLs (no localhost)
                 // Redirect URLs: These should point to app.sharkfunded.com
-                success_url: `https://app.fusionfunded.com/payment/success?orderId=${params.orderId}`,
-                failure_url: `https://app.fusionfunded.com/payment/failed?orderId=${params.orderId}`,
+                success_url: `https://dashboard.thefusionfunded.com/payment/success?orderId=${params.orderId}`,
+                failure_url: `https://dashboard.thefusionfunded.com/payment/failed?orderId=${params.orderId}`,
 
                 // Webhook/Notification URLs: Point to the backend endpoint
                 // Sending multiple variants to ensure compatibility with all EPay versions

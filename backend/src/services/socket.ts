@@ -16,6 +16,8 @@ export function initializeSocket(httpServer: HTTPServer) {
                     'http://localhost:3002',
                     'https://app.fusionfunded.com', // Explicit Add
                     'https://admin.fusionfunded.com', // Explicit Add
+                    'https://dashboard.thefusionfunded.com',
+                    'https://admin.thefusionfunded.com',
                     'https://api.fusionfunded.co', // Explicit Add
                     process.env.FRONTEND_URL,
                     process.env.ADMIN_URL

@@ -103,7 +103,7 @@ const PayoutCertificate = forwardRef<PayoutCertificateRef, PayoutCertificateProp
                 // QR Code Generation
                 try {
                     // QR Data: Verification URL
-                    const qrUrl = `https://fusionfunded.com/verify/${transactionId}`; // Using Transaction ID for lookup
+                    const qrUrl = `https://thefusionfunded.com/verify/${transactionId}`; // Using Transaction ID for lookup
                     const qrDataUrl = await QRCode.toDataURL(qrUrl, {
                         width: 150,
                         margin: 1,

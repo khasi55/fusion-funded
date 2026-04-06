@@ -60,7 +60,7 @@ export class FusionPayGateway implements PaymentGateway {
             const amountINR = await this.convertToINR(params.amount);
 
             // Frontend and backend URLs
-            const frontendUrl = process.env.FRONTEND_URL || 'https://app.fusionfunded.com';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://dashboard.thefusionfunded.com';
             const backendUrl = process.env.BACKEND_URL || 'https://api.fusionfunded.co';
             // 🛡️ SECURITY: Use a per-order signature that includes the expected status and amount
             const masterWebhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || 'fusion_secret_fallback';

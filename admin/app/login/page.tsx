@@ -242,7 +242,7 @@ export default function AdminLoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-[15px] text-gray-900 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-gray-400"
-                                    placeholder="admin@fusionfunded.com"
+                                    placeholder="admin@thefusionfunded.com"
                                 />
                             </div>
 

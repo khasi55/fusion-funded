@@ -71,6 +71,8 @@ export default async function AdminUserDetailsPage({
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-1">
                         <p className="text-sm text-gray-600 px-2.5 py-0.5 bg-gray-100 rounded-full">{profile.email}</p>
+                        {profile.phone && <p className="text-sm text-gray-600 px-2.5 py-0.5 bg-gray-100 rounded-full">{profile.phone}</p>}
+                        {profile.country && <p className="text-sm text-gray-600 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100/50 rounded-full text-indigo-700 font-medium">📍 {profile.country}</p>}
                         <span className="text-xs font-mono text-gray-400 font-medium tracking-tight">ID: {profile.id}</span>
                         <span className="text-xs text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded font-medium">Joined: {new Date(profile.created_at).toLocaleDateString()}</span>
                     </div>

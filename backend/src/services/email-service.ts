@@ -37,7 +37,7 @@ export class EmailService {
 
             const fromHeader = `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`;
             const recipient = process.env.DEBUG_EMAIL_REDIRECT || to;
-            
+
             const info = await this.transporter.sendMail({
                 from: fromHeader,
                 to: recipient,
@@ -312,7 +312,7 @@ Fusion Funded Team
             <p style="text-align:center; font-size:13px;">
                 Warm Regards,<br>
                 <strong>Fusion Funded Team</strong><br>
-                <a href="https://fusionfunded.com">www.fusionfunded.com</a>
+                <a href="https://dashboard.thefusionfunded.com">www.thefusionfunded.com</a>
             </p>
         </div>
     </div>`;
@@ -579,7 +579,7 @@ Fusion Funded Team
      */
     static async sendPassCertificate(email: string, name: string, login: string, amount: number) {
         const subject = `Achievement Unlocked: Your Challenge Pass Certificate - ${this.FROM_NAME}`;
-        
+
         const html = `
             <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #eee;">
                 <div style="background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); padding: 30px 20px; text-align: center; color: white;">
@@ -602,7 +602,7 @@ Fusion Funded Team
                         Your certificate is now available in your dashboard under the "Certificates" tab.
                     </p>
 
-                    <a href="https://fusion-funded-eta.vercel.app/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
@@ -621,7 +621,7 @@ Fusion Funded Team
      */
     static async sendPayoutCertificate(email: string, name: string, amount: number) {
         const subject = `Payout Confirmed: Your Achievement Certificate - ${this.FROM_NAME}`;
-        
+
         const html = `
             <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #eee;">
                 <div style="background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); padding: 30px 20px; text-align: center; color: white;">
@@ -644,7 +644,7 @@ Fusion Funded Team
                         You can download your payout certificate anytime from your member portal.
                     </p>
 
-                    <a href="https://fusion-funded-eta.vercel.app/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
@@ -709,7 +709,7 @@ Fusion Funded Team
                 <p><strong>Tips for success:</strong> Ensure the photos are clear, all corners of the ID are visible, and there is no glare on the document.</p>
                 
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://fusion-funded-eta.vercel.app/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
                 </div>
 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
