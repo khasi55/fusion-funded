@@ -245,30 +245,61 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             'payment_orders',
             'bank_details',
             'wallet_addresses',
-            'affiliate_requests',
-            'referrals',
-            'event_entries'
+            'affiliate_withdrawals',
+            'affiliate_earnings',
+            'risk_violations',
+            'daily_stats',
+            'trades',
+            'trade_consistency_snapshot'
         ];
 
-        // 1. Delete all dependent records
+        // 1. Special case: remove self-referencing referral links in profiles
+        try {
+            await supabase
+                .from('profiles')
+                .update({ referred_by: null })
+                .eq('referred_by', userId);
+        } catch (err) {
+            console.warn('Profile self-reference cleanup note:', err);
+        }
+
+        // 2. Special case: remove resolved_by references in risk_violations
+        try {
+            await supabase
+                .from('risk_violations')
+                .update({ resolved_by: null })
+                .eq('resolved_by', userId);
+        } catch (err) {
+            console.warn('Risk violations resolved_by cleanup note:', err);
+        }
+
+        // 3. Clear all dependent records
         for (const table of dependentTables) {
             try {
+                // Determine the correct user ID column
+                let column = 'user_id';
+                
+                // Special handling for affiliate_earnings (deleting where user is referrer OR referred)
+                if (table === 'affiliate_earnings') {
+                    await supabase.from(table).delete().eq('referrer_id', userId);
+                    await supabase.from(table).delete().eq('referred_user_id', userId);
+                    continue;
+                }
+
                 const { error: delError } = await supabase
                     .from(table)
                     .delete()
-                    .eq('user_id', userId);
+                    .eq(column, userId);
                 
-                if (delError) {
-                    // Some tables might not exist or use 'id' instead of 'user_id'
-                    // but most in this project use 'user_id'
-                    console.warn(`Note: Could not clear ${table} (might not use user_id or already empty):`, delError.message);
+                if (delError && delError.code !== '42P01') { // Ignore table not found
+                    console.warn(`Note: Could not clear ${table}:`, delError.message);
                 }
             } catch (err) {
                 console.warn(`Cleanup error for ${table}:`, err);
             }
         }
 
-        // 2. Delete from Supabase Auth (this cascades to profiles if RLS is set up, but we'll be safe)
+        // 4. Delete from Supabase Auth (this cascades to profiles if RLS is set up, but we'll manually check)
         const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 
         if (authError) {
