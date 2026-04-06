@@ -10,6 +10,9 @@ interface PayoutRequest {
     payout_method: string;
     status: string;
     account_number?: string;
+    metadata?: {
+        selected_addons?: string[];
+    };
 }
 
 export default function PayoutHistoryTable({ requests = [] }: { requests?: PayoutRequest[] }) {
@@ -58,8 +61,22 @@ export default function PayoutHistoryTable({ requests = [] }: { requests?: Payou
                                     <td className="py-4 px-4 text-gray-400 text-sm">
                                         {format(new Date(tx.created_at), "MMM dd, yyyy")}
                                     </td>
-                                    <td className="py-4 px-4 text-white font-mono text-sm">
-                                        {tx.account_number || '-'}
+                                    <td className="py-4 px-4">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-white font-mono text-sm leading-none">
+                                                {tx.account_number || '-'}
+                                            </span>
+                                            {tx.metadata?.selected_addons && tx.metadata.selected_addons.length > 0 && (
+                                                <div className="flex gap-1 items-center">
+                                                    {tx.metadata.selected_addons.includes('fast_payout') && (
+                                                        <span className="text-[9px] text-blue-400 font-black uppercase tracking-tighter" title="Fast Payout Active">⚡ Fast</span>
+                                                    )}
+                                                    {tx.metadata.selected_addons.includes('fees_refund') && (
+                                                        <span className="text-[9px] text-green-400 font-black uppercase tracking-tighter" title="Fee Refund Active">🎖️ Refund</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="py-4 px-4 text-white font-medium text-sm">
                                         ${Number(tx.amount).toFixed(2)}

@@ -22,6 +22,9 @@ interface PayoutRequest {
         equity?: number;
         balance?: number;
         account_type?: string;
+        metadata?: {
+            selected_addons?: string[];
+        };
     };
 }
 
@@ -350,10 +353,20 @@ export default function AdminPayoutsClient() {
                                                         </button>
                                                     </div>
                                                     {req.account_info.account_type && (
-                                                        <div className="flex items-center">
+                                                        <div className="flex items-center gap-2">
                                                             <span className="inline-flex py-0.5 px-2 rounded font-semibold text-[10px] uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
                                                                 {req.account_info.account_type}
                                                             </span>
+                                                            {req.account_info.metadata?.selected_addons?.includes('fast_payout') && (
+                                                                <span className="inline-flex py-0.5 px-2 rounded font-bold text-[9px] uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100">
+                                                                    ⚡ Fast
+                                                                </span>
+                                                            )}
+                                                            {req.account_info.metadata?.selected_addons?.includes('fees_refund') && (
+                                                                <span className="inline-flex py-0.5 px-2 rounded font-bold text-[9px] uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">
+                                                                    🎖️ Refund
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>

@@ -37,7 +37,7 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
         // Fetch ALL active accounts (filter in memory for robustness)
         const { data: accountsRaw } = await supabase
             .from('challenges')
-            .select('*')
+            .select('*, metadata') // Include metadata for add-on detection
             .eq('user_id', user.id);
 
         // Check KYC status
@@ -91,7 +91,8 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
                 status: acc.status,
                 profit: profit,
                 available: available,
-                created_at: acc.created_at
+                created_at: acc.created_at,
+                metadata: acc.metadata // Pass through metadata
             };
         });
 
@@ -361,7 +362,7 @@ router.post('/request', authenticate, requireKYC, resourceIntensiveLimiter, vali
         // Re-calculate total profit across ALL funded accounts to be safe
         const { data: accountsRaw, error: accountsError } = await supabase
             .from('challenges')
-            .select('*') // We need mt5_login etc for metadata so select all
+            .select('*, metadata') // We need metadata for add-ons
             .eq('user_id', user.id);
 
         if (accountsError) {
@@ -649,7 +650,8 @@ router.post('/request', authenticate, requireKYC, resourceIntensiveLimiter, vali
                     mt5_login: account.login,
                     mt5_ticket: mt5Ticket,
                     request_date: new Date().toISOString(),
-                    bank_details: (req as any).fullBankDetails || null
+                    bank_details: (req as any).fullBankDetails || null,
+                    selected_addons: account.metadata?.selected_addons || [] // Preserve add-ons in request
                 }
             });
         if (insertError) {
@@ -755,7 +757,7 @@ router.get('/admin', authenticate, requireRole(['super_admin', 'payouts_admin', 
             if (challengeId) {
                 const { data: challenge } = await supabase
                     .from('challenges')
-                    .select('login, investor_password, current_equity, current_balance, challenge_type')
+                    .select('login, investor_password, current_equity, current_balance, challenge_type, metadata')
                     .eq('id', challengeId)
                     .maybeSingle();
 
@@ -765,7 +767,8 @@ router.get('/admin', authenticate, requireRole(['super_admin', 'payouts_admin', 
                         investor_password: challenge.investor_password,
                         equity: challenge.current_equity,
                         balance: challenge.current_balance,
-                        account_type: challenge.challenge_type
+                        account_type: challenge.challenge_type,
+                        metadata: challenge.metadata
                     };
                 }
             }

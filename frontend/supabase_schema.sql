@@ -72,7 +72,7 @@ begin
     new.id, 
     new.raw_user_meta_data->>'full_name', 
     new.email,
-    substring(md5(random()::text) from 0 for 8), -- Generate a random 7-char code
+    NULL, -- No automatic code anymore
     referrer_id -- Save the referrer's ID
   );
   

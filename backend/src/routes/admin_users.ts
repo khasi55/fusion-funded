@@ -235,7 +235,40 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
 
         AuditLogger.info(req.user?.email || 'admin', `Deleted user ${targetEmail}`, { userId, category: 'User' });
 
-        // 1. Delete from Supabase Auth (this cascades to profiles if RLS is set up)
+        // List of tables that usually have foreign keys to user_id/profiles.id
+        const dependentTables = [
+            'notifications',
+            'certificates',
+            'payout_requests',
+            'kyc_requests',
+            'challenges',
+            'payment_orders',
+            'bank_details',
+            'wallet_addresses',
+            'affiliate_requests',
+            'referrals',
+            'event_entries'
+        ];
+
+        // 1. Delete all dependent records
+        for (const table of dependentTables) {
+            try {
+                const { error: delError } = await supabase
+                    .from(table)
+                    .delete()
+                    .eq('user_id', userId);
+                
+                if (delError) {
+                    // Some tables might not exist or use 'id' instead of 'user_id'
+                    // but most in this project use 'user_id'
+                    console.warn(`Note: Could not clear ${table} (might not use user_id or already empty):`, delError.message);
+                }
+            } catch (err) {
+                console.warn(`Cleanup error for ${table}:`, err);
+            }
+        }
+
+        // 2. Delete from Supabase Auth (this cascades to profiles if RLS is set up, but we'll be safe)
         const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 
         if (authError) {
@@ -243,10 +276,10 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             return res.status(500).json({ error: 'Auth Deletion Failed: ' + authError.message });
         }
 
-        // 2. Also delete profile manually in case of no cascade
+        // 3. Ensure profile is gone (if no cascade)
         await supabase.from('profiles').delete().eq('id', userId);
 
-        res.json({ success: true, message: `User ${targetEmail} deleted successfully` });
+        res.json({ success: true, message: `User ${targetEmail} and all related records deleted successfully` });
 
     } catch (error: any) {
         console.error('Admin Delete User Error:', error);

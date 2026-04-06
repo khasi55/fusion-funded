@@ -29,6 +29,9 @@ export interface AccountOption {
         days_required: number;
         time_met: boolean;
     };
+    metadata?: {
+        selected_addons?: string[];
+    };
 }
 
 interface RequestPayoutCardProps {
@@ -374,6 +377,42 @@ export default function RequestPayoutCard({ availablePayout: globalAvailable, wa
                                             ))}
                                         </select>
                                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Active Add-ons Display */}
+                            {getSelectedAccount()?.metadata?.selected_addons && getSelectedAccount()!.metadata!.selected_addons!.length > 0 && (
+                                <div className="space-y-3">
+                                    <label className="block text-sm font-medium text-gray-300">
+                                        Active Account Benefits
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {getSelectedAccount()!.metadata!.selected_addons!.map((addon: string) => {
+                                            const addonMap: any = {
+                                                'fees_refund': { label: '100% Fee Refund', icon: '🎖️', color: 'green' },
+                                                'fast_payout': { label: '48h Fast Payout', icon: '⚡', color: 'blue' },
+                                                'remove_consistency': { label: 'No Consistency Rule', icon: '🔓', color: 'purple' },
+                                                'min_trading_7': { label: '7-Day Min Trading', icon: '🗓️', color: 'orange' }
+                                            };
+                                            const info = addonMap[addon] || { label: addon, icon: '✨', color: 'gray' };
+                                            return (
+                                                <div 
+                                                    key={addon}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2",
+                                                        info.color === 'green' && "bg-green-500/10 border-green-500/20 text-green-400",
+                                                        info.color === 'blue' && "bg-blue-500/10 border-blue-500/20 text-blue-400",
+                                                        info.color === 'purple' && "bg-purple-500/10 border-purple-500/20 text-purple-400",
+                                                        info.color === 'orange' && "bg-orange-500/10 border-orange-500/20 text-orange-400",
+                                                        info.color === 'gray' && "bg-white/5 border-white/10 text-gray-400 font-medium"
+                                                    )}
+                                                >
+                                                    <span className="text-xs">{info.icon}</span>
+                                                    {info.label}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

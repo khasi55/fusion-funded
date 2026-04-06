@@ -375,7 +375,7 @@ export default function AffiliatePage() {
                 </div>
 
                 {/* Main Content Grid */}
-                {(stats.status === 'approved' || (referralCode && !['GENERATE', 'LOADING...', 'DEMO'].includes(referralCode))) ? (
+                {stats.status === 'approved' ? (
                     <div className="grid lg:grid-cols-3 gap-8">
 
                         {/* Left Col: Referral Tools */}

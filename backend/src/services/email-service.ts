@@ -602,7 +602,7 @@ Fusion Funded Team
                         Your certificate is now available in your dashboard under the "Certificates" tab.
                     </p>
 
-                    <a href="https://app.fusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
+                    <a href="https://fusion-funded-eta.vercel.app/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
@@ -644,7 +644,7 @@ Fusion Funded Team
                         You can download your payout certificate anytime from your member portal.
                     </p>
 
-                    <a href="https://app.fusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
+                    <a href="https://fusion-funded-eta.vercel.app/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
@@ -709,7 +709,7 @@ Fusion Funded Team
                 <p><strong>Tips for success:</strong> Ensure the photos are clear, all corners of the ID are visible, and there is no glare on the document.</p>
                 
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://app.fusionfunded.com/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
+                    <a href="https://fusion-funded-eta.vercel.app/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
                 </div>
 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
