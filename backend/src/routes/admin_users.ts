@@ -242,8 +242,9 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             'payout_requests',
             'kyc_requests',
             'challenges',
-            'challenges_evaluation', // Added
-            'challenges_rapid',      // Added
+            'challenges_evaluation',
+            'challenges_rapid',
+            'passed_challenges',     // Added
             'payment_orders',
             'bank_details',
             'wallet_addresses',
@@ -253,7 +254,11 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
             'daily_stats',
             'trades',
             'trade_consistency_snapshot',
-            'coupon_usage'           // Added
+            'coupon_usage',
+            'coupon_redemptions',    // Added
+            'discount_coupons',      // Added
+            'coupons',               // Added
+            'sessions'               // Added
         ];
 
         // 1. Special case: remove self-referencing referral links in profiles
@@ -287,6 +292,18 @@ router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req
                     await supabase.from(table).delete().eq('referrer_id', userId);
                     await supabase.from(table).delete().eq('referred_user_id', userId);
                     continue;
+                }
+
+                // Special handling for discount_coupons (affiliate_id)
+                if (table === 'discount_coupons' || table === 'coupons') {
+                    await supabase.from(table).delete().eq('affiliate_id', userId);
+                    await supabase.from(table).delete().eq('created_by', userId);
+                    // Also try normal user_id just in case
+                }
+
+                // Special handling for kyc_requests (approved_by)
+                if (table === 'kyc_requests') {
+                    await supabase.from(table).update({ approved_by: null }).eq('approved_by', userId);
                 }
 
                 const { error: delError } = await supabase
