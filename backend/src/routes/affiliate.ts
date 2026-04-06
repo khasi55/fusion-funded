@@ -233,7 +233,7 @@ router.post('/request', authenticate, async (req: AuthRequest, res: Response) =>
 
         if (profileError) throw profileError;
 
-        if (profile?.affiliate_status === 'approved' || profile?.referral_code) {
+        if (profile?.affiliate_status === 'approved') {
             res.status(400).json({ error: 'You are already an affiliate' });
             return;
         }
