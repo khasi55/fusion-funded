@@ -105,6 +105,10 @@ export default function AdminAffiliatesClient() {
     const [detailsWithdrawal, setDetailsWithdrawal] = useState<Withdrawal | null>(null);
     const [transactionId, setTransactionId] = useState("");
 
+    // Edit referral code state
+    const [editingCodeId, setEditingCodeId] = useState<string | null>(null);
+    const [editCodeValue, setEditCodeValue] = useState("");
+    const [savingCode, setSavingCode] = useState(false);
 
 
     const copyToClipboard = (text: string, label: string) => {
@@ -366,6 +370,33 @@ export default function AdminAffiliatesClient() {
             toast.error("Error rejecting request");
         } finally {
             setProcessingId(null);
+        }
+    };
+
+    const handleChangeReferralCode = async (userId: string) => {
+        if (!editCodeValue.trim()) return;
+        setSavingCode(true);
+        try {
+            const res = await fetch(`/api/admin/affiliates/tree/${userId}/referral-code`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ referral_code: editCodeValue.trim() })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Referral code updated!');
+                setAffiliateTree(prev => prev.map(n =>
+                    n.id === userId ? { ...n, referral_code: data.profile.referral_code } : n
+                ));
+                setEditingCodeId(null);
+                setEditCodeValue("");
+            } else {
+                toast.error(data.error || 'Failed to update code');
+            }
+        } catch (error) {
+            toast.error('Error updating referral code');
+        } finally {
+            setSavingCode(false);
         }
     };
 
@@ -648,7 +679,36 @@ export default function AdminAffiliatesClient() {
                                                 <div className="flex items-center gap-6">
                                                     <div className="text-right">
                                                         <div className="text-xs text-slate-500 uppercase font-medium tracking-wider">Referral Code</div>
-                                                        <div className="font-mono text-sm text-slate-900">{node.referral_code || '---'}</div>
+                                                        {editingCodeId === node.id ? (
+                                                            <div className="flex items-center gap-1 mt-1" onClick={e => e.stopPropagation()}>
+                                                                <input
+                                                                    autoFocus
+                                                                    type="text"
+                                                                    value={editCodeValue}
+                                                                    onChange={e => setEditCodeValue(e.target.value.toUpperCase())}
+                                                                    onKeyDown={e => { if (e.key === 'Enter') handleChangeReferralCode(node.id); if (e.key === 'Escape') { setEditingCodeId(null); setEditCodeValue(""); } }}
+                                                                    className="w-28 border border-blue-400 rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                    placeholder={node.referral_code || '---'}
+                                                                />
+                                                                <button onClick={e => { e.stopPropagation(); handleChangeReferralCode(node.id); }} disabled={savingCode} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded disabled:opacity-50">
+                                                                    {savingCode ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                                                                </button>
+                                                                <button onClick={e => { e.stopPropagation(); setEditingCodeId(null); setEditCodeValue(""); }} className="p-1 text-red-400 hover:bg-red-50 rounded">
+                                                                    <X size={12} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-1.5">
+                                                                <div className="font-mono text-sm text-slate-900">{node.referral_code || '---'}</div>
+                                                                <button
+                                                                    onClick={e => { e.stopPropagation(); setEditingCodeId(node.id); setEditCodeValue(node.referral_code || ''); }}
+                                                                    className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                                    title="Edit referral code"
+                                                                >
+                                                                    <Copy size={11} />
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="text-xs text-slate-500 uppercase font-medium tracking-wider">Referred</div>

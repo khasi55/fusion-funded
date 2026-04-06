@@ -10,6 +10,13 @@ import { OTPService } from '../services/otp-service';
 
 const router = Router();
 
+const getPayoutSplit = (processedCount: number): number => {
+    if (processedCount === 0) return 0.6; // 1st Payout: 60%
+    if (processedCount === 1) return 0.7; // 2nd Payout: 70%
+    if (processedCount === 2) return 0.8; // 3rd Payout: 80%
+    return 0.9; // 4th+ Payout: 90%
+};
+
 // GET /api/payouts/balance
 router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => {
     try {
@@ -83,7 +90,8 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
                 type: acc.challenge_type,
                 status: acc.status,
                 profit: profit,
-                available: available
+                available: available,
+                created_at: acc.created_at
             };
         });
 
@@ -96,7 +104,7 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
                 .from('payout_requests')
                 .select('created_at')
                 .filter('metadata->>challenge_id', 'eq', acc.id)
-                .eq('status', 'processed')
+                .eq('status', 'approved')
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
@@ -116,7 +124,22 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
             return {
                 ...acc,
                 consistency,
+                payout_split: getPayoutSplit(latestPayout ? 1 : 0), // Default logic if we only check latest, better to count below
                 payout_eligibility: payoutEligibility
+            };
+        }));
+
+        // REFINE SPLIT: Count ALL processed payouts for each account to get the real progressive step
+        const accountsWithRefinedSplit = await Promise.all(accountsWithEligibility.map(async (acc: any) => {
+            const { count } = await supabase
+                .from('payout_requests')
+                .select('*', { count: 'exact', head: true })
+                .filter('metadata->>challenge_id', 'eq', acc.id)
+                .eq('status', 'approved');
+
+            return {
+                ...acc,
+                payout_split: getPayoutSplit(count || 0)
             };
         }));
 
@@ -134,7 +157,7 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
 
         // Calculate stats (Gross for consistency with Available card)
         const totalPaid = payoutList
-            .filter((p: any) => p.status === 'processed')
+            .filter((p: any) => p.status === 'approved')
             .reduce((sum: number, p: any) => {
                 const val = p.metadata?.requested_amount ? Number(p.metadata.requested_amount) : (Number(p.amount) / 0.8);
                 return sum + val;
@@ -171,7 +194,7 @@ router.get('/balance', authenticate, async (req: AuthRequest, res: Response) => 
                 totalPaid,
                 pending,
             },
-            accountList: accountsWithEligibility,
+            accountList: accountsWithRefinedSplit,
             walletAddress: wallet?.wallet_address || null,
             hasWallet: !!wallet,
             eligibility: {
@@ -452,13 +475,24 @@ router.post('/request', authenticate, requireKYC, resourceIntensiveLimiter, vali
         const account = targetAccount || fundedAccounts[0];
 
         // if (DEBUG) console.log(`[Payout Request] Proceeding with account: ${account.id}, Account Type: ${account.account_type_id}`);
+        
+        // 🛡️ NEW SECURITY RULE: 18-Day Account Age Requirement
+        const eighteenDaysInMs = 18 * 24 * 60 * 60 * 1000;
+        const accountAgeMs = new Date().getTime() - new Date(account.created_at).getTime();
+        
+        if (accountAgeMs < eighteenDaysInMs) {
+            const daysRemaining = Math.ceil((eighteenDaysInMs - accountAgeMs) / (24 * 60 * 60 * 1000));
+            return res.status(400).json({ 
+                error: `Payouts are only available 18 days after account creation. ${daysRemaining} day(s) remaining.` 
+            });
+        }
 
         // 2.2 New Payout Rules Enforcement (0.25% Profit Share Requirement)
         const { data: lastProcessedPayout } = await supabase
             .from('payout_requests')
             .select('created_at')
             .filter('metadata->>challenge_id', 'eq', account.id)
-            .eq('status', 'processed')
+            .eq('status', 'approved')
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -590,7 +624,14 @@ router.post('/request', authenticate, requireKYC, resourceIntensiveLimiter, vali
         }
 
         // 4. Create Payout Request
-        const actualPayoutAmount = amount * 0.8; // User receives 80% Net
+        const { count: processedCount } = await supabase
+            .from('payout_requests')
+            .select('*', { count: 'exact', head: true })
+            .filter('metadata->>challenge_id', 'eq', account.id)
+            .eq('status', 'approved');
+
+        const splitPercentage = getPayoutSplit(processedCount || 0);
+        const actualPayoutAmount = amount * splitPercentage;
 
         const { error: insertError } = await supabase
             .from('payout_requests')
@@ -602,7 +643,8 @@ router.post('/request', authenticate, requireKYC, resourceIntensiveLimiter, vali
                 wallet_address: (req as any).payoutDestination,
                 metadata: {
                     requested_amount: grossDeduction, // Full Gross amount
-                    profit_split_deduction: grossDeduction * 0.2, // The 20% cut
+                    profit_split_percentage: splitPercentage,
+                    profit_split_deduction: grossDeduction * (1 - splitPercentage),
                     challenge_id: account.id,
                     mt5_login: account.login,
                     mt5_ticket: mt5Ticket,

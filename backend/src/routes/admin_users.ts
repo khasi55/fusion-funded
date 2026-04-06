@@ -220,4 +220,38 @@ router.post('/update-password', authenticate, requireRole(['super_admin']), asyn
     }
 });
 
+// DELETE /api/admin/users/:userId - Delete a user
+router.delete('/:userId', authenticate, requireRole(['super_admin']), async (req: AuthRequest, res: Response) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'Missing userId' });
+        }
+
+        // Fetch user email for logging
+        const { data: targetProfile } = await supabase.from('profiles').select('email').eq('id', userId).single();
+        const targetEmail = targetProfile?.email || userId;
+
+        AuditLogger.info(req.user?.email || 'admin', `Deleted user ${targetEmail}`, { userId, category: 'User' });
+
+        // 1. Delete from Supabase Auth (this cascades to profiles if RLS is set up)
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+
+        if (authError) {
+            console.error('Delete Auth User Failed:', authError);
+            return res.status(500).json({ error: 'Auth Deletion Failed: ' + authError.message });
+        }
+
+        // 2. Also delete profile manually in case of no cascade
+        await supabase.from('profiles').delete().eq('id', userId);
+
+        res.json({ success: true, message: `User ${targetEmail} deleted successfully` });
+
+    } catch (error: any) {
+        console.error('Admin Delete User Error:', error);
+        res.status(500).json({ error: 'Internal server error: ' + error.message });
+    }
+});
+
 export default router;

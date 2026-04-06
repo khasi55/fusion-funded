@@ -32,9 +32,9 @@ const PAYMENT_GATEWAYS = [
 ];
 
 const ADDONS = [
-    { id: 'fees_refund', label: 'Fees Refund', percentage: 30, desc: 'Get your fees refunded with 30% bonus' },
-    { id: 'remove_consistency', label: 'Remove Consistency', percentage: 20, desc: 'Trade without consistency rules' },
-    { id: 'min_trading_9', label: 'Min Trading Days (9 Days)', percentage: 12, desc: 'Allow payout after 9 trading days' },
+    { id: 'fees_refund', label: 'Fees Refund', percentage: 20, desc: 'Get your fees refunded with 20% bonus' },
+    { id: 'remove_consistency', label: 'Remove Consistency', percentage: 30, desc: 'Trade without consistency rules' },
+    { id: 'min_trading_7', label: 'Min Trading Days (7 Days)', percentage: 12, desc: 'Allow payout after 7 trading days' },
     { id: 'fast_payout', label: 'Fast Payout (6 Hours)', percentage: 10, desc: 'Receive your withdrawal in 6 hours' }
 ];
 

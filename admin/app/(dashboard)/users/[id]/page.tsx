@@ -44,7 +44,7 @@ export default async function AdminUserDetailsPage({
     ]);
 
     const totalPaid = (paymentOrders || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-    const totalPayouts = (payoutRequests || []).filter(r => ['approved', 'processed'].includes(r.status)).reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+    const totalPayouts = (payoutRequests || []).filter(r => r.status === 'approved').reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
     if (!profile) {
         notFound();

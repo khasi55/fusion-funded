@@ -55,7 +55,7 @@ async function getStats() {
     ] = await Promise.all([
         fetchAllRows(supabase, "payment_orders", "amount, created_at, payment_gateway", q => q.eq("status", "paid")),
         fetchAllRows(supabase, "challenges", "challenge_type, status, upgraded_to"),
-        fetchAllRows(supabase, "payout_requests", "amount, processed_at, created_at", q => q.in("status", ["approved", "processed"])),
+        fetchAllRows(supabase, "payout_requests", "amount, processed_at, created_at", q => q.eq("status", "approved")),
         fetchAllRows(supabase, "challenges", "id, challenge_type, status", q => q.eq("status", "passed")),
         fetchAllRows(supabase, "profiles", "id, created_at")
     ]);

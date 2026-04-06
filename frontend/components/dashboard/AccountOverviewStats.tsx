@@ -72,7 +72,7 @@ export default function AccountOverviewStats() {
     const initialBalance = selectedAccount.initial_balance || 100000;
 
     // Format dates - these could come from the account/challenge data
-    const created = (selectedAccount as any).created_at || new Date().toISOString();
+    const created = selectedAccount.created_at || new Date().toISOString();
     const startDate = new Date(created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     // Display PnL: Calculate directly from Equity/Balance relative to Initial Balance

@@ -11,7 +11,7 @@ import TradeMonthlyCalendar from "@/components/dashboard/TradeMonthlyCalendar";
 import EquityCurveChart from "@/components/dashboard/EquityCurveChart";
 import TradeHistory from "@/components/dashboard/TradeHistory";
 import TradeAnalysis from "@/components/dashboard/TradeAnalysis";
-import { ChevronRight, Key, RotateCw, Plus, LayoutDashboard, Rocket, LogOut, Share2, Copy, Eye } from "lucide-react";
+import { ChevronRight, Key, RotateCw, Plus, LayoutDashboard, Rocket, LogOut, Share2, Copy, Eye, AlertCircle, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { AccountProvider, useAccount } from "@/contexts/AccountContext";
@@ -487,13 +487,13 @@ function DashboardContent() {
                                                         </div>
                                                         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
                                                             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">STATUS</p>
-                                                            <p className="text-2xl font-black text-green-400 uppercase">GRADUATED</p>
+                                                            <p className="text-2xl font-black text-green-400 uppercase">PASSED</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="pt-8 space-y-4">
                                                         <p className="text-sm font-medium text-gray-400">
-                                                            Trading history and advanced analytics for this graduated account are now locked to preserve your performance record.
+                                                            Trading history and advanced analytics for this passed account are now locked to preserve your performance record.
                                                         </p>
                                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                                             <button 
@@ -503,6 +503,61 @@ function DashboardContent() {
                                                                 <LayoutDashboard size={20} />
                                                                 SWITCH TO FUNDED ACCOUNT
                                                             </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ) : selectedAccount && (selectedAccount.status?.toLowerCase() === 'failed' || selectedAccount.status?.toLowerCase() === 'breached') ? (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.98 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="bg-gradient-to-br from-red-500/10 via-blue-500/5 to-transparent border border-red-500/20 rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl"
+                                        >
+                                            {/* Decorative Elements */}
+                                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-red-500/10 blur-[100px] rounded-full pointer-events-none" />
+                                            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+                                            
+                                            <div className="relative z-10">
+                                                <div className="w-24 h-24 bg-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                                                    <AlertCircle className="w-12 h-12 text-red-400" />
+                                                </div>
+                                                
+                                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                                                    UNFORTUNATELY!
+                                                </h2>
+                                                <p className="text-xl sm:text-2xl font-bold text-red-400 mb-6 uppercase tracking-widest">
+                                                    YOUR ACCOUNT HAS BEEN BREACHED
+                                                </p>
+                                                
+                                                <div className="max-w-2xl mx-auto space-y-6 text-gray-300">
+                                                    <p className="text-base sm:text-lg leading-relaxed">
+                                                        We regret to inform you that your trading account <span className="text-white font-bold">#{selectedAccount.login}</span> has reached a breach level and is now closed.
+                                                    </p>
+                                                    
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">FINAL EQUITY</p>
+                                                            <p className="text-2xl font-black text-white">${selectedAccount.equity?.toLocaleString() || selectedAccount.balance?.toLocaleString()}</p>
+                                                        </div>
+                                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">STATUS</p>
+                                                            <p className="text-2xl font-black text-red-500 uppercase">BREACHED</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pt-8 space-y-4">
+                                                        <p className="text-sm font-medium text-gray-400">
+                                                            Don't let this setback stop your journey. Review your trading history and try again with a new challenge.
+                                                        </p>
+                                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                                            <Link 
+                                                                href="/challenges"
+                                                                className="w-full sm:w-auto px-8 py-4 bg-white text-[#050923] font-black rounded-2xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5"
+                                                            >
+                                                                <Zap size={20} />
+                                                                GET A NEW CHALLENGE
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 </div>

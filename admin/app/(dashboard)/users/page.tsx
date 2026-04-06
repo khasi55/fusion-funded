@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { CreateUserButton } from "@/components/users/CreateUserButton";
 import { Pagination } from "@/components/ui/Pagination";
+import { UserActions } from "@/components/users/UserActions";
 
 export default async function AdminUsersPage({
     searchParams,
@@ -105,13 +106,16 @@ export default async function AdminUsersPage({
                                         {new Date(user.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <Link
-                                            href={`/users/${user.id}`}
-                                            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                                        >
-                                            View Details
-                                            <ChevronRight className="ml-1 h-4 w-4" />
-                                        </Link>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Link
+                                                href={`/users/${user.id}`}
+                                                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                View
+                                                <ChevronRight className="ml-1 h-4 w-4" />
+                                            </Link>
+                                            <UserActions userId={user.id} currentEmail={user.email || ''} />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

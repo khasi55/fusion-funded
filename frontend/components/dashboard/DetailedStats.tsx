@@ -37,8 +37,14 @@ export default function DetailedStats() {
         const win = statsData?.biggest_win || 0;
         const loss = statsData?.biggest_loss || 0;
 
+        // Calculate days passed since account creation
+        const createdDate = selectedAccount.created_at ? new Date(selectedAccount.created_at) : new Date();
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - createdDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
         return [
-            { label: "Number of Days", value: "1", icon: Calendar },
+            { label: "Number of Days", value: String(diffDays), icon: Calendar },
             { label: "Total Trades Taken", value: String(trades), icon: Hash },
             { label: "Total Lots Used", value: (lots).toFixed(2), icon: BarChart3 },
             { label: "Biggest Win", value: win > 0 ? `+$${win.toFixed(2)}` : "$0.00", icon: TrendingUp, color: "text-green-400" },

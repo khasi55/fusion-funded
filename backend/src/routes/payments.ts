@@ -171,9 +171,9 @@ router.post('/create-order', async (req: Request, res: Response) => {
         let addonsCost = 0;
         if (Array.isArray(selectedAddons)) {
             const ADDON_PRICES = {
-                'fees_refund': 30,
-                'remove_consistency': 20,
-                'min_trading_9': 12,
+                'fees_refund': 20,
+                'remove_consistency': 30,
+                'min_trading_7': 12,
                 'fast_payout': 10
             };
             

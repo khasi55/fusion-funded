@@ -134,7 +134,7 @@ export default function PayoutsPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <PayoutStats
                     title="Available for Payout"
                     value={`$${stats.available.toFixed(2)}`}
@@ -153,6 +153,33 @@ export default function PayoutsPage() {
                     value={`$${stats.pending.toFixed(2)}`}
                     description={`${history.filter(h => h.status === 'pending').length} Request(s)`}
                     icon={Clock}
+                />
+                <PayoutStats
+                    title="Next Payout"
+                    value={(() => {
+                        if (eligibleAccounts.length === 0) return "--";
+                        const earliest = [...eligibleAccounts].sort((a, b) => 
+                            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                        )[0];
+                        const payoutDate = new Date(new Date(earliest.created_at).getTime() + 18 * 24 * 60 * 60 * 1000);
+                        const diff = payoutDate.getTime() - new Date().getTime();
+                        if (diff <= 0) return "Ready";
+                        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        return `${d}d ${h}h`;
+                    })()}
+                    description="Countdown to next eligible payout"
+                    icon={Clock}
+                    trend={(() => {
+                        if (eligibleAccounts.length === 0) return undefined;
+                        const earliest = [...eligibleAccounts].sort((a, b) => 
+                            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                        )[0];
+                        const payoutDate = new Date(new Date(earliest.created_at).getTime() + 18 * 24 * 60 * 60 * 1000);
+                        return payoutDate.getTime() <= new Date().getTime() 
+                            ? { value: "Eligible", isPositive: true }
+                            : undefined;
+                    })()}
                 />
             </div>
 

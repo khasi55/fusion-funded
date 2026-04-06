@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Wallet, AlertTriangle, CheckCircle, Loader2, ChevronDown, MapPin, Shield, Lock } from "lucide-react";
+import { ArrowRight, Wallet, AlertTriangle, CheckCircle, Loader2, ChevronDown, MapPin, Shield, Lock, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,8 @@ export interface AccountOption {
         maxAllowed: number;
         details: string;
     };
+    created_at?: string;
+    payout_split?: number;
     payout_eligibility?: {
         min_profit_amount: number;
         current_profit: number;
@@ -110,6 +112,24 @@ export default function RequestPayoutCard({ availablePayout: globalAvailable, wa
         }
 
         setShowConfirmation(true);
+    };
+
+    const isAccountTooNew = () => {
+        const selectedAcc = getSelectedAccount();
+        if (!selectedAcc || !selectedAcc.created_at) return false;
+        const createdDate = new Date(selectedAcc.created_at);
+        const eighteenDaysAgo = new Date();
+        eighteenDaysAgo.setDate(eighteenDaysAgo.getDate() - 18);
+        return createdDate > eighteenDaysAgo;
+    };
+
+    const getDaysRemaining = () => {
+        const selectedAcc = getSelectedAccount();
+        if (!selectedAcc || !selectedAcc.created_at) return 0;
+        const createdDate = new Date(selectedAcc.created_at);
+        const payoutDate = new Date(createdDate.getTime() + 18 * 24 * 60 * 60 * 1000);
+        const diff = payoutDate.getTime() - new Date().getTime();
+        return Math.ceil(diff / (1000 * 60 * 60 * 24));
     };
 
     const confirmAndPay = async () => {
@@ -229,13 +249,13 @@ export default function RequestPayoutCard({ availablePayout: globalAvailable, wa
                                     <span className="text-white text-xl font-bold tracking-tight">${parseFloat(amount).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-400 text-sm font-medium">Profit Split (20% Fee)</span>
-                                    <span className="text-red-400 text-xl font-bold tracking-tight">-${(parseFloat(amount) * 0.20).toFixed(2)}</span>
+                                    <span className="text-gray-400 text-sm font-medium">Profit Split ({((1 - (getSelectedAccount()?.payout_split || 0.8)) * 100).toFixed(0)}% Fee)</span>
+                                    <span className="text-red-400 text-xl font-bold tracking-tight">-${(parseFloat(amount) * (1 - (getSelectedAccount()?.payout_split || 0.8))).toFixed(2)}</span>
                                 </div>
                                 <div className="h-px bg-white/10 my-2" />
                                 <div className="flex justify-between items-center pt-1">
-                                    <span className="text-gray-300 text-sm font-medium uppercase tracking-wider">Total You Receive (80%)</span>
-                                    <span className="text-blue-400 text-2xl font-bold tracking-tight">${(parseFloat(amount) * 0.80).toFixed(2)}</span>
+                                    <span className="text-gray-300 text-sm font-medium uppercase tracking-wider">Total You Receive ({(getSelectedAccount()?.payout_split || 0.8) * 100}%)</span>
+                                    <span className="text-blue-400 text-2xl font-bold tracking-tight">${(parseFloat(amount) * (getSelectedAccount()?.payout_split || 0.8)).toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -452,10 +472,24 @@ export default function RequestPayoutCard({ availablePayout: globalAvailable, wa
                                 </div>
                             )}
 
+                            {/* 18-Day Rule Warning */}
+                            {isAccountTooNew() && (
+                                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-3">
+                                    <Clock className="text-blue-400 shrink-0 mt-0.5" size={16} />
+                                    <div>
+                                        <p className="text-xs text-blue-400 font-medium">Payout Lock Period</p>
+                                        <p className="text-[11px] text-gray-400 mt-1">
+                                            Payouts are available 18 days after account creation. 
+                                            Remaining: <span className="text-white font-bold">{getDaysRemaining()} days</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Submit Button */}
                             <button
                                 onClick={handleInitialSubmit}
-                                disabled={currentAvailable <= 0 || (method === 'crypto' ? !walletAddress : (!bankDetails || !bankDetails.is_locked)) || isLoading || !amount || !isKycVerified}
+                                disabled={currentAvailable <= 0 || (method === 'crypto' ? !walletAddress : (!bankDetails || !bankDetails.is_locked)) || isLoading || !amount || !isKycVerified || isAccountTooNew()}
                                 className="relative w-full py-4 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_0_20px_rgba(34,197,94,0.0)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] active:scale-[0.98]"
                                 style={{
                                     background: isKycVerified

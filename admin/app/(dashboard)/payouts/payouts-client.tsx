@@ -56,7 +56,7 @@ interface BankDetail {
 
 export default function AdminPayoutsClient() {
     const [activeTab, setActiveTab] = useState<'requests' | 'wallets' | 'banks'>('requests');
-    const [requestStatusFilter, setRequestStatusFilter] = useState<'pending' | 'approved' | 'processed' | 'rejected' | 'all'>('pending');
+    const [requestStatusFilter, setRequestStatusFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
     const [requests, setRequests] = useState<PayoutRequest[]>([]);
     const [wallets, setWallets] = useState<WalletAddress[]>([]);
     const [bankDetails, setBankDetails] = useState<BankDetail[]>([]);
@@ -285,7 +285,7 @@ export default function AdminPayoutsClient() {
                     {/* Status Sub-Navigation & Search */}
                     <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                         <div className="flex flex-wrap gap-2">
-                            {['pending', 'approved', 'processed', 'rejected', 'all'].map((status) => (
+                            {['pending', 'approved', 'rejected', 'all'].map((status) => (
                                 <button
                                     key={status}
                                     onClick={() => setRequestStatusFilter(status as any)}

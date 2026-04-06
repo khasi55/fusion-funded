@@ -558,4 +558,47 @@ router.post('/requests/:userId/reject', authenticate, requireRole(['super_admin'
     }
 });
 
+// PUT /api/admin/affiliates/tree/:userId/referral-code - Change affiliate's referral code
+router.put('/tree/:userId/referral-code', authenticate, requireRole(['super_admin', 'payouts_admin', 'sub_admin']), async (req: AuthRequest, res: Response) => {
+    try {
+        const { userId } = req.params;
+        const { referral_code } = req.body;
+
+        if (!referral_code || typeof referral_code !== 'string' || referral_code.trim().length < 3) {
+            return res.status(400).json({ error: 'Referral code must be at least 3 characters' });
+        }
+
+        const newCode = referral_code.trim().toUpperCase();
+
+        // Check uniqueness
+        const { data: existing } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('referral_code', newCode)
+            .neq('id', userId)
+            .maybeSingle();
+
+        if (existing) {
+            return res.status(400).json({ error: 'This referral code is already in use by another affiliate' });
+        }
+
+        // Update the code
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({ referral_code: newCode })
+            .eq('id', userId)
+            .select('id, full_name, email, referral_code')
+            .single();
+
+        if (error) throw error;
+
+        AuditLogger.info(req.user?.email || 'admin', `Changed referral code for user ${userId} to ${newCode}`, { userId, newCode, category: 'Affiliate' });
+
+        res.json({ message: 'Referral code updated', profile: data });
+    } catch (error: any) {
+        console.error('Change referral code error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 export default router;

@@ -21,6 +21,7 @@ interface Account {
     metadata?: any;
     is_public?: boolean;
     share_token?: string;
+    created_at?: string;
 }
 
 interface AccountContextType {
@@ -118,6 +119,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
                     metadata: challenge.metadata,
                     is_public: challenge.is_public,
                     share_token: challenge.share_token,
+                    created_at: challenge.created_at,
                 }));
 
                 // Optimize: Only update state if data actually changed
