@@ -49,6 +49,21 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 3. Confirmation message wrapped in a DO block
+-- 4. Backfill existing users (One-time migration)
+-- This will sync phone and country for users who signed up before this fix was applied.
+DO $$ 
+BEGIN
+    UPDATE public.profiles p
+    SET 
+        phone_number = COALESCE(p.phone_number, (u.raw_user_meta_data->>'phone_number')),
+        country = COALESCE(p.country, (u.raw_user_meta_data->>'country'))
+    FROM auth.users u
+    WHERE p.id = u.id
+    AND (p.phone_number IS NULL OR p.country IS NULL);
+    
+    RAISE NOTICE 'Backfill for existing users completed.';
+END $$;
+
 DO $$ 
 BEGIN
     RAISE NOTICE 'Profile sync fix applied successfully.';
