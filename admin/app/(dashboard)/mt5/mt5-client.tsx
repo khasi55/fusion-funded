@@ -464,6 +464,28 @@ export default function AdminMT5Client() {
                                                 <div>
                                                     <div className="font-bold text-gray-900 leading-none">{account.profiles?.full_name || "Restricted Access"}</div>
                                                     <div className="text-xs text-gray-500 mt-1.5 font-medium">{account.profiles?.email || "No identifier"}</div>
+                                                    {account.metadata?.assignment_note && (
+                                                        <div className="mt-2 flex flex-col gap-1">
+                                                            <div className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md font-bold uppercase w-fit">Admin Note</div>
+                                                            <div className="text-xs text-gray-600 italic line-clamp-2 max-w-[200px]" title={account.metadata.assignment_note}>
+                                                                "{account.metadata.assignment_note}"
+                                                            </div>
+                                                            {account.metadata.assignment_image_url && (
+                                                                <a 
+                                                                    href={account.metadata.assignment_image_url} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-[10px] text-indigo-600 hover:text-indigo-700 font-bold flex items-center gap-1 mt-0.5"
+                                                                >
+                                                                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                    </svg>
+                                                                    View Proof
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>

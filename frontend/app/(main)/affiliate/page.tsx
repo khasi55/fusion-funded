@@ -139,6 +139,7 @@ export default function AffiliatePage() {
         accountNumber: "",
         swiftCode: ""
     });
+    const [cryptoNetwork, setCryptoNetwork] = useState("TRC20");
     const [withdrawLoading, setWithdrawLoading] = useState(false);
     const [withdrawError, setWithdrawError] = useState("");
     const [withdrawSuccess, setWithdrawSuccess] = useState("");
@@ -233,7 +234,7 @@ export default function AffiliatePage() {
                 method: 'POST',
                 body: JSON.stringify({
                     amount,
-                    payout_method: withdrawMethod,
+                    payout_method: withdrawMethod === 'crypto' ? `USDT (${cryptoNetwork})` : withdrawMethod,
                     payout_details,
                     otp: otpCode
                 })
@@ -712,17 +713,50 @@ export default function AffiliatePage() {
                                     </div>
                                 </div>
 
+                                {/* Network Selection if Crypto */}
+                                {withdrawMethod === 'crypto' && (
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Select Network</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCryptoNetwork('TRC20')}
+                                                className={cn(
+                                                    "p-2 rounded-lg border text-xs font-medium transition-all",
+                                                    cryptoNetwork === 'TRC20'
+                                                        ? "bg-blue-600/20 border-blue-500/50 text-blue-400"
+                                                        : "bg-white/[0.02] border-white/5 text-gray-500"
+                                                )}
+                                            >
+                                                TRC-20
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setCryptoNetwork('BEP20')}
+                                                className={cn(
+                                                    "p-2 rounded-lg border text-xs font-medium transition-all",
+                                                    cryptoNetwork === 'BEP20'
+                                                        ? "bg-blue-600/20 border-blue-500/50 text-blue-400"
+                                                        : "bg-white/[0.02] border-white/5 text-gray-500"
+                                                )}
+                                            >
+                                                BEP-20
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Details */}
                                 <div className="space-y-4">
                                     {withdrawMethod === 'crypto' ? (
                                         <div className="space-y-2">
                                             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                                                TRC20 Address
+                                                {cryptoNetwork} Address
                                             </label>
                                             <textarea
                                                 value={withdrawDetails}
                                                 onChange={(e) => setWithdrawDetails(e.target.value)}
-                                                placeholder="Enter your USDT TRC20 wallet address"
+                                                placeholder={`Enter your USDT ${cryptoNetwork} wallet address`}
                                                 rows={3}
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none text-sm placeholder:text-gray-600"
                                                 required

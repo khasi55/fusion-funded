@@ -492,7 +492,7 @@ router.post('/requests/:userId/approve', authenticate, requireRole(['super_admin
 
         while (!isUnique && attempts < 10) {
             const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-            referralCode = `SHARK-${randomStr}`;
+            referralCode = `FUSION-${randomStr}`;
             
             const { data: existing } = await supabase
                 .from('profiles')

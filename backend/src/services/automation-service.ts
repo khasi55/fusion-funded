@@ -25,9 +25,9 @@ export class AutomationService {
                 return;
             }
 
-            // Specific Rule: grp3 (Phase 1) -> grp4 (Funded)
+            // Specific Rule: grp2/grp3 (Phase 1) -> grp4 (Funded)
             const currentGroup = (account.group || '').toUpperCase();
-            if (currentGroup.includes('GRP3')) {
+            if (currentGroup.includes('GRP2') || currentGroup.includes('GRP3')) {
                 return this.upgradeAccount(account.id, {
                     nextType: 'hft2_funded',
                     nextGroup: 'MBULGE\\contest\\grp4',
@@ -75,8 +75,8 @@ export class AutomationService {
                 const currentType = (account.challenge_type || '').toLowerCase();
                 const currentGroupStr = (account.group || '').toUpperCase();
 
-                // Specific mapping for grp3 -> grp4
-                if (currentGroupStr.includes('GRP3')) {
+                // Specific mapping for grp2/grp3 -> grp4
+                if (currentGroupStr.includes('GRP2') || currentGroupStr.includes('GRP3')) {
                     nextType = nextType || 'hft2_funded';
                     mt5Group = mt5Group || 'MBULGE\\contest\\grp4';
                 } else if (currentGroupStr.includes('GRP4')) {

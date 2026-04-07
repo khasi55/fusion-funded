@@ -224,7 +224,7 @@ export default function TradingObjectives({ objectives: initialObjectives, accou
 
     // Sync with DashboardData
     useEffect(() => {
-        const isHFT = selectedAccount?.group?.toUpperCase().includes('GRP3') || selectedAccount?.group?.toUpperCase().includes('GRP4');
+        const isHFT = selectedAccount?.group?.toUpperCase().includes('GRP2') || selectedAccount?.group?.toUpperCase().includes('GRP3') || selectedAccount?.group?.toUpperCase().includes('GRP4');
         const defaultDailyDD = isHFT ? 7 : 5;
 
         if (initialObjectives) {

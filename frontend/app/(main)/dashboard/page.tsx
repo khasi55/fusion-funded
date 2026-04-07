@@ -100,8 +100,8 @@ function DashboardContent() {
         const group = account.group || '';
         
         // Specific mapping for HFT Contest Groups
-        if (group.includes('grp3')) return 'HFT Phase 1';
-        if (group.includes('grp4')) return 'HFT Funded';
+        if (group.toLowerCase().includes('grp2') || group.toLowerCase().includes('grp3')) return 'HFT Phase 1';
+        if (group.toLowerCase().includes('grp4')) return 'HFT Funded';
 
         // Explicitly check for Direct Funded before Lite / Prime group parse
         if (group.includes('Direct-SF') || account.account_type === 'direct_funded' || account.challenge_type === 'direct_funded') {
@@ -387,16 +387,16 @@ function DashboardContent() {
                                                     </h2>
 
                                                      {/* Account Type Badge (HFT vs Prime vs Lite) */}
-                                                    {selectedAccount.group && !selectedAccount.group.includes('Direct-SF') && selectedAccount.account_type !== 'direct_funded' && (
+                                                     {selectedAccount.group && !selectedAccount.group.includes('Direct-SF') && selectedAccount.account_type !== 'direct_funded' && (
                                                         <span className={cn(
                                                             "px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
-                                                            selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4')
+                                                            selectedAccount.group.toUpperCase().includes('GRP2') || selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4')
                                                                 ? "bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)]" // HFT
                                                                 : selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO')
                                                                     ? "bg-purple-500/20 text-purple-400 border-purple-500/30" // Prime
                                                                     : "bg-blue-500/20 text-blue-400 border-blue-500/30" // Lite
                                                         )}>
-                                                            {selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4') ? "HFT 2.0" :
+                                                            {selectedAccount.group.toUpperCase().includes('GRP2') || selectedAccount.group.toUpperCase().includes('GRP3') || selectedAccount.group.toUpperCase().includes('GRP4') ? "HFT 2.0" :
                                                                 selectedAccount.group.includes('demo\\SF\\') || selectedAccount.group.toUpperCase().includes('PRO') ? "PRIME" : "LITE"}
                                                         </span>
                                                     )}
@@ -585,10 +585,10 @@ function DashboardContent() {
                                                 <TradeAnalysis />
                                             </div>
 
-                                            {/* Risk Analysis */}
-                                            <div className="shrink-0">
+                                            {/* Risk Analysis - Commented out as per request */}
+                                            {/* <div className="shrink-0">
                                                 <RiskAnalysis />
-                                            </div>
+                                            </div> */}
 
                                             {/* Detailed Stats */}
                                             <div className="shrink-0">

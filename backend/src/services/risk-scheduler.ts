@@ -123,8 +123,11 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
 
             if (!rule) {
                 const typeStr = (c.challenge_type || '').toLowerCase();
+                const groupStr = (c.group || '').toUpperCase();
                 if (typeStr.includes('competition')) {
                     rule = { max_drawdown_percent: 11, daily_drawdown_percent: 4 };
+                } else if (groupStr.includes('GRP2') || groupStr.includes('GRP3') || groupStr.includes('GRP4')) {
+                    rule = { max_drawdown_percent: 10, daily_drawdown_percent: 7 };
                 } else {
                     rule = { max_drawdown_percent: 10, daily_drawdown_percent: 5 };
                 }
@@ -232,8 +235,11 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                 if (!rule) rule = riskGroups.find(g => g.group_name === challenge.group);
                 if (!rule) {
                     const typeStr = (challenge.challenge_type || '').toLowerCase();
+                    const groupStr = (challenge.group || '').toUpperCase();
                     if (typeStr.includes('competition')) {
                         rule = { max_drawdown_percent: 11, daily_drawdown_percent: 4 };
+                    } else if (groupStr.includes('GRP2') || groupStr.includes('GRP3') || groupStr.includes('GRP4')) {
+                        rule = { max_drawdown_percent: 10, daily_drawdown_percent: 7 };
                     } else {
                         rule = { max_drawdown_percent: 10, daily_drawdown_percent: 5 };
                     }
@@ -251,9 +257,9 @@ async function processBatch(challenges: any[], riskGroups: any[], attempt = 1) {
                             if (res.equity >= targetEquity) {
                                 console.log(`✅ [Risk Scheduler] PROFIT TARGET MET for ${res.login}. Equity: ${res.equity} >= Target: ${targetEquity}`);
                                 
-                                // NEW: Automated Upgrade for grp3 -> grp4
-                                if ((challenge.group || '').toUpperCase().includes('GRP3')) {
-                                    console.log(`🤖 [Risk Scheduler] Triggering AUTOMATED UPGRADE for ${res.login} (grp3)`);
+                                // NEW: Automated Upgrade for grp2/grp3 -> grp4
+                                if ((challenge.group || '').toUpperCase().includes('GRP2') || (challenge.group || '').toUpperCase().includes('GRP3')) {
+                                    console.log(`🤖 [Risk Scheduler] Triggering AUTOMATED UPGRADE for ${res.login} (HFT Phase 1)`);
                                     // Trigger asynchronously to avoid blocking the batch process
                                     AutomationService.handleAutomatedUpgrade(res.login).catch(err => {
                                         console.error(`❌ [Risk Scheduler] Automation failure for ${res.login}:`, err.message);

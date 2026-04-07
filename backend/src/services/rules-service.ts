@@ -73,7 +73,9 @@ export class RulesService {
 
         // 0. HFT Specific Mapping (Highest Priority) - Must come before searching CACHE by 't'
         // because an HFT account might have a generic type like 'Phase 1' in the DB.
-        if (g.includes('GRP3')) return 'hft2_phase1';
+        if (g.includes('GRP2') || g.includes('GRP3')) {
+             return (t.includes('funded') || t.includes('live')) ? 'hft2_funded' : 'hft2_phase1';
+        }
         if (g.includes('GRP4')) return 'hft2_funded';
 
         // Already standard types

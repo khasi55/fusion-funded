@@ -11,8 +11,8 @@ export function startDailyEquityReset() {
     // if (DEBUG) console.log(" Daily Equity Reset Scheduler initialized. Schedule: '0 0 * * *' (00:00 UTC)");
 
 
-    cron.schedule('0 0 * * *', async () => {
-        if (DEBUG) console.log(" [Daily Reset] Starting Daily Equity Reset (00:00 UTC)...");
+    cron.schedule('0 22 * * *', async () => {
+        if (DEBUG) console.log(" [Daily Reset] Starting Daily Equity Reset (22:00 UTC / 03:30 IST)...");
         await performDailyReset();
     }, {
         timezone: "UTC"
@@ -150,9 +150,9 @@ async function performDailyReset() {
 }
 
 // Add strict retry for failed resets (eleven minutes later)
-cron.schedule('11 0 * * *', async () => {
+cron.schedule('11 22 * * *', async () => {
     const DEBUG = process.env.DEBUG === 'true';
-    if (DEBUG) console.log("[Daily Reset Backup] Running backup verification...");
+    if (DEBUG) console.log("[Daily Reset Backup] Running backup verification (22:11 UTC)...");
     // We could re-run or check specifically for non-updated accounts
     // For now, simpler to just rely on initial run, but logging is key.
 }, {

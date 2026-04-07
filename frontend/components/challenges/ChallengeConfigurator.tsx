@@ -321,7 +321,7 @@ const ManualPaymentModal = ({
                             <div className="text-center mb-6">
                                 <p className="text-xs text-gray-400 mb-1">Please send exactly</p>
                                 <h4 className="text-3xl font-black text-white">
-                                    {type === 'upi' ? `₹${Math.round(amount * 92).toLocaleString()}` : `$${amount.toLocaleString()}`}
+                                    {type === 'upi' ? `₹${Math.round(amount * 98).toLocaleString()}` : `$${amount.toLocaleString()}`}
                                 </h4>
                                 <p className="text-[10px] text-blue-400 mt-1 uppercase tracking-widest font-black">
                                     {type === 'upi' ? 'Manual Verification Required' : 'USDT ONLY'}
@@ -373,7 +373,7 @@ const ManualPaymentModal = ({
                                     {/* QR Code for UPI */}
                                     <div className="flex justify-center p-4 bg-white rounded-2xl mx-auto w-44 h-44 shadow-2xl">
                                         <QRCodeSVG
-                                            value={`upi://pay?pa=${upiDetails.upiId}&pn=${encodeURIComponent(upiDetails.name)}&am=${Math.round(amount * 92)}&cu=INR`}
+                                            value={`upi://pay?pa=${upiDetails.upiId}&pn=${encodeURIComponent(upiDetails.name)}&am=${Math.round(amount * 98)}&cu=INR`}
                                             size={144}
                                             level="H"
                                         />
