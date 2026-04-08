@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { createBrowserClient } from '@supabase/ssr'
-import { Loader2, CheckCircle, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react'
+import { Loader2, CheckCircle, AlertCircle, ArrowRight, ShieldCheck, KeyRound, Lock } from 'lucide-react'
 import AuthCard from '@/components/auth/AuthCard'
 import { motion } from 'framer-motion'
 
@@ -102,17 +102,24 @@ function ConfirmContent() {
 
     return (
         <AuthCard
-            title="Verify Your Email"
-            subtitle="Click the button below to securely sign in"
+            title={params.type === 'recovery' ? "Secure Password Reset" : "Verify Your Email"}
+            subtitle={params.type === 'recovery' ? "Confirm you've requested this reset" : "Click the button below to securely sign in"}
             error={error}
         >
             <div className="space-y-6 text-center py-4">
                 <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                    <ShieldCheck className="w-8 h-8 text-blue-400" />
+                    {params.type === 'recovery' ? (
+                        <KeyRound className="w-8 h-8 text-blue-400" />
+                    ) : (
+                        <ShieldCheck className="w-8 h-8 text-blue-400" />
+                    )}
                 </div>
                 
                 <p className="text-sm text-slate-400 px-2 leading-relaxed">
-                    To protect your account, we need to confirm you are opening this link in your browser.
+                    {params.type === 'recovery' 
+                        ? "To keep your account secure, please confirm you are opening this password reset link in your browser."
+                        : "To protect your account, we need to confirm you are opening this link in your browser."
+                    }
                 </p>
 
                 <button
