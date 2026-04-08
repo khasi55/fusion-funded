@@ -165,12 +165,14 @@ import emailRouter from './routes/email';
 import eventRouter from './routes/event';
 import publicConfigRouter from './routes/public_config';
 import publicRouter from './routes/public';
+import authPublicRouter from './routes/auth-public';
 import adminRouter from './routes/admin';
 import uploadRouter from './routes/upload';
 import paymentsRouter from './routes/payments';
 import authSessionRouter from './routes/auth_session';
 import adminOrderRouter from './routes/admin_orders';
 
+app.use('/api/auth/public', authPublicRouter);
 app.use('/api/auth', authSessionRouter);
 app.use('/api/overview', overviewRouter);
 app.use('/api/config', publicConfigRouter);

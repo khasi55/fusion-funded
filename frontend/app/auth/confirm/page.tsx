@@ -16,18 +16,42 @@ function ConfirmContent() {
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
 
-    const code = searchParams.get('code')
-    const token_hash = searchParams.get('token_hash')
-    const type = searchParams.get('type')
-    const next = searchParams.get('next') || '/'
+    const [params, setParams] = useState<{
+        code?: string | null;
+        token_hash?: string | null;
+        type?: string | null;
+        next: string;
+    }>({ next: '/' });
+
+    useEffect(() => {
+        const next = searchParams.get('next') || '/';
+        
+        // 1. Try Query Params
+        let code = searchParams.get('code');
+        let token_hash = searchParams.get('token_hash');
+        let type = searchParams.get('type');
+
+        // 2. Try Hash Params (Supabase often uses fragments)
+        if (!code && !token_hash && typeof window !== 'undefined') {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            code = hashParams.get('code') || hashParams.get('access_token');
+            token_hash = hashParams.get('token_hash');
+            type = hashParams.get('type');
+        }
+
+        console.log("🔍 [Auth Confirm] Resolved Params:", { code: !!code, token_hash: !!token_hash, type, next });
+        setParams({ code, token_hash, type, next });
+    }, [searchParams]);
 
     const handleConfirm = async () => {
         setLoading(true)
         setError(null)
 
         try {
+            const { code, token_hash, type, next } = params;
+
             if (code) {
-                // PKCE Flow
+                // PKCE or Access Token Flow
                 const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
                 if (exchangeError) throw exchangeError
                 
