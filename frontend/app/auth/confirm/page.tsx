@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
 import { Loader2, CheckCircle, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react'
 import AuthCard from '@/components/auth/AuthCard'
 import { motion } from 'framer-motion'
@@ -10,7 +11,14 @@ import { motion } from 'framer-motion'
 function ConfirmContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
-    const supabase = createClient()
+    
+    // EXTREMELY IMPORTANT: Disable detectSessionInUrl so Supabase doesn't try 
+    // to auto-exchange 'code' (which fails without a verifier cookie).
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { detectSessionInUrl: false } }
+    )
     
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -39,7 +47,18 @@ function ConfirmContent() {
             type = hashParams.get('type');
         }
 
-        console.log("🔍 [Auth Confirm] Resolved Params:", { code: !!code, token_hash: !!token_hash, type, next });
+        // 3. PRIORITY: If we have token_hash, IGNORE code to avoid PKCE pitfalls
+        if (token_hash) {
+            code = null;
+        }
+
+        console.log("🔍 [Auth Confirm] Resolved Params Content:", { 
+            hasCode: !!code, 
+            hasTokenHash: !!token_hash, 
+            tokenHashPreview: token_hash ? `${token_hash.substring(0, 10)}...` : null,
+            type, 
+            next 
+        });
         setParams({ code, token_hash, type, next });
     }, [searchParams]);
 
