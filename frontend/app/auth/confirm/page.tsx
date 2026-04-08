@@ -1,0 +1,115 @@
+'use client'
+
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
+import { Loader2, CheckCircle, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react'
+import AuthCard from '@/components/auth/AuthCard'
+import { motion } from 'framer-motion'
+
+function ConfirmContent() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const supabase = createClient()
+    
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState(false)
+
+    const code = searchParams.get('code')
+    const token_hash = searchParams.get('token_hash')
+    const type = searchParams.get('type')
+    const next = searchParams.get('next') || '/'
+
+    const handleConfirm = async () => {
+        setLoading(true)
+        setError(null)
+
+        try {
+            if (code) {
+                // PKCE Flow
+                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+                if (exchangeError) throw exchangeError
+                
+                console.log("✅ [Auth Confirm] Code exchanged successfully")
+                router.push(next)
+            } else if (token_hash && type) {
+                // OTP / Magic Link Flow
+                const { error: verifyError } = await supabase.auth.verifyOtp({
+                    token_hash,
+                    type: type as any,
+                })
+                if (verifyError) throw verifyError
+
+                console.log("✅ [Auth Confirm] OTP verified successfully")
+                router.push(next)
+            } else {
+                throw new Error("Invalid or missing authentication parameters.")
+            }
+        } catch (err: any) {
+            console.error("❌ [Auth Confirm] Error:", err)
+            setError(err.message || "Failed to verify link. It may have expired or already been used.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Auto-verify if it's already used or if we want to be faster? 
+    // No, the whole point is to wait for user interaction to avoid scanners.
+
+    return (
+        <AuthCard
+            title="Verify Your Email"
+            subtitle="Click the button below to securely sign in"
+            error={error}
+        >
+            <div className="space-y-6 text-center py-4">
+                <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                    <ShieldCheck className="w-8 h-8 text-blue-400" />
+                </div>
+                
+                <p className="text-sm text-slate-400 px-2 leading-relaxed">
+                    To protect your account, we need to confirm you are opening this link in your browser.
+                </p>
+
+                <button
+                    onClick={handleConfirm}
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-blue-900/20 h-[56px]"
+                >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                        <div className="flex items-center gap-2">
+                            <span>Confirm & Continue</span>
+                            <ArrowRight className="w-5 h-5" />
+                        </div>
+                    )}
+                </button>
+                
+                {error && (
+                    <div className="mt-4">
+                        <p className="text-xs text-slate-500">
+                            If this link expired, please request a new one from the login page.
+                        </p>
+                    </div>
+                )}
+            </div>
+        </AuthCard>
+    )
+}
+
+export default function AuthConfirmPage() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-[#050617] p-4 relative overflow-hidden">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />
+            
+            <Suspense fallback={
+                <div className="flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                </div>
+            }>
+                <ConfirmContent />
+            </Suspense>
+        </div>
+    )
+}

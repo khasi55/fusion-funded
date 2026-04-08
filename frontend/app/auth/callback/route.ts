@@ -6,6 +6,8 @@ export async function GET(request: Request) {
     const code = searchParams.get('code')
     // if "next" is in param, use it as the redirect URL
     const next = searchParams.get('next') ?? '/'
+    const token_hash = searchParams.get('token_hash')
+    const type = searchParams.get('type')
 
     if (code) {
         const supabase = await createClient()
@@ -29,16 +31,13 @@ export async function GET(request: Request) {
         }
     } else {
         // Check for token_hash and type (Implicit/Recovery flow)
-        const token_hash = searchParams.get('token_hash')
-        const type = searchParams.get('type') as any // Cast to any to avoid type complexity with Supabase types if needed, or import EmailOtpType
-
         if (token_hash && type) {
             console.log(`🔍 [Auth Callback] Found token_hash and type (${type}). Verifying OTP...`);
             const supabase = await createClient()
 
             const { error, data } = await supabase.auth.verifyOtp({
                 token_hash,
-                type,
+                type: type as any,
             })
 
             if (!error) {
@@ -63,5 +62,12 @@ export async function GET(request: Request) {
     }
 
     // return the user to an error page with instructions
+    console.error(`❌ [Auth Callback] Authentication failed. Redirecting to login...`, {
+        origin,
+        code: code ? 'present' : 'absent',
+        token_hash: token_hash ? 'present' : 'absent',
+        type
+    });
+    
     return NextResponse.redirect(`${origin}/login?error=Could not authenticate user`)
 }
