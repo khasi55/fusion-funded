@@ -20,7 +20,8 @@ export function startDailyEquityReset() {
 }
 
 // Reuse BRIDGE_URL logic
-const BRIDGE_URL = process.env.BRIDGE_URL || 'https://bridge.sharkfunded.co';
+// Reuse BRIDGE_URL logic
+const BRIDGE_URL = process.env.MT5_BRIDGE_URL || process.env.BRIDGE_URL || 'https://bridge.sharkfunded.co';
 
 async function performDailyReset() {
     try {
@@ -88,7 +89,7 @@ async function performDailyReset() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-API-Key': process.env.MT5_API_KEY || 'shark-bridge-secret'
+                        'X-API-Key': process.env.MT5_BRIDGE_API_KEY || process.env.MT5_API_KEY || 'shark-bridge-secret'
                     },
                     body: JSON.stringify(payload)
                 });

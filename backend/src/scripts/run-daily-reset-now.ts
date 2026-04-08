@@ -7,7 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const BRIDGE_URL = process.env.BRIDGE_URL || 'https://bridge.sharkfunded.co';
+const BRIDGE_URL = process.env.MT5_BRIDGE_URL || process.env.BRIDGE_URL || 'https://bridge.sharkfunded.co';
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase credentials');
@@ -80,7 +80,7 @@ async function performManualDailyReset() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-API-Key': process.env.MT5_API_KEY || 'shark-bridge-secret'
+                        'X-API-Key': process.env.MT5_BRIDGE_API_KEY || process.env.MT5_API_KEY || 'shark-bridge-secret'
                     },
                     body: JSON.stringify(payload)
                 });
