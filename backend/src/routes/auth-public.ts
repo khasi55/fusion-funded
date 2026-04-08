@@ -20,7 +20,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
             type: 'recovery',
             email,
             options: {
-                // Point to our frontend confirmation page
+                // Point to our frontend confirmation page (as backup redirect, though we'll bypass it)
                 redirectTo: `${process.env.FRONTEND_URL || 'https://dashboard.thefusionfunded.com'}/auth/confirm?next=/reset-password`
             }
         });
@@ -31,7 +31,21 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
         }
 
         const { properties, user } = data;
-        const recoveryUrl = data.properties.action_link;
+        const actionLink = properties.action_link;
+        
+        // Parse the token_hash from the action_link
+        const urlObj = new URL(actionLink);
+        const tokenHash = urlObj.searchParams.get('token_hash');
+
+        if (!tokenHash) {
+            console.error('[Public Auth] Failed to extract token_hash from action_link');
+            return res.status(500).json({ error: 'Internal server error: token generation failed' });
+        }
+
+        // Build a DIRECT link to our frontend confirmation page
+        // This bypasses the Supabase verify endpoint entirely, ensuring no PKCE conversion happens.
+        const frontendUrl = process.env.FRONTEND_URL || 'https://dashboard.thefusionfunded.com';
+        const directRecoveryUrl = `${frontendUrl}/auth/confirm?token_hash=${tokenHash}&type=recovery&next=/reset-password`;
 
         // 2. Send the email using our EmailService
         const name = user?.user_metadata?.full_name || 'Trader';
@@ -47,13 +61,13 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
                     <p>We received a request to reset your password. Click the button below to choose a new one:</p>
                     
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="${recoveryUrl}" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        <a href="${directRecoveryUrl}" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                             Reset Password
                         </a>
                     </div>
                     
                     <p>If the button doesn't work, copy and paste this link into your browser:</p>
-                    <p style="font-size: 12px; color: #666; word-break: break-all;">${recoveryUrl}</p>
+                    <p style="font-size: 12px; color: #666; word-break: break-all;">${directRecoveryUrl}</p>
                     
                     <p>If you didn't request a password reset, you can safely ignore this email.</p>
                 </div>
@@ -64,7 +78,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
             </div>
         `;
 
-        await EmailService.sendEmail(email, subject, html, `Reset your password here: ${recoveryUrl}`);
+        await EmailService.sendEmail(email, subject, html, `Reset your password here: ${directRecoveryUrl}`);
 
         res.json({ success: true, message: 'Recovery email sent' });
 
