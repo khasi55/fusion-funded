@@ -33,12 +33,41 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
         const { properties, user } = data;
         const actionLink = properties.action_link;
         
+        console.log('[Public Auth] Action Link:', actionLink);
+        console.log('[Public Auth] Properties:', JSON.stringify(properties, null, 2));
+
         // Parse the token_hash from the action_link
         const urlObj = new URL(actionLink);
-        const tokenHash = urlObj.searchParams.get('token_hash');
+        let tokenHash = urlObj.searchParams.get('token_hash');
+
+        // Fallback 1: Check fragment
+        if (!tokenHash && urlObj.hash) {
+            const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+            tokenHash = hashParams.get('token_hash');
+        }
+
+        // Fallback 2: Check hashed_token property directly
+        if (!tokenHash && (properties as any).hashed_token) {
+            tokenHash = (properties as any).hashed_token;
+        }
+
+        // Fallback 3: Check email_otp (sometimes it's the same or can be used as token_hash)
+        if (!tokenHash && (properties as any).email_otp) {
+            tokenHash = (properties as any).email_otp;
+        }
 
         if (!tokenHash) {
-            console.error('[Public Auth] Failed to extract token_hash from action_link');
+            console.error('[Public Auth] Failed to extract token_hash from action_link. Full Link:', actionLink);
+            // If all else fails, check if there's a 'code' and use it (last resort, though likely still PKCE-bound)
+            const code = urlObj.searchParams.get('code');
+            if (code) {
+                console.warn('[Public Auth] Found code instead of token_hash. Sending code link.');
+                const frontendUrl = process.env.FRONTEND_URL || 'https://dashboard.thefusionfunded.com';
+                const codeRecoveryUrl = `${frontendUrl}/auth/confirm?code=${code}&next=/reset-password`;
+                await EmailService.sendEmail(email, 'Reset Your Password - Fusion Funded', `Reset here: ${codeRecoveryUrl}`, `Reset here: ${codeRecoveryUrl}`);
+                return res.json({ success: true, message: 'Recovery email sent (code flow)' });
+            }
+
             return res.status(500).json({ error: 'Internal server error: token generation failed' });
         }
 
