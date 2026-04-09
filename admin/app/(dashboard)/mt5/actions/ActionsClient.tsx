@@ -96,7 +96,7 @@ export default function MT5ActionsClient() {
             </div>
 
             {account && (
-                <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] animate-in fade-in slide-in-from-bottom-4 duration-300">
                     {/* Header */}
                     <div className="bg-white px-6 py-5 sm:px-8 sm:py-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">

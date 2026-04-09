@@ -290,7 +290,7 @@ export function AccountActions({ accountId, login, currentStatus, userId, curren
                 )}
 
                 {/* 4. More Actions Dropdown */}
-                <div className="relative flex-none">
+                <div className={`relative flex-none ${showMoreActions ? 'z-[80]' : ''}`}>
                     <button
                         onClick={() => setShowMoreActions(!showMoreActions)}
                         className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all active:scale-[0.98] border ${showMoreActions ? 'bg-gray-100 border-gray-300 text-gray-900 shadow-inner' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm'}`}
@@ -302,10 +302,10 @@ export function AccountActions({ accountId, login, currentStatus, userId, curren
                     {showMoreActions && (
                         <>
                             <div
-                                className="fixed inset-0 z-10"
+                                className="fixed inset-0 z-[60]"
                                 onClick={() => setShowMoreActions(false)}
                             />
-                            <div className="absolute right-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-20 overflow-hidden animate-in fade-in zoom-in duration-150 origin-bottom-right">
+                            <div className="absolute right-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-[70] overflow-hidden animate-in fade-in zoom-in duration-150 origin-bottom-right">
                                 <div className="p-1.5 space-y-0.5">
                                     <button
                                         onClick={() => { setShowLeverageModal(true); setShowMoreActions(false); }}
@@ -341,13 +341,16 @@ export function AccountActions({ accountId, login, currentStatus, userId, curren
 
                                     {(currentStatus === 'passed' || currentStatus === 'active') && (() => {
                                         const type = (challengeType || '').toLowerCase();
+                                        // Debug: console.log(`[Eligibility Check] Account: ${login}, Type: "${type}", UpgradedTo: "${upgradedTo}"`);
                                         const isFunded = type.includes('funded') || type.includes('live') || type.includes('master');
-                                        const canUpgrade = !isFunded && !upgradedTo && (
-                                            type.includes('phase 1') || type.includes('phase_1') ||
-                                            type.includes('step 1') || type.includes('step_1') ||
+                                        const hasAlreadyUpgraded = upgradedTo && upgradedTo !== 'null' && upgradedTo !== '';
+                                        
+                                        const canUpgrade = !isFunded && !hasAlreadyUpgraded && (
+                                            type.includes('phase 1') || type.includes('phase_1') || type.includes('phase1') ||
+                                            type.includes('step 1') || type.includes('step_1') || type.includes('step1') ||
                                             type.includes('1_step') || type.includes('2_step') ||
-                                            type.includes('phase 2') || type.includes('phase_2') ||
-                                            type.includes('step 2') || type.includes('step_2')
+                                            type.includes('phase 2') || type.includes('phase_2') || type.includes('phase2') ||
+                                            type.includes('step 2') || type.includes('step_2') || type.includes('step2')
                                         );
 
                                         return canUpgrade && (

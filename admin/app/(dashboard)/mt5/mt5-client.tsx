@@ -435,8 +435,8 @@ export default function AdminMT5Client() {
             </div>
 
             {/* Main Content Table - Institutional Density */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm">
+                <div className="overflow-visible">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50">
