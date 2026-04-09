@@ -556,8 +556,8 @@ export default function AdminAffiliatesClient() {
                                                                 onClick={() => setDetailsWithdrawal(item)}
                                                                 className="flex items-center gap-2 group/btn"
                                                             >
-                                                                <span className="text-[12px] font-mono font-medium text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-md border border-blue-100 truncate max-w-[180px] group-hover/btn:bg-blue-100 transition-colors" title={item.payout_method === 'crypto' ? item.payout_details?.address : item.payout_details?.account_number}>
-                                                                    {item.payout_method === 'crypto'
+                                                                <span className="text-[12px] font-mono font-medium text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-md border border-blue-100 truncate max-w-[180px] group-hover/btn:bg-blue-100 transition-colors" title={(item.payout_method === 'crypto' || !!item.payout_details?.address || item.payout_method?.toLowerCase().includes('bep')) ? item.payout_details?.address : item.payout_details?.account_number}>
+                                                                    {(item.payout_method === 'crypto' || !!item.payout_details?.address || item.payout_method?.toLowerCase().includes('bep'))
                                                                         ? (item.payout_details?.address || "No address")
                                                                         : item.payout_details?.account_number
                                                                             ? `${item.payout_details.bank_name || 'Bank'}: ${item.payout_details.account_number}`
@@ -1065,7 +1065,7 @@ export default function AdminAffiliatesClient() {
                                         </div>
 
                                         <div className="p-5 space-y-4">
-                                            {detailsWithdrawal.payout_method === 'crypto' ? (
+                                            {(detailsWithdrawal.payout_method === 'crypto' || !!detailsWithdrawal.payout_details?.address || detailsWithdrawal.payout_method?.toLowerCase().includes('bep')) ? (
                                                 <div className="space-y-2">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Crypto Address</span>

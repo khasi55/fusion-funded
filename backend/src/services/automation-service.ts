@@ -63,8 +63,8 @@ export class AutomationService {
 
             if (fetchError || !account) throw new Error('Account not found');
 
-            if (account.status !== 'active') {
-                return { success: false, message: `Account ${account.login} is already in state: ${account.status}` };
+            if (account.status !== 'active' && account.status !== 'passed') {
+                return { success: false, message: `Account ${account.login} is in state: ${account.status}. Must be active or passed to upgrade.` };
             }
 
             // 2. Determine upgrade path if not provided
