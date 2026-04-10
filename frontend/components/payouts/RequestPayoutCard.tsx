@@ -391,7 +391,7 @@ export default function RequestPayoutCard({ availablePayout: globalAvailable, wa
                                         {getSelectedAccount()!.metadata!.selected_addons!.map((addon: string) => {
                                             const addonMap: any = {
                                                 'fees_refund': { label: '100% Fee Refund', icon: '🎖️', color: 'green' },
-                                                'fast_payout': { label: '48h Fast Payout', icon: '⚡', color: 'blue' },
+                                                'fast_payout': { label: '6h Fast Payout', icon: '⚡', color: 'blue' },
                                                 'remove_consistency': { label: 'No Consistency Rule', icon: '🔓', color: 'purple' },
                                                 'min_trading_7': { label: '7-Day Min Trading', icon: '🗓️', color: 'orange' }
                                             };

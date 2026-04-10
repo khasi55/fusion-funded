@@ -174,7 +174,7 @@ router.post('/create-order', async (req: Request, res: Response) => {
                 'fees_refund': 20,
                 'remove_consistency': 30,
                 'min_trading_7': 12,
-                'fast_payout': 10
+                'fast_payout': 0
             };
             
             let totalMultiplier = 0;

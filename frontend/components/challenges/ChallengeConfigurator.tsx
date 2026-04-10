@@ -32,10 +32,10 @@ const PAYMENT_GATEWAYS = [
 ];
 
 const ADDONS = [
-    { id: 'fees_refund', label: 'Fees Refund', percentage: 20, desc: 'Get your fees refunded with 20% bonus' },
+    { id: 'fees_refund', label: 'Fees Refund', percentage: 20, desc: 'Get your fees refunded ' },
     { id: 'remove_consistency', label: 'Remove Consistency', percentage: 30, desc: 'Trade without consistency rules' },
     { id: 'min_trading_7', label: 'Min Trading Days (7 Days)', percentage: 12, desc: 'Allow payout after 7 trading days' },
-    { id: 'fast_payout', label: 'Fast Payout (6 Hours)', percentage: 10, desc: 'Receive your withdrawal in 6 hours' }
+    { id: 'fast_payout', label: 'Fast Payout (6 Hours)', percentage: 0, desc: 'Receive your withdrawal in 6 hours' }
 ];
 
 // Helper to map size number to string key
@@ -273,8 +273,8 @@ const ManualPaymentModal = ({
             const res = await fetch(`${backendUrl}/api/payments/update-manual-utr`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    orderId, 
+                body: JSON.stringify({
+                    orderId,
                     utr,
                     proofUrl: finalProofUrl
                 })
@@ -751,7 +751,7 @@ export default function ChallengeConfigurator() {
                                             </div>
                                         </div>
                                         <span className={cn("text-xs font-black px-2 py-1 rounded bg-white/5", isActive ? "text-primary" : "text-gray-400")}>
-                                            +{addon.percentage}%
+                                            {addon.percentage === 0 ? "0%" : `+${addon.percentage}%`}
                                         </span>
                                     </div>
                                 );
