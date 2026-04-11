@@ -27,7 +27,6 @@ const PLATFORMS = [
 ];
 
 const PAYMENT_GATEWAYS = [
-    { id: "upi_manual", label: "UPI ", currency: "INR", desc: "Scan QR or Pay to Account", icon: "🇮🇳" },
     { id: "crypto_manual", label: "Crypto ", currency: "USD", desc: "USDT (Tron/BSC/ETH)", icon: "💎" }
 ];
 

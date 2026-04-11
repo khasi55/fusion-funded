@@ -148,7 +148,7 @@ function CheckoutContent() {
     const [formData, setFormData] = useState({
         firstName: "", lastName: "", email: "", country: "", phone: "", terms: false, referralCode: ""
     });
-    const [selectedGateway, setSelectedGateway] = useState("sharkpay");
+    const [selectedGateway, setSelectedGateway] = useState("epay");
 
 
     // Dynamic Size Logic
@@ -703,47 +703,7 @@ function CheckoutContent() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {/* SharkPay Option */}
-                            <motion.button
-                                whileHover={{ scale: 1.02, translateY: -5 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => setSelectedGateway("Sharkpay")}
-                                className={cn(
-                                    "p-10 border-[3px] rounded-[3.5rem] transition-all text-left relative overflow-hidden group/card",
-                                    selectedGateway === "Sharkpay" 
-                                        ? "bg-blue-600/15 border-blue-500 shadow-[0_30px_60px_-12px_rgba(255,255,255,0.05),0_18px_36px_-18px_rgba(37,99,235,0.3)] ring-1 ring-blue-400/20" 
-                                        : "bg-slate-900/40 border-white/5 hover:border-white/10 backdrop-blur-xl"
-                                )}
-                            >
-                                <div className="flex justify-between items-start mb-10">
-                                    <div className={cn(
-                                        "p-5 rounded-3xl transition-all duration-500 shadow-2xl", 
-                                        selectedGateway === "Sharkpay" ? "bg-blue-500 text-white rotate-6 scale-110" : "bg-white/5 text-slate-500"
-                                    )}>
-                                        <CreditCard size={32} strokeWidth={2.5} />
-                                    </div>
-                                    {selectedGateway === "Sharkpay" && (
-                                        <motion.div 
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(96,165,250,0.5)]"
-                                        >
-                                            <Check className="text-white" size={18} strokeWidth={4} />
-                                        </motion.div>
-                                    )}
-                                </div>
-                                <h3 className="text-2xl font-black text-white tracking-tight mb-2">UPI / Domestic</h3>
-                                <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed">Instant Validation via SharkPay</p>
-                                
-                                <div className="mt-10 flex flex-col">
-                                    <span className="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.3em] mb-1">Estimated Conversion</span>
-                                    <div className="text-3xl font-black text-white font-mono tracking-tighter">
-                                        ₹{Math.round(finalPriceUSD * EXCHANGE_RATE_INR).toLocaleString()}
-                                    </div>
-                                </div>
 
-                                <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover/card:bg-blue-500/10 transition-all duration-700" />
-                            </motion.button>
 
                             {/* EPay Option */}
                             <motion.button
@@ -893,7 +853,7 @@ function CheckoutContent() {
                                 {loading ? <Loader2 className="animate-spin" /> : (
                                     validatingCoupon ? "Validating..." : (
                                         currentStep === 3
-                                            ? (selectedGateway.toLowerCase() === 'cregis' ? "Complete with Crypto" : `Confirm with ${selectedGateway === 'Sharkpay' ? 'UPI' : selectedGateway}`)
+                                            ? (selectedGateway.toLowerCase() === 'cregis' ? "Complete with Crypto" : `Confirm with ${selectedGateway}`)
                                             : "Continue"
                                     )
                                 )}
