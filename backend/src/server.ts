@@ -55,7 +55,7 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://*.supabase.co", "https://main.fusionfunded.co", "https://*.thefusionfunded.com", "https://*.tradingview.com", "https://s3.tradingview.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://*.tradingview.com"],
-            imgSrc: ["'self'", "blob:", "data:", "https://*.supabase.co", "https://main.fusionfunded.co", "https://*.thefusionfunded.com", "https://*.tradingview.com"],
+            imgSrc: ["'self'", "blob:", "data:", "https://*.supabase.co", "https://main.fusionfunded.co", "https://*.thefusionfunded.com", "https://*.tradingview.com", "https://api.dicebear.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
             connectSrc: ["'self'", "https://*.supabase.co", "https://main.fusionfunded.co", "https://*.thefusionfunded.com", "https://api.fusionfunded.co", "https://api.fusionfunded.com", "wss://*.supabase.co", "wss://main.fusionfunded.co", "wss://*.thefusionfunded.com", "wss://api.fusionfunded.co", "wss://api.fusionfunded.com", "ws://localhost:3001", "http://localhost:3001", "ws://127.0.0.1:3001", "http://127.0.0.1:3001"],
             frameSrc: ["'self'", "https://*.supabase.co", "https://main.fusionfunded.co", "https://*.thefusionfunded.com", "https://fusionpay.vercel.app", "https://fusionfundedpayment.vercel.app", "https://payments.fusionfunded.com", "https://*.cregis.io", "https://*.tradingview.com"],

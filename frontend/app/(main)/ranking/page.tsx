@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, ArrowUp, ArrowDown, Crown, Loader2, Medal, TrendingUp, DollarSign } from "lucide-react";
+import { Trophy, ArrowUp, ArrowDown, Crown, Loader2, Medal, TrendingUp, DollarSign, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Trader {
@@ -173,15 +173,14 @@ export default function RankingPage() {
                                                     </td>
                                                     <td className="px-8 py-6">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 rounded-full bg-slate-800 ring-2 ring-white/10 shadow-sm overflow-hidden border border-[#0ea5e9]/30">
-                                                                <img src={trader.avatar} alt={trader.name} className="w-full h-full object-cover" />
+                                                            <div className="w-10 h-10 rounded-full bg-slate-800 ring-2 ring-white/10 shadow-sm overflow-hidden border border-[#0ea5e9]/30 flex items-center justify-center">
+                                                                <TableAvatar avatar={trader.avatar} name={trader.name} />
                                                             </div>
                                                             <div>
                                                                 <div className="font-bold text-white text-sm flex items-center gap-2">
                                                                     {trader.name}
                                                                     {trader.isMe && <span className="text-[10px] bg-[#0ea5e9]/20 text-[#0ea5e9] px-2 py-0.5 rounded-full border border-[#0ea5e9]/20">YOU</span>}
                                                                 </div>
-                                                                <div className="text-xs text-gray-400 font-medium">{trader.country}</div>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -236,57 +235,119 @@ export default function RankingPage() {
 
 // Sub-component for clean podium cards
 function PodiumCard({ trader, rank, accentColor, ringColor, isWinner = false, delay }: { trader: Trader, rank: number, accentColor: string, ringColor: string, isWinner?: boolean, delay: number }) {
+    const [imgError, setImgError] = useState(false);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay, type: "spring" }}
+            transition={{ delay, type: "spring", damping: 15, stiffness: 100 }}
             className={cn(
-                "relative bg-black/40 backdrop-blur-xl rounded-[32px] p-8 text-center flex flex-col items-center border border-white/10",
-                isWinner ? "shadow-2xl shadow-yellow-500/20 min-h-[420px] ring-1 ring-[#0ea5e9]/50" : "shadow-xl shadow-blue-900/10 min-h-[360px]"
+                "relative bg-black/40 backdrop-blur-2xl rounded-[32px] p-8 text-center flex flex-col items-center border border-white/10 transition-all duration-500",
+                isWinner 
+                    ? "shadow-[0_0_50px_rgba(234,179,8,0.15)] min-h-[440px] border-yellow-500/30 bg-gradient-to-b from-yellow-500/5 to-transparent" 
+                    : "shadow-2xl shadow-blue-900/10 min-h-[380px]"
             )}
         >
+            {/* Crown for Winner */}
+            {isWinner && (
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: delay + 0.3 }}
+                    className="absolute -top-12 z-20"
+                >
+                    <Crown size={48} className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" fill="currentColor" />
+                </motion.div>
+            )}
+
             {/* Rank Badge */}
             <div className={cn(
-                "absolute -top-5 w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border-2 border-[#0ea5e9]/30",
-                rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-600 text-white shadow-yellow-500/30 font-black" :
-                    rank === 2 ? "bg-white/10 text-white border-white/20 backdrop-blur-md" :
-                        "bg-white/10 text-white border-orange-500/30 backdrop-blur-md"
+                "absolute -top-5 w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl border-2 z-10 transition-transform hover:scale-110 duration-300",
+                rank === 1 ? "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 text-white border-yellow-300/50 shadow-yellow-500/40" :
+                rank === 2 ? "bg-slate-700/80 text-white border-slate-500/50 backdrop-blur-md shadow-slate-900/40" :
+                "bg-orange-900/80 text-white border-orange-700/50 backdrop-blur-md shadow-orange-900/40"
             )}>
                 {rank}
             </div>
 
-            {isWinner && <Crown size={40} className="text-yellow-400 absolute -top-16 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" fill="currentColor" />}
-
-            {/* Avatar */}
+            {/* Avatar Container */}
             <div className={cn(
-                "rounded-full p-1.5 mb-6 shadow-[0_0_20px_rgba(14,165,233,0.3)]",
-                isWinner ? "w-32 h-32 bg-gradient-to-br from-yellow-300 to-amber-500" : "w-24 h-24 bg-gradient-to-br from-[#0ea5e9] to-[#0369a1]"
+                "relative rounded-full p-1.5 mb-6 group transition-all duration-500",
+                isWinner 
+                    ? "w-32 h-32 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 shadow-[0_0_30px_rgba(234,179,8,0.4)]" 
+                    : "w-24 h-24 bg-gradient-to-br from-slate-400 to-slate-600 shadow-[0_0_20px_rgba(148,163,184,0.2)]"
             )}>
-                <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#070b14] bg-slate-900">
-                    <img src={trader.avatar} alt={trader.name} className="w-full h-full object-cover" />
+                <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#070b14] bg-[#0f172a] flex items-center justify-center relative">
+                    {!imgError && trader.avatar ? (
+                        <img 
+                            src={trader.avatar} 
+                            alt={trader.name} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center text-slate-500">
+                            <User size={isWinner ? 48 : 36} className="opacity-50" />
+                        </div>
+                    )}
+                    
+                    {/* Inner Glow */}
+                    <div className="absolute inset-0 rounded-full shadow-inner pointer-events-none bg-gradient-to-tr from-white/5 to-transparent opacity-30"></div>
                 </div>
             </div>
 
             {/* Info */}
-            <h3 className="text-2xl font-black text-white tracking-tight mb-1">
-                {trader.name}
-            </h3>
-            <p className="text-[#0ea5e9] font-bold text-xs uppercase tracking-widest mb-8 text-opacity-80">
-                {trader.accountSize} Account
-            </p>
+            <div className="mb-6">
+                <h3 className="text-2xl font-black text-white tracking-tight mb-1 group-hover:text-[#0ea5e9] transition-colors line-clamp-1">
+                    {trader.name}
+                </h3>
+                <div className="flex items-center justify-center gap-2">
+                    <span className="text-[#0ea5e9] font-bold text-[10px] uppercase tracking-[0.2em] bg-[#0ea5e9]/10 px-3 py-1 rounded-full border border-[#0ea5e9]/20">
+                        {trader.accountSize} Account
+                    </span>
+                </div>
+            </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 w-full mt-auto">
-                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">Profit</p>
-                    <p className="text-lg font-black text-white">${trader.totalProfit.toLocaleString()}</p>
+            <div className="grid grid-cols-2 gap-3 w-full mt-auto">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5 hover:bg-white/10 transition-colors">
+                    <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1.5">Profit</p>
+                    <p className="text-lg font-black text-white tracking-tight">${trader.totalProfit.toLocaleString()}</p>
                 </div>
-                <div className={cn("rounded-2xl p-4 border bg-opacity-10", isWinner ? "bg-yellow-500/10 border-yellow-500/30" : "bg-[#0ea5e9]/10 border-[#0ea5e9]/30")}>
-                    <p className={cn("text-[10px] font-bold uppercase tracking-wider mb-1", isWinner ? "text-yellow-400" : "text-[#0ea5e9]")}>Return</p>
-                    <p className={cn("text-lg font-black", isWinner ? "text-yellow-400" : "text-[#0ea5e9]")}>{trader.return}%</p>
+                <div className={cn(
+                    "rounded-2xl p-4 border transition-colors", 
+                    isWinner 
+                        ? "bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20" 
+                        : "bg-[#0ea5e9]/5 border-[#0ea5e9]/10 hover:bg-[#0ea5e9]/10"
+                )}>
+                    <p className={cn(
+                        "text-[9px] font-black uppercase tracking-widest mb-1.5", 
+                        isWinner ? "text-yellow-400" : "text-[#0ea5e9]"
+                    )}>Return</p>
+                    <p className={cn(
+                        "text-lg font-black tracking-tight", 
+                        isWinner ? "text-yellow-400" : "text-[#0ea5e9]"
+                    )}>{trader.return}%</p>
                 </div>
             </div>
         </motion.div>
     )
+}
+
+function TableAvatar({ avatar, name }: { avatar: string, name: string }) {
+    const [imgError, setImgError] = useState(false);
+
+    if (!imgError && avatar) {
+        return (
+            <img 
+                src={avatar} 
+                alt={name} 
+                className="w-full h-full object-cover" 
+                onError={() => setImgError(true)}
+            />
+        );
+    }
+
+    return <User size={18} className="text-slate-500 opacity-50" />;
 }

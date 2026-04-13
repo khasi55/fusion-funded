@@ -31,7 +31,7 @@ const securityHeaders = [
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://main.fusionfunded.co https://*.thefusionfunded.com https://*.google-analytics.com https://*.googletagmanager.com https://*.tradingview.com https://s3.tradingview.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.tradingview.com;
-      img-src 'self' blob: data: https://*.supabase.co https://main.fusionfunded.co https://*.thefusionfunded.com https://*.google-analytics.com https://*.googletagmanager.com https://*.tradingview.com;
+      img-src 'self' blob: data: https://*.supabase.co https://main.fusionfunded.co https://*.thefusionfunded.com https://*.google-analytics.com https://*.googletagmanager.com https://*.tradingview.com https://api.dicebear.com;
       font-src 'self' https://fonts.gstatic.com data:;
       connect-src 'self' http://localhost:3001 ws://localhost:3001 https://*.supabase.co https://*.fusionfunded.co https://*.fusionfunded.com https://*.thefusionfunded.com https://*.sharkfunded.co wss://*.sharkfunded.co wss://*.fusionfunded.co wss://*.fusionfunded.com wss://*.thefusionfunded.com wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;
       frame-src 'self' https://*.supabase.co https://main.fusionfunded.co https://*.thefusionfunded.com https://fusionpay.vercel.app https://fusionfundedpayment.vercel.app https://payments.fusionfunded.com https://*.paymentservice.me https://*.cregis.io https://*.tradingview.com;

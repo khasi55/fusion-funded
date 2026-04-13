@@ -67,52 +67,69 @@ router.get('/', async (req, res) => {
 
         debugLog(`Found ${challenges.length} active challenges`);
 
-        // 2. Fetch profiles for these users
+        // 2. Fetch profiles for these users in batches
         const userIds = Array.from(new Set(challenges.map(c => c.user_id).filter(id => id)));
-        debugLog(`Fetching profiles for ${userIds.length} users`);
+        debugLog(`Fetching profiles for ${userIds.length} users in batches`);
+
+        const CHUNK_SIZE = 50;
+        const profileChunks = [];
+        for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
+            profileChunks.push(userIds.slice(i, i + CHUNK_SIZE));
+        }
 
         let profiles: any[] = [];
-        if (userIds.length > 0) {
-            const { data, error: profilesError } = await supabase
-                .from('profiles')
-                .select('id, full_name, avatar_url, country')
-                .in('id', userIds);
+        for (const chunk of profileChunks) {
+            try {
+                const { data, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, display_name, email, avatar_url, country')
+                    .in('id', chunk);
 
-            if (profilesError) {
-                debugLog(`Profiles fetch error: ${profilesError.message}`);
-                // Don't throw, just continue with empty profiles
-            } else {
-                profiles = data || [];
+                if (profilesError) {
+                    debugLog(`Profiles fetch error for chunk: ${profilesError.message}`);
+                } else if (data) {
+                    profiles = [...profiles, ...data];
+                }
+            } catch (err: any) {
+                debugLog(`Profiles chunk fetch exception: ${err.message}`);
             }
         }
 
         const profileMap = new Map(profiles.map(p => [p.id, p]));
-        debugLog(`Mapped ${profileMap.size} profiles`);
+        debugLog(`Mapped ${profileMap.size} profiles from ${profiles.length} total fetched`);
 
-        // 3. Fetch trades to calculate Day Change and Profit
+        // 3. Fetch trades to calculate Day Change and Profit in batches
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         const challengeIds = challenges.map(c => c.id).filter(id => id);
-        debugLog(`Fetching trades for ${challengeIds.length} challenges`);
+        debugLog(`Fetching trades for ${challengeIds.length} challenges in batches`);
+
+        const challengeChunks = [];
+        for (let i = 0; i < challengeIds.length; i += CHUNK_SIZE) {
+            challengeChunks.push(challengeIds.slice(i, i + CHUNK_SIZE));
+        }
 
         let recentTrades: any[] = [];
-        if (challengeIds.length > 0) {
-            const { data, error: tradesError } = await supabase
-                .from('trades')
-                .select('challenge_id, profit_loss, close_time')
-                .in('challenge_id', challengeIds)
-                .not('close_time', 'is', null)
-                .gt('lots', 0); // Exclude 0-lot depsits
+        for (const chunk of challengeChunks) {
+            try {
+                const { data, error: tradesError } = await supabase
+                    .from('trades')
+                    .select('challenge_id, profit_loss, close_time')
+                    .in('challenge_id', chunk)
+                    .not('close_time', 'is', null)
+                    .gt('lots', 0); // Exclude 0-lot deposits
 
-            if (tradesError) {
-                debugLog(`Trades fetch error: ${tradesError.message}`);
-                // Don't throw, just continue with empty trades
-            } else {
-                recentTrades = data || [];
+                if (tradesError) {
+                    debugLog(`Trades fetch error for chunk: ${tradesError.message}`);
+                } else if (data) {
+                    recentTrades = [...recentTrades, ...data];
+                }
+            } catch (err: any) {
+                debugLog(`Trades chunk fetch exception: ${err.message}`);
             }
         }
-        debugLog(`Found ${recentTrades.length} trades`);
+        debugLog(`Found ${recentTrades.length} trades total`);
 
         // 4. Process data
         const leaderboard = challenges.map((c: any) => {
@@ -126,10 +143,13 @@ router.get('/', async (req, res) => {
             const returns = (totalProfit / initialBalance) * 100;
 
             const profile = profileMap.get(c.user_id) || {};
+            const displayName = profile.display_name || profile.full_name || 'Anonymous';
+            const email = profile.email || '';
 
             return {
                 id: c.id,
-                name: profile.full_name || 'Anonymous',
+                name: displayName,
+                email: email,
                 avatar: profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`,
                 country: profile.country || '🌍',
                 accountSize: `${initialBalance / 1000}k`,
