@@ -71,7 +71,7 @@ async function main() {
 
     // Leverage & Group (Uniform: AUS\contest\7012\g1)
     const leverage = order.metadata?.leverage || 100;
-    const group = 'AUS\\contest\\7012\\g1';
+    const group = 'AUS\\contest\\7401\\grp2';
 
     const challengeData = {
         user_id: order.user_id,

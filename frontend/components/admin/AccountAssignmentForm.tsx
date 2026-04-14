@@ -11,6 +11,9 @@ const MT5_GROUPS = {
     "Prime Instant Funding": "demo\\SF\\0-Pro",
     "Prime 1-Step Challenge": "demo\\SF\\1-Pro",
     "Prime 2-Step Challenge": "demo\\SF\\2-Pro",
+    "HFT 2.0 Phase 1 (grp2)": "AUS\\contest\\7401\\grp2",
+    "HFT 2.0 Phase 2 (grp3)": "AUS\\contest\\7401\\grp3",
+    "HFT 2.0 Funded (grp4)": "AUS\\contest\\7401\\grp4",
     "Funded Live Account": "SF Funded Live",
     "Competition Account": "demo\\SF\\0-Demo\\comp",
 };
@@ -20,6 +23,7 @@ const ACCOUNT_SIZES = {
     prime: [2500, 5000, 10000, 25000, 50000, 100000,],
     funded: [2500, 5000, 10000, 25000, 50000, 100000,],
     competition: [100000],
+    hft: [5000, 10000, 15000, 25000, 50000, 100000, 200000],
 };
 
 interface User {
@@ -78,6 +82,7 @@ export default function AccountAssignmentForm({ users }: AccountAssignmentFormPr
         if (selectedGroup.includes("Prime")) return ACCOUNT_SIZES.prime;
         if (selectedGroup.includes("Funded")) return ACCOUNT_SIZES.funded;
         if (selectedGroup.includes("Competition")) return ACCOUNT_SIZES.competition;
+        if (selectedGroup.includes("HFT")) return ACCOUNT_SIZES.hft;
         return [];
     };
 

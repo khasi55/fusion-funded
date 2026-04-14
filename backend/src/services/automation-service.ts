@@ -30,7 +30,7 @@ export class AutomationService {
             if (currentGroup.includes('GRP2') || currentGroup.includes('GRP3')) {
                 return this.upgradeAccount(account.id, {
                     nextType: 'hft2_funded',
-                    nextGroup: 'MBULGE\\contest\\grp4',
+                    nextGroup: 'AUS\\contest\\7401\\grp4',
                     isAutomated: true
                 });
             }
@@ -78,13 +78,13 @@ export class AutomationService {
                 // Specific mapping for grp2/grp3 -> grp4
                 if (currentGroupStr.includes('GRP2') || currentGroupStr.includes('GRP3')) {
                     nextType = nextType || 'hft2_funded';
-                    mt5Group = mt5Group || 'MBULGE\\contest\\grp4';
+                    mt5Group = mt5Group || 'AUS\\contest\\7401\\grp4';
                 } else if (currentGroupStr.includes('GRP4')) {
                     // Already funded? No further upgrade for now
                     return { success: false, message: 'Account is already in Funded group' };
                 } else {
                     // Default logic
-                    mt5Group = mt5Group || 'MBULGE\\contest\\grp4';
+                    mt5Group = mt5Group || 'AUS\\contest\\7401\\grp4';
                     nextType = nextType || 'hft2_funded';
                 }
             }

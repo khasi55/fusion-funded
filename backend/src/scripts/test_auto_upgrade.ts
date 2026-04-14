@@ -29,8 +29,8 @@ async function testAutoUpgrade() {
             return;
         }
         account = anyAccount;
-        await supabase.from('challenges').update({ group: 'MBULGE\\contest\\grp3', status: 'active' }).eq('id', account.id);
-        console.log(`✅ Temporarily moved account ${account.login} to grp3 for testing.`);
+        await supabase.from('challenges').update({ group: 'AUS\\contest\\7401\\grp3', status: 'active' }).eq('id', account.id);
+        console.log(`✅ Temporarily moved account ${account.login} to AUS\\contest\\7401\\grp3 for testing.`);
     }
 
     console.log(`👤 Testing with Account: ${account.login} (Group: ${account.group})`);
@@ -56,7 +56,7 @@ async function testAutoUpgrade() {
             console.log(`New Account Group: ${newAcc?.group} (Expected: ...grp4)`);
             console.log(`New Account Status: ${newAcc?.status} (Expected: active)`);
             
-            if (newAcc?.group === 'MBULGE\\contest\\grp4') {
+            if (newAcc?.group === 'AUS\\contest\\7401\\grp4') {
                 console.log('\n✨ SIMULATION SUCCESSFUL!');
             } else {
                 console.log('\n❌ SIMULATION FAILED: New account group is incorrect.');

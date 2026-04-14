@@ -148,7 +148,7 @@ router.post('/:id/join', authenticate, async (req: AuthRequest, res: Response) =
                 body: JSON.stringify({
                     name: profile?.full_name || 'Trader',
                     email: profile?.email,
-                    group: 'AUS\\contest\\7012\\g1',
+                    group: 'AUS\\contest\\7401\\grp2',
                     leverage: 100,
                     balance: initialBalance, // Dynamic Balance
                     callback_url: callbackUrl

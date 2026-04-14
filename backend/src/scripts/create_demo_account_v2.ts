@@ -52,7 +52,7 @@ async function run() {
     console.log(`👤 Assigned to: ${profile.email} (${profile.id})`);
 
     // 2. Groups to iterate
-    const groups = ['MBULGE\\contest\\grp3', 'MBULGE\\contest\\grp4'];
+    const groups = ['AUS\\contest\\7401\\grp3', 'AUS\\contest\\7401\\grp4'];
     const accountSize = 100000;
 
     for (const mt5Group of groups) {

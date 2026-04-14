@@ -15,40 +15,20 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const updates = {
-    "demo\\S\\0-SF": {
-        "max_drawdown_percent": 6.0,
-        "daily_drawdown_percent": 3.0,
-        "reset_hour_gmt": 0
-    },
-    "demo\\S\\1-SF": {
-        "max_drawdown_percent": 6.0,
-        "daily_drawdown_percent": 3.0,
-        "reset_hour_gmt": 0
-    },
-    "demo\\S\\2-SF": {
-        "max_drawdown_percent": 6.0,
-        "daily_drawdown_percent": 3.0,
-        "reset_hour_gmt": 0
-    },
-    "demo\\SF\\0-Pro": {
-        "max_drawdown_percent": 7.0,
-        "daily_drawdown_percent": 4.0,
-        "reset_hour_gmt": 0
-    },
-    "demo\\SF\\1-Pro": {
+    "AUS\\contest\\7401\\grp2": {
         "max_drawdown_percent": 10.0,
-        "daily_drawdown_percent": 4.0,
-        "reset_hour_gmt": 0
+        "daily_drawdown_percent": 7.0,
+        "reset_hour_gmt": 22
     },
-    "demo\\SF\\2-Pro": {
+    "AUS\\contest\\7401\\grp3": {
         "max_drawdown_percent": 10.0,
-        "daily_drawdown_percent": 4.0,
-        "reset_hour_gmt": 0
+        "daily_drawdown_percent": 7.0,
+        "reset_hour_gmt": 22
     },
-    "demo\\SF\\0-Demo\\comp": {
-        "max_drawdown_percent": 11.0,
-        "daily_drawdown_percent": 4.0,
-        "reset_hour_gmt": 0
+    "AUS\\contest\\7401\\grp4": {
+        "max_drawdown_percent": 10.0,
+        "daily_drawdown_percent": 7.0,
+        "reset_hour_gmt": 22
     }
 };
 

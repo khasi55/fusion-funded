@@ -195,7 +195,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
         // 2. Determine challenge type and MT5 group
         let challengeType = 'Phase 1';
         // Enforced: use provided group or fallback to test group
-        let finalGroup = mt5Group || 'MBULGE\\contest\\grp1';
+        let finalGroup = mt5Group || 'AUS\\contest\\7401\\grp2';
 
         // Logic matched with payment webhook
         const lowerPlan = (planType || '').toLowerCase();
@@ -204,10 +204,10 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
         if (lowerPlan.includes('hft')) {
             if (lowerPlan.includes('funded')) {
                 challengeType = 'hft2_funded';
-                finalGroup = mt5Group || 'MBULGE\\contest\\grp4';
+                finalGroup = mt5Group || 'AUS\\contest\\7401\\grp4';
             } else {
                 challengeType = 'hft2_phase1';
-                finalGroup = mt5Group || 'MBULGE\\contest\\grp3';
+                finalGroup = mt5Group || 'AUS\\contest\\7401\\grp3';
             }
         } 
         // 2. Direct Funded
