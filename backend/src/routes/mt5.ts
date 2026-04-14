@@ -173,6 +173,7 @@ router.get('/accounts', authenticate, requireRole(['super_admin', 'admin', 'sub_
 router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_admin']), resourceIntensiveLimiter, validateRequest(mt5AssignSchema), async (req: AuthRequest, res: Response) => {
     try {
         const { email, mt5Group, accountSize, planType, note, imageUrl, competitionId } = req.body;
+        console.log(`🔌 [MT5 Assign Debug] Request: email=${email}, group=${mt5Group}, plan=${planType}, size=${accountSize}`);
 
         // Validate Competition ID if applicable
         if (planType === 'Competition Account' && !competitionId) {

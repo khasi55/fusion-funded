@@ -159,9 +159,9 @@ router.get('/', async (req, res) => {
             };
         });
 
-        // 5. Sort by Profit and Take Top 100
+        // 5. Sort by Percentage Return and Take Top 100
         const sortedLeaderboard = leaderboard
-            .sort((a, b) => b.totalProfit - a.totalProfit)
+            .sort((a, b) => b.return - a.return)
             .slice(0, 100)
             .map((item, index) => ({ ...item, rank: index + 1 }));
 

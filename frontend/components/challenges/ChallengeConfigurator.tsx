@@ -27,6 +27,7 @@ const PLATFORMS = [
 ];
 
 const PAYMENT_GATEWAYS = [
+    { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
     { id: "crypto_manual", label: "Crypto ", currency: "USD", desc: "USDT (Tron/BSC/ETH)", icon: "💎" }
 ];
 
@@ -225,11 +226,9 @@ const ManualPaymentModal = ({
     };
 
     const upiDetails = {
-        upiId: 'accentureinnovative@idfcbank',
-        accountNumber: '70690133894',
-        ifsc: 'IDFB0042262',
-        name: 'Accenture innovative tech',
-        bank: 'IDFC First Bank'
+        upiId: 'FUSION2024@YBL',
+        name: 'Fusion Funded',
+        bank: 'UPI Payment'
     };
 
     const uploadProof = async (file: File): Promise<string | null> => {
@@ -377,26 +376,16 @@ const ManualPaymentModal = ({
                                             level="H"
                                         />
                                     </div>
-
-                                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2">
-                                        <div className="flex items-center justify-between border-b border-white/5 pb-2 text-left">
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase">UPI ID</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-white font-mono opacity-90">{upiDetails.upiId}</span>
-                                                <button onClick={() => copyToClipboard(upiDetails.upiId)} className="text-primary"><Copy className="w-3 h-3" /></button>
+                                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2 text-center">
+                                        <div className="flex flex-col items-center justify-center p-4">
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Scan or Pay to UPI ID</p>
+                                            <div className="flex items-center gap-3 bg-black/40 px-6 py-3 rounded-xl border border-white/10 mb-2">
+                                                <span className="text-sm text-white font-mono font-black">{upiDetails.upiId}</span>
+                                                <button onClick={() => copyToClipboard(upiDetails.upiId)} className="text-primary hover:text-primary/80 transition-colors">
+                                                    <Copy className="w-4 h-4" />
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center justify-between border-b border-white/5 py-2">
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase">Account No</p>
-                                            <span className="text-xs text-white font-mono opacity-90">{upiDetails.accountNumber}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between border-b border-white/5 py-2">
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase">IFSC</p>
-                                            <span className="text-xs text-white font-mono opacity-90">{upiDetails.ifsc}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between pt-1">
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase">Bank</p>
-                                            <span className="text-[10px] text-primary font-black">{upiDetails.bank}</span>
+                                            <p className="text-[11px] text-primary font-black uppercase tracking-widest">{upiDetails.name}</p>
                                         </div>
                                     </div>
                                 </div>
