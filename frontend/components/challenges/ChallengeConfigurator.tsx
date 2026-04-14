@@ -583,7 +583,7 @@ export default function ChallengeConfigurator() {
                 return;
             }
 
-            const mt5Group = 'MBULGE\\contest\\grp3';
+            const mt5Group = 'AUS\\contest\\7401\\grp2'; // New HFT 2.0 Phase 1 Group
             const isBrowser = typeof window !== 'undefined';
             const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co');
             const orderId = `FF${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
