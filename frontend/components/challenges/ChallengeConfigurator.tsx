@@ -27,7 +27,7 @@ const PLATFORMS = [
 ];
 
 const PAYMENT_GATEWAYS = [
-    { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
+    // { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
     { id: "crypto_manual", label: "Crypto ", currency: "USD", desc: "USDT (Tron/BSC/ETH)", icon: "💎" }
 ];
 
@@ -493,7 +493,7 @@ export default function ChallengeConfigurator() {
     const [size, setSize] = useState(100000);
 
     const [platform, setPlatform] = useState("mt5");
-    const [gateway, setGateway] = useState("fusionpay");
+    const [gateway, setGateway] = useState("crypto_manual");
     const [coupon, setCoupon] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [couponError, setCouponError] = useState("");

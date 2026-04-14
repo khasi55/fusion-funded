@@ -65,7 +65,7 @@ const PLATFORMS = [
 ];
 
 const PAYMENT_GATEWAYS = [
-    { id: "sharkpay", label: "FusionPay", currency: "INR", desc: "Pay in Indian Rupees (₹)", icon: "🇮🇳" }
+    // { id: "sharkpay", label: "FusionPay", currency: "INR", desc: "Pay in Indian Rupees (₹)", icon: "🇮🇳" }
 ];
 
 // Helper to map size number to string key
