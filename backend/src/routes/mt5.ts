@@ -173,7 +173,7 @@ router.get('/accounts', authenticate, requireRole(['super_admin', 'admin', 'sub_
 router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_admin']), resourceIntensiveLimiter, validateRequest(mt5AssignSchema), async (req: AuthRequest, res: Response) => {
     try {
         const { email, mt5Group, accountSize, planType, note, imageUrl, competitionId } = req.body;
-        console.error(`🔌 [MT5 Assign Debug] Request: email=${email}, group=${mt5Group}, plan=${planType}, size=${accountSize}`);
+
 
         // Validate Competition ID if applicable
         if (planType === 'Competition Account' && !competitionId) {
@@ -244,8 +244,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
         // 3. Call Python MT5 Bridge to create account
         const callbackUrl = `${process.env.BACKEND_URL || process.env.FRONTEND_URL}/api/mt5/trades/webhook`;
 
-        // console.log(`🔌 [MT5 Assign] Attempting to real create account in group: '${finalGroup}' for ${email}`);
-        // console.log(`🔌 [MT5 Assign] Payload:`, JSON.stringify({...}));
+
 
         let mt5Data;
         try {
@@ -257,7 +256,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                 balance: accountSize,
                 callback_url: callbackUrl
             }) as any;
-            // console.log(`✅ [MT5 Assign] Bridge Response:`, JSON.stringify(mt5Data, null, 2));
+
         } catch (bridgeError: any) {
             console.error(`❌ [MT5 Assign] Bridge Call Failed:`, bridgeError);
             console.error(`❌ [MT5 Assign] Bridge Error Details:`, bridgeError.message);
@@ -269,7 +268,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
         const masterPassword = mt5Data.password;
         const investorPassword = mt5Data.investor_password;
 
-        console.log(`📝 [MT5 Assign] Inserting challenge: Login=${mt5Login}, Size=${accountSize}, SOD=${accountSize}`);
+
 
         // 4. Create unified challenge record
         const { data: challenge, error: challengeError } = await supabase

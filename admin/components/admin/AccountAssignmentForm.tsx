@@ -121,17 +121,17 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
         if (category === 'direct_funded') return "demo\\S\\0-Direct-SF";
         if (category === 'competition') return "demo\\SF\\0-Demo\\comp";
 
-        return "AUS\\contest\\7401\\grp2"; // Default HFT Phase 1 Group (grp2)
+        return "AUS\\contest\\7401\\grp3"; // Default HFT Challenge Group
     };
 
     // 2. Get Plan Type Display Name
     const getPlanTypeName = () => {
-        if (category === 'funded') return "HFT 2.0 Funded (grp4)";
+        if (category === 'funded') return "HFT Funded Account";
         if (category === 'direct_funded') return "Fusion Funded Direct Funded";
         if (category === 'competition') return "Competition Account";
 
         // Challenge Name
-        return `HFT 2.0 Phase 1 (grp2)`;
+        return `HFT Phase 1 Challenge`;
     };
 
     // 3. Get Available Sizes
