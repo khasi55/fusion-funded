@@ -161,15 +161,29 @@ export class AutomationService {
 
             // 8. Email credentials
             if (profile.email) {
-                EmailService.sendAccountCredentials(
-                    profile.email,
-                    profile.full_name,
-                    String(newLogin),
-                    newPassword,
-                    newServer,
-                    newInvestorPassword
-                ).catch(err => console.error(`❌ [Automation] Email failed for ${newLogin}:`, err.message));
+                const isFunded = nextType.toLowerCase().includes('funded') || mt5Group.toLowerCase().includes('grp4');
+                
+                if (isFunded) {
+                    EmailService.sendFundedAccountCredentials(
+                        profile.email,
+                        profile.full_name,
+                        String(newLogin),
+                        newPassword,
+                        newServer,
+                        newInvestorPassword
+                    ).catch(err => console.error(`❌ [Automation] Funded Email failed for ${newLogin}:`, err.message));
+                } else {
+                    EmailService.sendAccountCredentials(
+                        profile.email,
+                        profile.full_name,
+                        String(newLogin),
+                        newPassword,
+                        newServer,
+                        newInvestorPassword
+                    ).catch(err => console.error(`❌ [Automation] Email failed for ${newLogin}:`, err.message));
+                }
             }
+
 
             // 9. Audit Log
             AuditLogger.info(adminEmail, `Account Upgrade: ${account.login} -> ${newLogin}`, {

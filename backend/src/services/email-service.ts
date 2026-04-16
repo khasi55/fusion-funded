@@ -109,7 +109,39 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\\n\\nYour new trading account has been created.\\n\\nLogin: ${login}\\nPassword: ${password}\\nServer: BULGE GROUP INVESTMENT\\n${investorPassword ? `Investor Password: ${investorPassword}\\n` : ''}\\n\\nPlease login to MT5 with these details.`;
+        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: BULGE GROUP INVESTMENT\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
+
+        await this.sendEmail(email, subject, html, text);
+    }
+
+    /**
+     * Send Funded Account Credentials (Login, Password, Server) - Specifically for Upgrades
+     */
+    static async sendFundedAccountCredentials(email: string, name: string, login: string, password: string, server: string, investorPassword?: string) {
+        const subject = `Congratulations! Your Live Funded Account is Ready - ${this.FROM_NAME}`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #d4edda; border-radius: 10px;">
+                <h2 style="color: #155724;">Congratulations! Challenge Completed</h2>
+                <p>Dear ${name},</p>
+                <p>We’re excited to inform you that your <strong>Live Funded Account</strong> is now ready to use! Here is your login details:</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <p><strong>Login:</strong> ${login}</p>
+                    <p><strong>Password:</strong> ${password}</p>
+                    <p><strong>Server:</strong> BULGE GROUP INVESTMENT</p>
+                    ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
+                </div>
+
+                <p>Please download the MT5 platform and login using these credentials to start your funded journey.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    Thank you for trading with Fusion Funded!
+                </p>
+            </div>
+        `;
+
+        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: BULGE GROUP INVESTMENT\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }

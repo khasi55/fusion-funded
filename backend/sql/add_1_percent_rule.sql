@@ -5,7 +5,7 @@ ADD COLUMN IF NOT EXISTS max_single_loss_percent FLOAT DEFAULT 0;
 -- Update config for Instant Accounts (assuming group names contain 'Instant' or 'SF')
 -- Modify these WHERE clauses to match your actual group names in production
 UPDATE risk_rules_config
-SET max_single_loss_percent = 1
+SET max_single_loss_percent = 2
 WHERE mt5_group_name ILIKE '%Instant%' OR mt5_group_name ILIKE '%Funded%' OR mt5_group_name ILIKE '%Lite%';
 
 -- Ensure Tick Scalping is enabled (120s) where needed as per user request

@@ -1,8 +1,3 @@
--- ============================================
--- RISK RULES BY MT5 GROUP
--- ============================================
--- Uses mt5_group_name as the key for rules
--- Matches actual account_types table structure
 
 -- 0. Drop old table if exists
 drop table if exists public.risk_rules_config cascade;
@@ -41,16 +36,15 @@ create table public.risk_rules_config (
   updated_at timestamp with time zone default now()
 );
 
--- 2. Enable RLS
+
 alter table public.risk_rules_config enable row level security;
 
--- 3. Create Policy
+
 create policy "Risk rules are publicly readable"
   on public.risk_rules_config for select
   using (true);
 
--- 4. Insert Rules by MT5 Group
--- ONLY 3 RULES: Max Daily Loss, Max Drawdown, Max Loss Per Trade
+
 insert into public.risk_rules_config (
     mt5_group_name,
     max_daily_loss_percent,
@@ -60,14 +54,14 @@ insert into public.risk_rules_config (
 )
 values 
   -- LITE/REGULAR ACCOUNTS
-  ('demo\S\0-SF', 4.0, 8.0, 1.0, false),        -- Instant Funding (Funded -> 1% Risk)
+  ('demo\S\0-SF', 4.0, 8.0, 2.0, false),        -- Instant Funding (Funded -> 2% Risk)
   ('demo\S\1-SF', 4.0, 6.0, 2.0, false),        -- 1 Step (Eval -> 2% Risk)
   ('demo\S\2-SF', 4.0, 8.0, 2.0, false),        -- 2 Step (Eval -> 2% Risk)
   
   -- PRIME/PRO ACCOUNTS
-  ('demo\SF\0-Pro', 5.0, 10.0, 1.0, false),     -- Instant Funding Pro (Funded -> 1% Risk)
+  ('demo\SF\0-Pro', 5.0, 10.0, 2.0, false),     -- Instant Funding Pro (Funded -> 2% Risk)
   ('demo\SF\1-Pro', 5.0, 10.0, 2.0, false),     -- 1 Step Pro (Eval -> 2% Risk)
   ('demo\SF\2-Pro', 5.0, 10.0, 2.0, false),     -- 2 Step Pro (Eval -> 2% Risk)
   
   -- FUNDED LIVE
-  ('SF Funded Live', 5.0, 10.0, 1.0, false);    -- Master Account (Funded -> 1% Risk)
+  ('SF Funded Live', 5.0, 10.0, 2.0, false);    -- Master Account (Funded -> 2% Risk)

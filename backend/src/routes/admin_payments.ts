@@ -139,14 +139,64 @@ router.get('/', authenticate, requireRole(['super_admin', 'payouts_admin', 'admi
                 else if (atn.includes('lite')) determinedModel = 'lite';
             }
 
-            // Enhanced name/email resolution for guest checkouts
+            // Enhanced metadata resolution and recursive proof detection
             let metadata = p.metadata || {};
-            if (typeof metadata.data === 'string') {
-                try {
-                    metadata = { ...metadata, ...JSON.parse(metadata.data) };
-                } catch (e) {}
-            }
+            
+            // Helper to recursively flatten and parse metadata
+            const flattenMetadata = (obj: any): any => {
+                if (!obj) return {};
+                
+                // If it's a string, try to parse it first
+                if (typeof obj === 'string' && (obj.startsWith('{') || obj.startsWith('['))) {
+                    try { obj = JSON.parse(obj); } catch (e) { return {}; }
+                }
+                
+                if (typeof obj !== 'object' || obj === null) return {};
+                let result = { ...obj };
+                
+                // If there's a 'data' string inside that might be JSON, parse it
+                if (typeof obj.data === 'string' && (obj.data.startsWith('{') || obj.data.startsWith('['))) {
+                    try { result = { ...result, ...JSON.parse(obj.data) }; } catch (e) {}
+                }
 
+                return result;
+            };
+
+            metadata = flattenMetadata(metadata);
+
+            // Recursive function to find anything that looks like a proof URL
+            const recursiveDetectProof = (obj: any, depth = 0): string | null => {
+                if (!obj || depth > 5) return null;
+                
+                // If it's a string, check if it's a URL to an image
+                if (typeof obj === 'string') {
+                    const lowered = obj.toLowerCase();
+                    const isUrl = lowered.startsWith('http');
+                    const isImage = /\.(jpg|jpeg|png|webp|gif|pdf)$/.test(lowered);
+                    const isSupabase = lowered.includes('supabase') && lowered.includes('storage');
+                    
+                    if (isUrl && (isImage || isSupabase)) return obj;
+                }
+                
+                // If it's an object, search its values
+                if (typeof obj === 'object') {
+                    // Prioritize certain keys if they exist
+                    const priorityKeys = ['proof_url', 'proofUrl', 'screenshot', 'receipt', 'payment_proof', 'proof', 'txid_proof'];
+                    for (const key of priorityKeys) {
+                        if (obj[key] && typeof obj[key] === 'string' && obj[key].startsWith('http')) return obj[key];
+                    }
+                    
+                    // Otherwise search all keys
+                    for (const key in obj) {
+                        const found = recursiveDetectProof(obj[key], depth + 1);
+                        if (found) return found;
+                    }
+                }
+                
+                return null;
+            };
+
+            const proofUrlFromMetadata = recursiveDetectProof(metadata);
             const guestName = metadata.customerName || metadata.name || metadata.payer_name || metadata.customer_name;
             const guestEmail = metadata.customerEmail || metadata.email || metadata.payer_email || metadata.customer_email;
 
@@ -166,7 +216,8 @@ router.get('/', authenticate, requireRole(['super_admin', 'payouts_admin', 'admi
                 paid_at: p.paid_at,
                 user_name: profile?.full_name || profile?.email?.split('@')[0] || guestName || 'Guest User',
                 user_email: profile?.email || guestEmail || 'Unknown',
-                metadata: p.metadata || {}
+                metadata: metadata,
+                proof_image: p.proof_image || proofUrlFromMetadata || null
             };
         });
 

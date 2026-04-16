@@ -31,14 +31,16 @@ router.post('/update-manual-utr', async (req, res) => {
         const updatedMetadata = {
             ...(existingOrder.metadata || {}),
             utr_submitted_at: new Date().toISOString(),
-            proof_url: proofUrl || (existingOrder.metadata?.proof_url) || null
+            proof_url: proofUrl || (existingOrder.metadata?.proof_url) || null,
+            proofUrl: proofUrl || (existingOrder.metadata?.proofUrl) || null
         };
 
         const { error } = await supabaseAdmin
             .from('payment_orders')
             .update({ 
                 payment_id: utr,
-                metadata: updatedMetadata
+                metadata: updatedMetadata,
+                proof_image: proofUrl || (existingOrder.metadata?.proof_url) || null
             })
             .eq('order_id', orderId)
             .in('payment_gateway', ['manual_crypto', 'upi', 'crypto', 'manual', 'upi_manual', 'crypto_manual']);

@@ -64,7 +64,7 @@ const PLATFORMS = [
     { id: "mt5", label: "MetaTrader 5" }
 ];
 
-const PAYMENT_GATEWAYS = [
+const PAYMENT_GATEWAYS: any[] = [
     // { id: "sharkpay", label: "FusionPay", currency: "INR", desc: "Pay in Indian Rupees (₹)", icon: "🇮🇳" }
 ];
 

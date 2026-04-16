@@ -274,10 +274,10 @@ async function processTradeEvent(data: { login: number, trades: any[], event?: s
             allow_hedging: rulesConfig?.allow_hedging ?? true,
             allow_martingale: rulesConfig?.allow_martingale ?? true,
 
-            // 1% Loss Rule: Apply only to Instant/Funded accounts
+            // 2% Loss Rule: Apply only to Instant/Funded accounts
             max_single_loss_percent: rulesConfig?.max_single_loss_percent ?? (() => {
                 const type = (challenge.challenge_type || '').toLowerCase();
-                if (type.includes('instant') || type.includes('funded')) return 1;
+                if (type.includes('instant') || type.includes('funded')) return 2;
                 return 0; // Disabled for evaluations
             })(),
             initialBalance: Number(challenge.initial_balance)

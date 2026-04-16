@@ -27,7 +27,7 @@ const PLATFORMS = [
 ];
 
 const PAYMENT_GATEWAYS = [
-    // { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
+    { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
     { id: "crypto_manual", label: "Crypto ", currency: "USD", desc: "USDT (Tron/BSC/ETH)", icon: "💎" }
 ];
 
@@ -226,7 +226,7 @@ const ManualPaymentModal = ({
     };
 
     const upiDetails = {
-        upiId: 'FUSION2024@YBL',
+        upiId: 'accentureinnovative@idfcbank',
         name: 'Fusion Funded',
         bank: 'UPI Payment'
     };

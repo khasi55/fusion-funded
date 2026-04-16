@@ -105,7 +105,7 @@ export class AdvancedRiskEngine {
             if (scalping) violations.push(scalping);
         }
 
-        // 6. 1% Loss Rule (For Instant/Funded)
+        // 6. Max Single Loss Rule (For Instant/Funded)
         if (rules.max_single_loss_percent && rules.max_single_loss_percent > 0 && rules.initialBalance) {
             const lossViolation = this.checkMaxSingleLoss(trade, rules.initialBalance, rules.max_single_loss_percent);
             if (lossViolation) violations.push(lossViolation);
@@ -235,7 +235,7 @@ export class AdvancedRiskEngine {
         return null;
     }
 
-    // Rule: Max Single Loss (1% Rule)
+    // Rule: Max Single Loss Rule
     private checkMaxSingleLoss(trade: Trade, initialBalance: number, maxPercent: number): RiskViolation | null {
         // Only check closed trades with negative PL
         if (!trade.close_time || trade.profit_loss >= 0) return null;
@@ -247,7 +247,7 @@ export class AdvancedRiskEngine {
             return {
                 violation_type: 'max_loss_exceeded',
                 severity: 'breach',
-                description: `1% Loss Rule Breached: Loss $${lossAbs.toFixed(2)} exceeds ${maxPercent}% of balance ($${maxLossAmount.toFixed(2)})`,
+                description: `Max Single Loss Rule Breached: Loss $${lossAbs.toFixed(2)} exceeds ${maxPercent}% of balance ($${maxLossAmount.toFixed(2)})`,
                 trade_ticket: trade.ticket_number,
                 symbol: trade.symbol,
                 metadata: {

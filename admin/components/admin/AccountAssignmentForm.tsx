@@ -20,6 +20,13 @@ const SIZES_CONFIG = {
     competition: [100000],
 };
 
+const ADDONS = [
+    { id: 'fees_refund', label: 'Fees Refund', percentage: 20, desc: 'Get your challenge fees refund' },
+    { id: 'remove_consistency', label: 'Remove Consistency', percentage: 30, desc: 'Trade without consistency rules' },
+    { id: 'min_trading_7', label: 'Min Trading Days (7 Days)', percentage: 12, desc: 'Allow payout after 7 trading days' },
+    { id: 'fast_payout', label: 'Fast Payout (6 Hours)', percentage: 0, desc: 'Receive your withdrawal in 6 hours' }
+];
+
 interface User {
     id: string;
     email: string;
@@ -44,6 +51,7 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
     const [accountSize, setAccountSize] = useState<number | "">("");
     const [note, setNote] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
     // UI State
     const [loading, setLoading] = useState(false);
@@ -163,6 +171,7 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
         setSelectedEmail("");
         setNote("");
         setImageFile(null);
+        setSelectedAddons([]);
         setError(null);
         setSuccess(false);
         // Reset file input manually if needed via ref, but standard state update handles most
@@ -213,7 +222,8 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
                     planType: getPlanTypeName(),
                     note,
                     imageUrl,
-                    competitionId: category === 'competition' ? selectedCompetitionId : undefined
+                    competitionId: category === 'competition' ? selectedCompetitionId : undefined,
+                    addons: selectedAddons
                 }),
             });
 
@@ -377,6 +387,46 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
                                         ${size.toLocaleString()}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Add-ons Section */}
+                        <div className="mt-8">
+                            <label className="block text-sm font-medium text-gray-700 mb-4">Add-ons</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {ADDONS.map(addon => {
+                                    const isActive = selectedAddons.includes(addon.id);
+                                    return (
+                                        <div
+                                            key={addon.id}
+                                            onClick={() => {
+                                                setSelectedAddons(prev =>
+                                                    prev.includes(addon.id)
+                                                        ? prev.filter(id => id !== addon.id)
+                                                        : [...prev, addon.id]
+                                                );
+                                            }}
+                                            className={`relative flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-300 select-none group ${isActive ? "bg-indigo-50 border-indigo-200 shadow-sm" : "bg-white border-gray-200 hover:border-gray-300"}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${isActive ? "border-indigo-600 bg-indigo-600" : "border-gray-300 bg-white"}`}>
+                                                    {isActive && <Check size={14} className="text-white" strokeWidth={4} />}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className={`text-sm font-bold ${isActive ? "text-indigo-900" : "text-gray-700"}`}>
+                                                        {addon.label}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-500 leading-tight">
+                                                        {addon.desc}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className={`text-xs font-black px-2 py-1 rounded ${isActive ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-500"}`}>
+                                                {addon.percentage === 0 ? "0%" : `+${addon.percentage}%`}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 

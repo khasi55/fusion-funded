@@ -370,8 +370,8 @@ function AccountSwitcherContent({
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">PNL</p>
-                                        <p className={cn("font-bold text-sm", pnl >= 0 ? "text-green-400" : "text-red-400")}>
-                                            {pnl >= 0 ? "+" : ""}{pnl.toLocaleString()}
+                                        <p className={cn("font-bold text-sm", status.toLowerCase() === 'passed' ? "text-gray-400" : (pnl >= 0 ? "text-green-400" : "text-red-400"))}>
+                                            {status.toLowerCase() === 'passed' ? "n/a" : (pnl >= 0 ? "+" : "") + pnl.toLocaleString()}
                                         </p>
                                     </div>
                                 </div>

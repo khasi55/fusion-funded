@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function main() {
-    const orderId = 'SF-ORDER-1770203368464-d4a366e1';
+    const orderId = process.argv[2] || 'SF-ORDER-1770203368464-d4a366e1';
     console.log(`Fetching order: ${orderId}`);
 
     const { data: order, error } = await supabase

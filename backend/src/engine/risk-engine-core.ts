@@ -54,7 +54,7 @@ export interface DailyStats {
 export interface CoreRiskRules {
     max_daily_loss_percent: number;
     max_total_drawdown_percent: number;
-    max_risk_per_trade_percent?: number; // 1% Rule
+    max_risk_per_trade_percent?: number; // Max Risk Rule
 }
 
 export interface CoreRiskResult {
@@ -142,7 +142,7 @@ export class CoreRiskEngine {
         const drawdownCheck = this.checkMaxDrawdown(trade, dailyStats, rules);
         if (drawdownCheck) violations.push(drawdownCheck);
 
-        // 3. Max Risk Per Trade (1% Rule)
+        // 3. Max Risk Per Trade Rule
         if (rules.max_risk_per_trade_percent) {
             const riskCheck = this.checkRiskPerTrade(trade, dailyStats, rules.max_risk_per_trade_percent);
             if (riskCheck) violations.push(riskCheck);
@@ -211,10 +211,10 @@ export class CoreRiskEngine {
         return null;
     }
 
-    // Rule 3: Max Risk Per Trade (1%)
+    // Rule 3: Max Risk Per Trade
     private checkRiskPerTrade(trade: Trade, stats: DailyStats, maxPercent: number): RiskViolation | null {
         // Calculation requires Stop Loss. If unavailable, we can't accurately calculate risk %.
-        // Fallback: Check if realized loss exceeds 1% (Post-trade check)
+        // Fallback: Check if realized loss exceeds limit (Post-trade check)
 
         if (trade.profit_loss < 0) {
             const lossAmount = Math.abs(trade.profit_loss);

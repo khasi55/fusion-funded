@@ -124,6 +124,7 @@ export const mt5AssignSchema = z.object({
         planType: z.string().min(1),
         note: z.string().min(1),
         imageUrl: z.string().url(),
-        competitionId: z.string().uuid().optional().nullable()
+        competitionId: z.string().uuid().optional().nullable(),
+        addons: z.array(z.string()).optional()
     }).strict()
 });

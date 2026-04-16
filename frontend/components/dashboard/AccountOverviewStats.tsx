@@ -94,10 +94,10 @@ export default function AccountOverviewStats() {
             />
             <StatBox
                 label="PnL"
-                value={`${displayPnL >= 0 ? '+' : ''}$${displayPnL.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                value={selectedAccount.status?.toLowerCase() === 'passed' ? 'n/a' : `${displayPnL >= 0 ? '+' : ''}$${displayPnL.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={TrendingUp}
-                isNegative={isPnlNegative}
-                isPositive={isPnlPositive}
+                isNegative={selectedAccount.status?.toLowerCase() !== 'passed' && isPnlNegative}
+                isPositive={selectedAccount.status?.toLowerCase() !== 'passed' && isPnlPositive}
             />
             <StatBox
                 label="Start Date"

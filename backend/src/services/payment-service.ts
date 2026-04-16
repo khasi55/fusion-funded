@@ -34,7 +34,8 @@ export class PaymentService {
             return order;
         }
 
-        // 2. Update status to 'paid'
+        // 2. Update status to 'paid' (Atomic check: only if not already paid)
+        console.log(`[PaymentService] Marking order ${orderId} as paid...`);
         const { data: updatedOrder, error: updateError } = await supabaseAdmin
             .from('payment_orders')
             .update({
@@ -45,10 +46,32 @@ export class PaymentService {
                 metadata: { ...(order.metadata || {}), ...(paymentData.metadata || {}) }
             })
             .eq('order_id', orderId)
+            .neq('status', 'paid') // Prevent double-marking as paid
             .select()
             .single();
 
         if (updateError) {
+            // If it failed because another process already marked it as paid, we should fetch it again
+            console.warn(`[PaymentService] Order ${orderId} update failed or already paid. Re-fetching...`);
+            const { data: reFetchedOrder } = await supabaseAdmin
+                .from('payment_orders')
+                .select('*, account_types(*)')
+                .eq('order_id', orderId)
+                .single();
+            
+            if (reFetchedOrder && reFetchedOrder.status === 'paid' && reFetchedOrder.is_account_created) {
+                console.log(`[PaymentService] Order ${orderId} was finalized by another process.`);
+                return reFetchedOrder;
+            }
+            
+            // If it's still not finalized (is_account_created is false), we might want to continue or wait.
+            // But for simplicity, if we couldn't update it ourselves, we let the other process finish.
+            if (reFetchedOrder && reFetchedOrder.status === 'paid' && !reFetchedOrder.is_account_created) {
+               console.log(`[PaymentService] Order ${orderId} is being finalized by another process. Waiting...`);
+               // Optional: Wait a bit and re-fetch, but for now we'll just return it and let the client poll
+               return reFetchedOrder;
+            }
+
             throw new Error(`Failed to update order status: ${updateError.message}`);
         }
 
@@ -168,6 +191,24 @@ export class PaymentService {
     }
 
     private static async issueAccount(order: any) {
+        // Idempotency: Double check if account already issued for this order
+        if (!order.metadata?.is_bogo_free && order.is_account_created) {
+            console.warn(`[PaymentService] Order ${order.order_id} already has an account (${order.login}). Skipping issueAccount.`);
+            return { challengeId: order.challenge_id, login: order.login };
+        }
+
+        // Additional safeguard: check challenges table for this order_id in metadata
+        const { data: existingChallenge } = await supabaseAdmin
+            .from('challenges')
+            .select('id, login')
+            .contains('metadata', { order_id: order.order_id })
+            .maybeSingle();
+        
+        if (existingChallenge && !order.metadata?.is_bogo_free) {
+            console.warn(`[PaymentService] Found existing challenge for order ${order.order_id}: ${existingChallenge.login}. Skipping.`);
+            return { challengeId: existingChallenge.id, login: existingChallenge.login };
+        }
+
         const { data: profile } = await supabaseAdmin
             .from('profiles')
             .select('full_name, email')
@@ -219,6 +260,7 @@ export class PaymentService {
                 group: mt5Group,
                 metadata: {
                     ...(order.metadata || {}),
+                    order_id: order.order_id,
                     plan: 'HFT Phase 1',
                     model: 'HFT'
                 }

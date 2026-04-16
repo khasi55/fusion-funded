@@ -172,7 +172,7 @@ router.get('/accounts', authenticate, requireRole(['super_admin', 'admin', 'sub_
 // POST /api/mt5/assign - Assign new MT5 account to user (admin only)
 router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_admin']), resourceIntensiveLimiter, validateRequest(mt5AssignSchema), async (req: AuthRequest, res: Response) => {
     try {
-        const { email, mt5Group, accountSize, planType, note, imageUrl, competitionId } = req.body;
+        const { email, mt5Group, accountSize, planType, note, imageUrl, competitionId, addons = [] } = req.body;
 
 
         // Validate Competition ID if applicable
@@ -297,7 +297,8 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                     competition_id: competitionId,
                     assigned_by: req.user.email,
                     assigned_by_id: req.user.id,
-                    model: 'HFT 2.0'
+                    model: 'HFT 2.0',
+                    selected_addons: addons
                 }
             })
             .select()

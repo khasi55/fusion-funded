@@ -208,6 +208,7 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Equity</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Profit</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Status</th>
+                            <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Addons</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Created</th>
                         </tr>
                     </thead>
@@ -304,6 +305,22 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <StatusBadge status={account.status} upgradedTo={account.upgraded_to} />
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                            {account.metadata?.selected_addons && account.metadata.selected_addons.length > 0 ? (
+                                                account.metadata.selected_addons.map((addonId: string) => {
+                                                    const label = addonId.replace(/_/g, ' ');
+                                                    return (
+                                                        <span key={addonId} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase">
+                                                            {label}
+                                                        </span>
+                                                    );
+                                                })
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="text-[12px] text-gray-500 font-medium">
