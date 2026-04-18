@@ -210,7 +210,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {/* Footer / Social Links */}
                     <div className="px-6 py-4 mt-auto space-y-3">
                         <a
-                            href="https://www.instagram.com/thefusionfunded"
+                            href="https://www.instagram.com/thefusionfunded_official"
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(
