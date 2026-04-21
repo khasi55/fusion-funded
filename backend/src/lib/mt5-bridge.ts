@@ -98,9 +98,9 @@ async function callBridge(endpoint: string, body: any, method = 'POST', options:
 
 export async function createMT5Account(params: MT5AccountParams, signal?: AbortSignal) {
     const data = await callBridge('/create-account', params, 'POST', { signal }) as any;
-    // Force BULGE GROUP INVESTMENT branding regardless of bridge response
+    // Force OCEAN MARKET LIMITED branding regardless of bridge response
     if (data) {
-        data.server = 'BULGE GROUP INVESTMENT';
+        data.server = 'OCEAN MARKET LIMITED';
     }
     return data;
 }

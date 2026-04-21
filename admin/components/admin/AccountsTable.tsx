@@ -9,8 +9,9 @@ import { toast } from "sonner";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { disableAccountsByGroup } from "@/app/actions/mt5-actions";
-import { ChevronLeft, ChevronRight, Filter, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, TrendingUp, TrendingDown, CalendarDays, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import TradeMonthlyCalendar from "@/components/dashboard/TradeMonthlyCalendar";
 
 interface AccountsTableProps {
     accounts: any[];
@@ -18,14 +19,16 @@ interface AccountsTableProps {
     totalPages: number;
     groups: string[];
     currentGroupFilter: string;
+    currentStatusFilter?: string;
 }
 
-export function AccountsTable({ accounts, currentPage, totalPages, groups, currentGroupFilter }: AccountsTableProps) {
+export function AccountsTable({ accounts, currentPage, totalPages, groups, currentGroupFilter, currentStatusFilter = "" }: AccountsTableProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [isBulkActing, setIsBulkActing] = useState(false);
+    const [calendarAccountId, setCalendarAccountId] = useState<string | null>(null);
 
     // Toggle single row selection
     const toggleSelection = (login: number) => {
@@ -93,6 +96,17 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
             params.set('group', group);
         } else {
             params.delete('group');
+        }
+        params.set('page', '1'); // Reset to page 1
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const handleStatusFilterChange = (status: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (status) {
+            params.set('status', status);
+        } else {
+            params.delete('status');
         }
         params.set('page', '1'); // Reset to page 1
         router.push(`${pathname}?${params.toString()}`);
@@ -186,10 +200,21 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                         onChange={(e) => handleGroupFilterChange(e.target.value)}
                         className="bg-white border border-gray-200 text-[14px] font-medium text-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 block w-full sm:w-64 p-2.5 transition-all shadow-sm outline-none cursor-pointer"
                     >
-                        <option value="">All Groups</option>
-                        {groups.map(g => (
-                            <option key={g} value={g}>{g}</option>
-                        ))}
+                        <option value="">Server Group: All</option>
+
+                        <option value="AUS\contest\7401\grp3">HFT Phase 1</option>
+                        <option value="AUS\contest\7401\grp4">HFT Funded</option>
+                    </select>
+
+                    <select
+                        value={currentStatusFilter}
+                        onChange={(e) => handleStatusFilterChange(e.target.value)}
+                        className="bg-white border border-gray-200 text-[14px] font-medium text-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 block w-full sm:w-48 p-2.5 transition-all shadow-sm outline-none cursor-pointer"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="breached">Breached</option>
+                        <option value="disabled">Disabled</option>
                     </select>
                 </div>
             </div>
@@ -210,6 +235,7 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Status</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Addons</th>
                             <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap">Created</th>
+                            <th className="px-6 py-3.5 font-semibold text-gray-500 text-[11px] uppercase tracking-wider whitespace-nowrap text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 bg-white">
@@ -331,6 +357,18 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                                             })}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCalendarAccountId(account.id);
+                                            }}
+                                            className="p-1.5 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded bg-gray-50 border border-gray-100 transition-colors ml-auto"
+                                            title="View Calendar"
+                                        >
+                                            <CalendarDays size={16} />
+                                        </button>
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -381,6 +419,23 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
                                 </button>
                             </nav>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Calendar Modal */}
+            {calendarAccountId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm px-4">
+                    <div className="bg-[#0f1225] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+                        <button 
+                            onClick={() => setCalendarAccountId(null)}
+                            className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors z-10"
+                        >
+                            <X size={20} />
+                        </button>
+                        <div className="p-6 pt-10">
+                            <TradeMonthlyCalendar accountId={calendarAccountId} />
                         </div>
                     </div>
                 </div>

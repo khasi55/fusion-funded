@@ -5,6 +5,7 @@ import AccountSwitcher from "@/components/dashboard/AccountSwitcher";
 import TradingObjectives from "@/components/dashboard/TradingObjectives";
 import DetailedStats from "@/components/dashboard/DetailedStats";
 import AccountOverviewStats from "@/components/dashboard/AccountOverviewStats";
+import AccountManagerCard from "@/components/dashboard/AccountManagerCard";
 import RiskAnalysis from "@/components/dashboard/RiskAnalysis";
 
 import TradeMonthlyCalendar from "@/components/dashboard/TradeMonthlyCalendar";
@@ -304,45 +305,49 @@ function DashboardContent() {
                     ) : (
                         <>
                             {/* Page Title Row */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-6 md:mb-8 border-b border-white/10 pb-6 md:pb-8">
-                                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 md:mb-8 border-b border-white/10 pb-6 md:pb-8">
+                                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-tight shrink-0">
                                     Account {selectedAccount?.account_number ? selectedAccount.account_number.replace('SF', 'FF') : "-------"}
                                 </h1>
-                                <button
-                                    onClick={() => {
-                                        if (selectedAccount && !syncing) {
-                                            // Trigger refresh logic
-                                            const sync = async () => {
-                                                setSyncing(true);
-                                                try {
-                                                    await fetch('/api/mt5/sync-trades', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            login: selectedAccount.login,
-                                                            user_id: selectedAccount.user_id
-                                                        })
-                                                    });
-                                                    toast('Synced trades successfully', 'success');
-                                                } catch (err) {
-                                                    toast('Sync error', 'error');
-                                                } finally {
-                                                    setSyncing(false);
-                                                }
-                                            };
-                                            sync();
-                                        }
-                                    }}
-                                    disabled={syncing || !selectedAccount}
-                                    className={cn(
-                                        "px-4 md:px-6 py-2 md:py-2.5 bg-slate-200 active:bg-slate-300 text-slate-700 rounded-lg text-xs md:text-sm font-bold border border-slate-300 transition-all flex items-center gap-1.5 md:gap-2 shadow-sm touch-manipulation whitespace-nowrap",
-                                        syncing && "opacity-70 cursor-not-allowed"
-                                    )}
-                                >
-                                    <RotateCw size={14} className={cn(syncing && "animate-spin text-slate-600")} />
-                                    <span className="hidden sm:inline">Refresh</span>
-                                    <span className="sm:hidden">Sync</span>
-                                </button>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full xl:w-auto justify-end">
+                                    <AccountManagerCard />
+                                    <button
+                                        onClick={() => {
+                                            if (selectedAccount && !syncing) {
+                                                // Trigger refresh logic
+                                                const sync = async () => {
+                                                    setSyncing(true);
+                                                    try {
+                                                        await fetch('/api/mt5/sync-trades', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({
+                                                                login: selectedAccount.login,
+                                                                user_id: selectedAccount.user_id
+                                                            })
+                                                        });
+                                                        toast('Synced trades successfully', 'success');
+                                                    } catch (err) {
+                                                        toast('Sync error', 'error');
+                                                    } finally {
+                                                        setSyncing(false);
+                                                    }
+                                                };
+                                                sync();
+                                            }
+                                        }}
+                                        disabled={syncing || !selectedAccount}
+                                        className={cn(
+                                            "px-4 md:px-6 py-2 md:py-2.5 bg-slate-200 active:bg-slate-300 text-slate-700 rounded-lg text-xs md:text-sm font-bold border border-slate-300 transition-all flex items-center gap-1.5 md:gap-2 shadow-sm touch-manipulation whitespace-nowrap h-full",
+                                            syncing && "opacity-70 cursor-not-allowed"
+                                        )}
+                                        style={{ minHeight: "44px" }}
+                                    >
+                                        <RotateCw size={14} className={cn(syncing && "animate-spin text-slate-600")} />
+                                        <span className="hidden sm:inline">Refresh</span>
+                                        <span className="sm:hidden">Sync</span>
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Two Column Layout Grid */}

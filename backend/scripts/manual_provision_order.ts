@@ -130,7 +130,7 @@ async function main() {
                 login: mt5Data.login,
                 master_password: mt5Data.password,
                 investor_password: mt5Data.investor_password || '',
-                server: mt5Data.server || 'BULGE GROUP INVESTMENT',
+                server: mt5Data.server || 'OCEAN MARKET LIMITED',
                 platform: order.platform || 'MT5',
                 leverage: leverage,
                 group: mt5Group,
@@ -165,7 +165,7 @@ async function main() {
             fullName,
             String(mt5Data.login),
             mt5Data.password,
-            mt5Data.server || 'BULGE GROUP INVESTMENT',
+            mt5Data.server || 'OCEAN MARKET LIMITED',
             mt5Data.investor_password
         );
         console.log('✅ Email Sent.');

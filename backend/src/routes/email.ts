@@ -184,7 +184,7 @@ router.post('/send-account-credentials', authenticate, requireRole(['super_admin
                         </tr>
                         <tr>
                             <td style="padding: 8px 0;"><strong>Server:</strong></td>
-                            <td style="padding: 8px 0;">BULGE GROUP INVESTMENT</td>
+                            <td style="padding: 8px 0;">OCEAN MARKET LIMITED</td>
                         </tr>
                         <tr>
                             <td style="padding: 8px 0;"><strong>MT5 Group:</strong></td>
@@ -223,7 +223,7 @@ Account Details:
 - MT5 Login: ${login}
 - Master Password: ${masterPassword}
 - Investor Password: ${investorPassword}
-- Server: BULGE GROUP INVESTMENT
+- Server: OCEAN MARKET LIMITED
 - MT5 Group: ${mt5Group}
 
 IMPORTANT: Keep your master password secure. Never share it with anyone.
@@ -245,7 +245,7 @@ Fusion Funded Team
             name,
             login,
             masterPassword,
-            'BULGE GROUP INVESTMENT',
+            'OCEAN MARKET LIMITED',
             investorPassword
         );
 

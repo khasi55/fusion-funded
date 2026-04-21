@@ -112,7 +112,7 @@ export class AutomationService {
             const newLogin = mt5Data.login;
             const newPassword = mt5Data.password;
             const newInvestorPassword = mt5Data.investor_password || '';
-            const newServer = mt5Data.server || 'BULGE GROUP INVESTMENT';
+            const newServer = mt5Data.server || 'OCEAN MARKET LIMITED';
 
             // 5. Insert new challenge
             const { data: newChallenge, error: createError } = await supabase
@@ -172,6 +172,15 @@ export class AutomationService {
                         newServer,
                         newInvestorPassword
                     ).catch(err => console.error(`❌ [Automation] Funded Email failed for ${newLogin}:`, err.message));
+
+                    // Send the capital allocation certificate automatically!
+                    EmailService.sendPassCertificate(
+                        profile.email,
+                        profile.full_name || 'Trader',
+                        String(newLogin),
+                        Number(account.initial_balance)
+                    ).catch(err => console.error(`❌ [Automation] Pass Certificate Email failed for ${newLogin}:`, err.message));
+
                 } else {
                     EmailService.sendAccountCredentials(
                         profile.email,

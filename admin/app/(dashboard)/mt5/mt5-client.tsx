@@ -254,13 +254,9 @@ export default function AdminMT5Client() {
     const uniqueSizes = Array.from(new Set(accounts.map(a => a.initial_balance))).sort((a, b) => a - b);
 
     const MT5_GROUP_FILTERS = [
-        { label: "Lite - Instant Funding", value: "demo\\S\\0-SF" },
-        { label: "Lite - 1-Step Challenge", value: "demo\\S\\1-SF" },
-        { label: "Lite - 2-Step Challenge", value: "demo\\S\\2-SF" },
-        { label: "Prime - Instant Funding", value: "demo\\SF\\0-Pro" },
-        { label: "Prime - 1-Step Challenge", value: "demo\\SF\\1-Pro" },
-        { label: "Prime - 2-Step Challenge", value: "demo\\SF\\2-Pro" },
-        { label: "Funded Live Account", value: "SF Funded Live" },
+
+        { label: "HFT Phase 1", value: "AUS\\contest\\7401\\grp3" },
+        { label: "HFT Funded", value: "AUS\\contest\\7401\\grp4" },
     ];
 
     // Pagination Logic
@@ -471,9 +467,9 @@ export default function AdminMT5Client() {
                                                                 "{account.metadata.assignment_note}"
                                                             </div>
                                                             {account.metadata.assignment_image_url && (
-                                                                <a 
-                                                                    href={account.metadata.assignment_image_url} 
-                                                                    target="_blank" 
+                                                                <a
+                                                                    href={account.metadata.assignment_image_url}
+                                                                    target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="text-[10px] text-indigo-600 hover:text-indigo-700 font-bold flex items-center gap-1 mt-0.5"
                                                                 >

@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import QRCode from 'qrcode';
 import { EventEntryService } from './event-entry-service';
 import { supabase } from '../lib/supabase';
+import { CertificateService } from './certificate-service';
 
 export class EmailService {
     // SMTP Credentials
@@ -97,7 +98,7 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> BULGE GROUP INVESTMENT</p>
+                    <p><strong>Server:</strong> OCEAN MARKET LIMITED</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
@@ -109,7 +110,7 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: BULGE GROUP INVESTMENT\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
+        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: OCEAN MARKET LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -129,7 +130,7 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> BULGE GROUP INVESTMENT</p>
+                    <p><strong>Server:</strong> OCEAN MARKET LIMITED</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
@@ -141,7 +142,7 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: BULGE GROUP INVESTMENT\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
+        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: OCEAN MARKET LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -218,7 +219,7 @@ export class EmailService {
                 </div>
 
                 <p>You will receive your new credentials shortly via email if your challenge requires a new account creation.</p>
-                <p>Thank you for trading with BULGE GROUP INVESTMENT!</p>
+                <p>Thank you for trading with OCEAN MARKET LIMITED!</p>
             </div>
         `;
 
@@ -645,7 +646,37 @@ Fusion Funded Team
 
         const text = `Congratulations ${name}!\n\nYou have passed your challenge (Account ${login}). Your $${amount.toLocaleString()} Certificate of Capital Allocation is now available in your dashboard.`;
 
-        await this.sendEmail(email, subject, html, text);
+        // Generate Certificate PDF
+        let pdfAttachment = null;
+        try {
+            const { data: profile } = await supabase.from('profiles').select('id').eq('email', email).single();
+            if (profile?.id) {
+                const pdfBuffer = await CertificateService.generateAllocationCertificate(profile.id, name, amount);
+                if (pdfBuffer) {
+                    pdfAttachment = {
+                        filename: 'Capital_Allocation_Certificate.pdf',
+                        content: pdfBuffer,
+                        contentType: 'application/pdf'
+                    };
+                }
+            }
+        } catch (err) {
+            console.error('Failed to generate attachment:', err);
+        }
+
+        const mailOptions: any = {
+            from: `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`,
+            to: email,
+            subject: subject,
+            text: text,
+            html: html
+        };
+
+        if (pdfAttachment) {
+            mailOptions.attachments = [pdfAttachment];
+        }
+
+        await this.transporter.sendMail(mailOptions);
     }
 
     /**
@@ -687,7 +718,37 @@ Fusion Funded Team
 
         const text = `Great job ${name}!\n\nYour payout of $${amount.toLocaleString()} has been processed. Your Certificate of Payout is now available in your dashboard.`;
 
-        await this.sendEmail(email, subject, html, text);
+        // Generate Certificate PDF
+        let pdfAttachment = null;
+        try {
+            const { data: profile } = await supabase.from('profiles').select('id').eq('email', email).single();
+            if (profile?.id) {
+                const pdfBuffer = await CertificateService.generatePayoutCertificate(profile.id, name, amount);
+                if (pdfBuffer) {
+                    pdfAttachment = {
+                        filename: 'Payout_Certificate.pdf',
+                        content: pdfBuffer,
+                        contentType: 'application/pdf'
+                    };
+                }
+            }
+        } catch (err) {
+            console.error('Failed to generate attachment:', err);
+        }
+
+        const mailOptions: any = {
+            from: `"${this.FROM_NAME}" <${this.FROM_EMAIL}>`,
+            to: email,
+            subject: subject,
+            text: text,
+            html: html
+        };
+
+        if (pdfAttachment) {
+            mailOptions.attachments = [pdfAttachment];
+        }
+
+        await this.transporter.sendMail(mailOptions);
     }
 
     /**

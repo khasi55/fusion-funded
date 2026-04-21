@@ -8,7 +8,25 @@ import { fetchFromBackend } from "@/lib/backend-api";
 
 export default function ZenvesttPage() {
     return (
-        <div className="min-h-[80vh] flex flex-col items-center justify-center p-8 text-center space-y-8 max-w-4xl mx-auto">
+        <div className="min-h-[80vh] flex flex-col items-center justify-start pt-12 pb-8 px-8 text-center space-y-12 max-w-4xl mx-auto">
+
+            {/* Link to Zenvestt.com at Top */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full flex justify-center"
+            >
+                <a 
+                    href="https://www.zenvestt.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 hover:from-purple-600/40 hover:to-blue-600/40 border border-purple-500/30 text-white font-bold rounded-2xl shadow-[0_0_30px_rgba(147,51,234,0.15)] hover:shadow-[0_0_40px_rgba(147,51,234,0.3)] transition-all active:scale-95 text-base sm:text-lg backdrop-blur-md group"
+                >
+                    <span>Visit www.zenvestt.com</span>
+                    <Sparkles className="w-5 h-5 group-hover:animate-pulse text-purple-400" />
+                </a>
+            </motion.div>
 
             {/* Hero Section */}
             <motion.div
@@ -56,15 +74,7 @@ export default function ZenvesttPage() {
                 ))}
             </motion.div>
 
-            {/* Notification Form (Visual Only for now) */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="pt-8"
-            >
-
-            </motion.div>
+            {/* Remove from here */}
 
         </div>
     );

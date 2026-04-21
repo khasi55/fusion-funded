@@ -190,6 +190,7 @@ export default async function AccountsListPage({
                     currentPage={page}
                     totalPages={totalPages}
                     currentGroupFilter={groupFilter}
+                    currentStatusFilter={statusFilter}
                 />
             </div>
         </div>

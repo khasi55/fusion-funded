@@ -282,7 +282,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                 login: mt5Login,
                 master_password: masterPassword,
                 investor_password: investorPassword,
-                server: 'BULGE GROUP INVESTMENT',
+                server: 'OCEAN MARKET LIMITED',
                 platform: 'MT5',
                 group: finalGroup, // Save the assigned group
                 leverage: 100,
@@ -337,7 +337,7 @@ router.post('/assign', authenticate, requireRole(['super_admin', 'admin', 'sub_a
                 profile.full_name || 'Trader',
                 String(mt5Login),
                 masterPassword,
-                'BULGE GROUP INVESTMENT',
+                'OCEAN MARKET LIMITED',
                 investorPassword
             ).catch(err => console.error("Async Email Error:", err));
         }

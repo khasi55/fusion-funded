@@ -95,6 +95,40 @@ router.post('/send-custom-campaign', authenticate, requireRole(['super_admin', '
                 name: p.full_name || 'Trader'
             }));
 
+        } else if (targetGroup === 'all_users') {
+            const ALL_PROFILES = [];
+            const BATCH_SIZE = 1000;
+            let page = 0;
+            let hasMore = true;
+
+            while (hasMore) {
+                const { data: profiles, error: profilesError } = await supabaseAdmin
+                    .from('profiles')
+                    .select('email, full_name')
+                    .range(page * BATCH_SIZE, (page + 1) * BATCH_SIZE - 1);
+
+                if (profilesError) {
+                    console.error("Error fetching all users batch:", profilesError);
+                    return res.status(500).json({ error: 'Failed to fetch all users' });
+                }
+
+                if (profiles && profiles.length > 0) {
+                    ALL_PROFILES.push(...profiles);
+                    page++;
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            if (ALL_PROFILES.length === 0) {
+                return res.status(400).json({ error: 'No users found in the system' });
+            }
+
+            targetRecipients = ALL_PROFILES.map(p => ({
+                email: p.email,
+                name: p.full_name || 'Trader'
+            }));
+
         } else if (targetGroup === 'manual' && Array.isArray(recipients)) {
             // Use manually provided list
             targetRecipients = recipients;

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Calendar, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { useAccount } from "@/contexts/AccountContext";
+import { AccountContext } from "@/contexts/AccountContext";
 import { fetchFromBackend } from "@/lib/backend-api";
 
 interface DayData {
@@ -14,8 +14,10 @@ interface DayData {
     isToday: boolean;
 }
 
-export default function TradeMonthlyCalendar() {
-    const { selectedAccount } = useAccount();
+export default function TradeMonthlyCalendar({ accountId }: { accountId?: string }) {
+    const context = useContext(AccountContext);
+    const selectedAccount = context?.selectedAccount;
+    const targetAccountId = accountId || selectedAccount?.id;
     const [currentDate, setCurrentDate] = useState(new Date());
     const [calendarData, setCalendarData] = useState<DayData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,10 +33,10 @@ export default function TradeMonthlyCalendar() {
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     useEffect(() => {
-        if (selectedAccount) {
+        if (targetAccountId) {
             fetchTradeData();
         }
-    }, [currentDate, selectedAccount]);
+    }, [currentDate, targetAccountId]);
 
     const fetchTradeData = async () => {
         try {
@@ -61,19 +63,44 @@ export default function TradeMonthlyCalendar() {
             try {
                 const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
                 // Use backend API
-                const result = await fetchFromBackend(`/api/dashboard/calendar?month=${monthStr}&accountId=${selectedAccount?.id}`);
-                // Safely access trades
-                const tradeList = result.trades || [];
+                const result = await fetchFromBackend(`/api/dashboard/calendar?month=${monthStr}&accountId=${targetAccountId}`);
+                if (result.calendar && Array.isArray(result.calendar)) {
+                    // Use pre-computed calendar data from backend
+                    result.calendar.forEach((dayStat: any) => {
+                        const dayDate = new Date(dayStat.date);
+                        // Prevent off-by-one errors from timezones by parsing as local date or just splitting string
+                        // The format from DB is YYYY-MM-DD
+                        const day = parseInt(dayStat.date.split('-')[2], 10);
+                        tradesByDay[day] = {
+                            pnl: dayStat.profit,
+                            count: dayStat.trades
+                        };
+                    });
+                } else {
+                    // Fallback to manual calculation
+                    const tradeList = result.trades || [];
 
-                tradeList.forEach((trade: any) => {
-                    const tradeDate = new Date(trade.close_time || trade.open_time); // Use close_time primarily
-                    const day = tradeDate.getDate();
-                    if (!tradesByDay[day]) {
-                        tradesByDay[day] = { pnl: 0, count: 0 };
-                    }
-                    tradesByDay[day].pnl += trade.profit_loss || 0;
-                    tradesByDay[day].count += 1;
-                });
+                    tradeList.forEach((trade: any) => {
+                        const comment = (trade.comment || '').toLowerCase();
+                        const symbol = (trade.symbol || '');
+                        const isNonTrade = comment.includes('deposit') ||
+                            comment.includes('balance') ||
+                            comment.includes('initial') ||
+                            symbol.trim() === '' ||
+                            symbol === '#N/A' ||
+                            symbol === 'BALANCE' || Number(trade.lots) === 0;
+
+                        if (isNonTrade) return;
+
+                        const tradeDate = new Date(trade.close_time || trade.open_time); // Use close_time primarily
+                        const day = tradeDate.getDate();
+                        if (!tradesByDay[day]) {
+                            tradesByDay[day] = { pnl: 0, count: 0 };
+                        }
+                        tradesByDay[day].pnl += (Number(trade.profit_loss) || 0) + (Number(trade.commission) || 0) + (Number(trade.swap) || 0);
+                        tradesByDay[day].count += 1;
+                    });
+                }
             } catch (e) {
                 console.error("Failed to fetch calendar data", e);
                 // Continue with empty data, do not break grid

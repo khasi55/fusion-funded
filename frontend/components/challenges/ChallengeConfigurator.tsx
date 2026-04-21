@@ -26,6 +26,8 @@ const PLATFORMS = [
     { id: "mt5", label: "MetaTrader 5" }
 ];
 
+
+
 const PAYMENT_GATEWAYS = [
     { id: "upi_manual", label: "Domestic UPI", currency: "INR", desc: "Instant UPI/Bank Transfer", icon: "🇮🇳" },
     { id: "crypto_manual", label: "Crypto ", currency: "USD", desc: "USDT (Tron/BSC/ETH)", icon: "💎" }

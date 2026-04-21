@@ -29,7 +29,7 @@ export default function EmailsPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [bulkInput, setBulkInput] = useState("");
     const [mode, setMode] = useState<'manual' | 'bulk'>('manual');
-    const [targetGroup, setTargetGroup] = useState<'manual' | 'active_accounts'>('manual');
+    const [targetGroup, setTargetGroup] = useState<'manual' | 'active_accounts' | 'all_users'>('manual');
 
     // Email Content State
     const [subject, setSubject] = useState("");
@@ -110,7 +110,9 @@ export default function EmailsPage() {
             return;
         }
 
-        const targetDescription = targetGroup === 'active_accounts' ? 'ALL Active Accounts' : `${validRecipients.length} manual recipients`;
+        let targetDescription = `${validRecipients.length} manual recipients`;
+        if (targetGroup === 'active_accounts') targetDescription = 'ALL Active Accounts';
+        if (targetGroup === 'all_users') targetDescription = 'ALL Users';
 
         if (!confirm(`Are you sure you want to broadcast this email to ${targetDescription}?`)) {
             return;
@@ -234,7 +236,7 @@ export default function EmailsPage() {
                                 Targeting
                             </h2>
 
-                            <div className="flex gap-4 mb-6">
+                            <div className="flex flex-col gap-4 mb-6 sm:flex-row">
                                 <label className={`cursor-pointer flex-1 border rounded-xl p-4 transition-all ${targetGroup === 'manual' ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500' : 'border-gray-200 hover:border-indigo-200'}`}>
                                     <div className="flex items-center gap-2">
                                         <input
@@ -263,6 +265,21 @@ export default function EmailsPage() {
                                         <span className="font-semibold text-gray-900">Active Accounts</span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1 ml-6">All users with non-breached MT5 accounts.</p>
+                                </label>
+
+                                <label className={`cursor-pointer flex-1 border rounded-xl p-4 transition-all ${targetGroup === 'all_users' ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500' : 'border-gray-200 hover:border-indigo-200'}`}>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="targetGroup"
+                                            value="all_users"
+                                            checked={targetGroup === 'all_users'}
+                                            onChange={() => setTargetGroup('all_users')}
+                                            className="text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <span className="font-semibold text-gray-900">All Users</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 ml-6">Every registered user in the system.</p>
                                 </label>
                             </div>
 

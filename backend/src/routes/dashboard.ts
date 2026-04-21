@@ -22,9 +22,13 @@ router.get('/calendar', authenticate, async (req: AuthRequest, res: Response) =>
 
         let query = supabase
             .from('trades')
-            .select('close_time, profit_loss, commission, swap, comment')
-            .eq('user_id', user.id)
+            .select('close_time, profit_loss, commission, swap, comment, symbol, lots')
             .order('close_time', { ascending: true, nullsFirst: false });
+
+        // Apply tenancy check for standard users
+        if (user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'sub_admin') {
+            query = query.eq('user_id', user.id);
+        }
 
         // Filter by Account (Challenge ID)
         if (accountId) {

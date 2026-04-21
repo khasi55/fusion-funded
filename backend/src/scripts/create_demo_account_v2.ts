@@ -88,7 +88,7 @@ async function run() {
                     login: mt5Login,
                     master_password: masterPassword,
                     investor_password: investorPassword,
-                    server: 'BULGE GROUP INVESTMENT',
+                    server: 'OCEAN MARKET LIMITED',
                     platform: 'MT5',
                     group: mt5Group,
                     leverage: 100,

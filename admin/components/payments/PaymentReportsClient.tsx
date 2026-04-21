@@ -11,7 +11,8 @@ import {
     Upload,
     RefreshCw,
     Image,
-    ExternalLink
+    ExternalLink,
+    X
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -337,7 +338,13 @@ export function PaymentReportsClient() {
                         </div>
                         
                         <div className="flex items-center gap-3 pointer-events-auto">
-                            {/* All buttons removed per user request */}
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+                                className="p-3 bg-white/5 hover:bg-white/15 text-white/70 hover:text-white rounded-xl transition-all border border-white/10 hover:border-white/30 group backdrop-blur-md flex items-center justify-center"
+                                title="Close Image"
+                            >
+                                <X size={20} className="group-hover:scale-110 transition-transform" />
+                            </button>
                         </div>
                     </div>
 

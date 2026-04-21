@@ -5,8 +5,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import { EmailService } from '../services/email-service';
 
 async function test() {
-    const testEmail = 'siddareddy1947@gmail.com';
-    const testName = 'Siddareddy';
+    const testEmail = 'khasireddy3@gmail.com';
+    const testName = 'Khasi Reddy';
     
     console.log(`🚀 Sending test Pass Certificate to ${testEmail}...`);
     await EmailService.sendPassCertificate(testEmail, testName, '123456', 50000);

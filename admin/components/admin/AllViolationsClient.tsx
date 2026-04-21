@@ -1,12 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AllViolationsClient({ enrichedAccounts }: { enrichedAccounts: any[] }) {
     const searchParams = useSearchParams();
     const searchTerm = searchParams.get('search') || "";
+    
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 20;
 
     const filteredAccounts = useMemo(() => {
         if (!searchTerm) return enrichedAccounts;
@@ -21,6 +25,17 @@ export default function AllViolationsClient({ enrichedAccounts }: { enrichedAcco
             return loginMatch || nameMatch || emailMatch || ticketMatch;
         });
     }, [enrichedAccounts, searchTerm]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    const paginatedAccounts = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredAccounts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [filteredAccounts, currentPage]);
+
+    const totalPages = Math.ceil(filteredAccounts.length / ITEMS_PER_PAGE);
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -43,7 +58,7 @@ export default function AllViolationsClient({ enrichedAccounts }: { enrichedAcco
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredAccounts?.map((account: any) => (
+                        {paginatedAccounts?.map((account: any) => (
                             <tr key={account.challengeId} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4">
                                     <Link
@@ -97,7 +112,7 @@ export default function AllViolationsClient({ enrichedAccounts }: { enrichedAcco
                                 </td>
                             </tr>
                         ))}
-                        {filteredAccounts?.length === 0 && (
+                        {paginatedAccounts?.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                     {enrichedAccounts.length === 0
@@ -109,6 +124,33 @@ export default function AllViolationsClient({ enrichedAccounts }: { enrichedAcco
                     </tbody>
                 </table>
             </div>
+
+            {totalPages > 1 && (
+                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-gray-50">
+                    <div className="text-sm text-gray-500">
+                        Showing <span className="font-medium text-gray-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-gray-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredAccounts.length)}</span> of <span className="font-medium text-gray-900">{filteredAccounts.length}</span> results
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <span className="text-sm font-medium text-gray-600 min-w-[3rem] text-center">
+                            {currentPage} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1045,7 +1045,6 @@ router.put('/admin/:id/approve', authenticate, requireRole(['super_admin', 'payo
 
 
 
-        /* 
         // Notify User via Email & Issue Certificate
         try {
             const { data: payout } = await supabase.from('payout_requests').select('user_id, amount, metadata').eq('id', id).single();
@@ -1055,31 +1054,15 @@ router.put('/admin/:id/approve', authenticate, requireRole(['super_admin', 'payo
                     // 1. Send Standard Notice
                     await EmailService.sendPayoutApprovedNotice(profile.email, profile.full_name || 'User', payout.amount, finalTransactionId);
                     
-                    // 2. Issue Certificate
-                    const certNumber = `FF-PAY-${Math.floor(100000 + Math.random() * 900000)}`;
-                    const challengeId = payout.metadata?.challenge_id;
-                    
-                    await supabase.from('certificates').insert({
-                        user_id: payout.user_id,
-                        challenge_id: challengeId,
-                        type: 'payout',
-                        certificate_number: certNumber,
-                        full_name: profile.full_name || 'Trader',
-                        amount: payout.amount,
-                        metadata: {
-                            transaction_id: finalTransactionId,
-                            date: new Date().toISOString()
-                        }
-                    });
+                    /* We don't need to manually insert into certificates DB here anymore since CertificateService.saveToDatabase takes care of it natively inside EmailService.sendPayoutCertificate */
 
-                    // 3. Send Certificate Email
+                    // 2. Send Certificate Email (automatically generates PDF and logs to DB)
                     await EmailService.sendPayoutCertificate(profile.email, profile.full_name || 'Trader', Number(payout.amount));
                 }
             }
         } catch (emailErr) {
             console.error('Failed to issue payout certificate or send email:', emailErr);
         }
-        */
 
         res.json({
             success: true,
