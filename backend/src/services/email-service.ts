@@ -8,11 +8,11 @@ export class EmailService {
     // SMTP Credentials
     private static SMTP_HOST = process.env.SMTP_HOST || 'smtp.elasticemail.com';
     private static SMTP_PORT = Number(process.env.SMTP_PORT) || 2525;
-    private static SMTP_USER = process.env.SMTP_USER || 'info@oceanmarket.com';
+    private static SMTP_USER = process.env.SMTP_USER || 'info@thefusionfunded.com';
     private static SMTP_PASS = process.env.SMTP_PASS || '71996BAF006E6B187B73F684FCE6B7819578';
 
-    private static FROM_EMAIL = process.env.FROM_EMAIL || 'info@oceanmarket.com';
-    private static FROM_NAME = 'Ocean Market';
+    private static FROM_EMAIL = process.env.FROM_EMAIL || 'info@thefusionfunded.com';
+    private static FROM_NAME = 'Fusion Funded';
 
     private static transporter = nodemailer.createTransport({
         host: EmailService.SMTP_HOST,
@@ -71,7 +71,7 @@ export class EmailService {
                 </div>
 
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center;">
-                    <p>Sent by <strong>Ocean Market</strong></p>
+                    <p>Sent by <strong>Fusion Funded</strong></p>
                     <p>If you no longer wish to receive these emails, you can update your preferences in your dashboard.</p>
                 </div>
             </div>
@@ -98,7 +98,7 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> OCEAN MARKET LIMITED</p>
+                    <p><strong>Server:</strong> FUSION FUNDED LIMITED</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
@@ -110,7 +110,7 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: OCEAN MARKET LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
+        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: FUSION FUNDED LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -130,19 +130,19 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> OCEAN MARKET LIMITED</p>
+                    <p><strong>Server:</strong> FUSION FUNDED LIMITED</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
                 <p>Please download the MT5 platform and login using these credentials to start your funded journey.</p>
                 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
-                    Thank you for trading with Ocean Market!
+                    Thank you for trading with Fusion Funded!
                 </p>
             </div>
         `;
 
-        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: OCEAN MARKET LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Ocean Market!`;
+        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: FUSION FUNDED LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -219,11 +219,11 @@ export class EmailService {
                 </div>
 
                 <p>You will receive your new credentials shortly via email if your challenge requires a new account creation.</p>
-                <p>Thank you for trading with OCEAN MARKET LIMITED!</p>
+                <p>Thank you for trading with FUSION FUNDED LIMITED!</p>
             </div>
         `;
 
-        const text = `Congratulations ${name}!\n\nYour account ${login} has passed the ${phase}.\n\nOur team will review and upgrade your account shortly. Thank you for trading with Ocean Market!`;
+        const text = `Congratulations ${name}!\n\nYour account ${login} has passed the ${phase}.\n\nOur team will review and upgrade your account shortly. Thank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -260,7 +260,7 @@ export class EmailService {
 
                 <p style="margin-top: 25px; font-size: 13px; color: #666;">
                     Best regards,<br/>
-                    <strong>Ocean Market Team</strong>
+                    <strong>Fusion Funded Team</strong>
                 </p>
             </div>
         `;
@@ -277,7 +277,7 @@ Prepare your strategy and compete with the best.
 IMPORTANT: The competition starts this coming Monday. Trading begins on that day.
 
 Best regards,
-Ocean Market Team
+Fusion Funded Team
         `;
 
         await this.sendEmail(email, subject, html, text);
@@ -294,7 +294,7 @@ Ocean Market Team
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
         
         <div style="background: linear-gradient(135deg, #0d47a1 0%, #002171 100%); padding: 40px 20px; text-align: center; color: white;">
-            <h1 style="margin: 0; font-size: 28px; font-weight: 800;">OCEAN MARKET COMMUNITY EVENT</h1>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 800;">FUSION FUNDED COMMUNITY EVENT</h1>
            
         </div>
 
@@ -302,7 +302,7 @@ Ocean Market Team
             <h2>Dear ${name},</h2>
 
             <p style="font-size: 16px; line-height: 1.6;">
-                We are delighted to invite you to the <strong>Ocean Market Community Event</strong> — an exclusive
+                We are delighted to invite you to the <strong>Fusion Funded Community Event</strong> — an exclusive
                 in-person gathering for our valued traders and partners.
                 <br><br>
                 This event is designed to help you connect with our team, interact with fellow traders, 
@@ -344,15 +344,15 @@ Ocean Market Team
 
             <p style="text-align:center; font-size:13px;">
                 Warm Regards,<br>
-                <strong>Ocean Market Team</strong><br>
-                <a href="https://dashboard.oceanmarket.com">www.oceanmarket.com</a>
+                <strong>Fusion Funded Team</strong><br>
+                <a href="https://dashboard.thefusionfunded.com">www.thefusionfunded.com</a>
             </p>
         </div>
     </div>`;
     }
 
     static async sendEventInvite(email: string, name: string) {
-        const subject = `Invitation to Ocean Market Community Event – Mumbai`;
+        const subject = `Invitation to Fusion Funded Community Event – Mumbai`;
 
         try {
             // Create Unique Pass in DB
@@ -362,7 +362,7 @@ Ocean Market Team
             const qrData = JSON.stringify({
                 name: name,
                 email: email,
-                event: 'Ocean Market Community Event',
+                event: 'Fusion Funded Community Event',
                 date: '2026-01-30',
                 id: uniqueCode
             });
@@ -385,7 +385,7 @@ Dear ${name},
 
 You are invited!
 
-We are pleased to invite you to the Ocean Market Exclusive Event. This event brings together our community for an in-person trading meet up, networking, and reward ceremony.
+We are pleased to invite you to the Fusion Funded Exclusive Event. This event brings together our community for an in-person trading meet up, networking, and reward ceremony.
 
 Date: 30th January  
 Venue: Aurika Hotel, Mumbai  
@@ -398,7 +398,7 @@ Requirement: Please bring your personal laptop.
 Please show the QR code attached to this email at the entrance.
 
 Regards,  
-Ocean Market Team
+Fusion Funded Team
 `;
 
             await this.transporter.sendMail({
@@ -474,11 +474,11 @@ Ocean Market Team
                 </div>
 
                 <p>The funds should reach your designated account shortly depending on the payment method's processing time.</p>
-                <p>Thank you for trading with Ocean Market!</p>
+                <p>Thank you for trading with Fusion Funded!</p>
             </div>
         `;
 
-        const text = `Dear ${name},\n\nYour payout request for $${amount.toFixed(2)} has been approved and processed. Transaction ID: ${transactionId}.\n\nThank you for trading with Ocean Market!`;
+        const text = `Dear ${name},\n\nYour payout request for $${amount.toFixed(2)} has been approved and processed. Transaction ID: ${transactionId}.\n\nThank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -635,11 +635,11 @@ Ocean Market Team
                         Your certificate is now available in your dashboard under the "Certificates" tab.
                     </p>
 
-                    <a href="https://dashboard.oceanmarket.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #0d47a1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">View Certificate</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
-                    <p>Sent by <strong>Ocean Market</strong></p>
+                    <p>Sent by <strong>Fusion Funded</strong></p>
                 </div>
             </div>
         `;
@@ -707,11 +707,11 @@ Ocean Market Team
                         You can download your payout certificate anytime from your member portal.
                     </p>
 
-                    <a href="https://dashboard.oceanmarket.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/certificates" style="display: inline-block; margin-top: 25px; padding: 12px 30px; background-color: #1a237e; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Member Portal</a>
                 </div>
 
                 <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee;">
-                    <p>Sent by <strong>Ocean Market</strong></p>
+                    <p>Sent by <strong>Fusion Funded</strong></p>
                 </div>
             </div>
         `;
@@ -772,7 +772,7 @@ Ocean Market Team
                 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
                     Best regards,<br/>
-                    <strong>The Ocean Market Team</strong>
+                    <strong>The Fusion Funded Team</strong>
                 </p>
             </div>
         `;
@@ -802,7 +802,7 @@ Ocean Market Team
                 <p><strong>Tips for success:</strong> Ensure the photos are clear, all corners of the ID are visible, and there is no glare on the document.</p>
                 
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://dashboard.oceanmarket.com/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
+                    <a href="https://dashboard.thefusionfunded.com/dashboard/profile" style="background-color: #0d47a1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Retry Verification</a>
                 </div>
 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
@@ -811,7 +811,7 @@ Ocean Market Team
             </div>
         `;
 
-        const text = `Dear ${name},\n\nYour KYC verification was rejected.\n\nReason: ${reason}\n\nPlease log in to your dashboard at Ocean Market to retry verification with clearer documents.`;
+        const text = `Dear ${name},\n\nYour KYC verification was rejected.\n\nReason: ${reason}\n\nPlease log in to your dashboard at Fusion Funded to retry verification with clearer documents.`;
 
         await this.sendEmail(email, subject, html, text);
     }
