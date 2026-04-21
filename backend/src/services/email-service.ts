@@ -98,7 +98,7 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> FUSION FUNDED LIMITED</p>
+                    <p><strong>Server:</strong> Ocean Markets Limited</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
@@ -110,7 +110,7 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: FUSION FUNDED LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
+        const text = `Dear ${name},\n\nYour new trading account has been created.\n\nLogin: ${login}\nPassword: ${password}\nServer: Ocean Markets Limited\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nPlease login to MT5 with these details.`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -130,7 +130,7 @@ export class EmailService {
                 <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
                     <p><strong>Login:</strong> ${login}</p>
                     <p><strong>Password:</strong> ${password}</p>
-                    <p><strong>Server:</strong> FUSION FUNDED LIMITED</p>
+                    <p><strong>Server:</strong> Ocean Markets Limited</p>
                     ${investorPassword ? `<p><strong>Investor Password:</strong> ${investorPassword}</p>` : ''}
                 </div>
 
@@ -142,7 +142,7 @@ export class EmailService {
             </div>
         `;
 
-        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: FUSION FUNDED LIMITED\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
+        const text = `Dear ${name},\n\nCongratulations! Challenge Completed\nWe’re excited to inform you that your Live Funded Account is now ready to use! Here is your login details.\n\nLogin: ${login}\nPassword: ${password}\nServer: Ocean Markets Limited\n${investorPassword ? `Investor Password: ${investorPassword}\n` : ''}\n\nThank you for trading with Fusion Funded!`;
 
         await this.sendEmail(email, subject, html, text);
     }
@@ -219,7 +219,7 @@ export class EmailService {
                 </div>
 
                 <p>You will receive your new credentials shortly via email if your challenge requires a new account creation.</p>
-                <p>Thank you for trading with FUSION FUNDED LIMITED!</p>
+                <p>Thank you for trading with Fusion Funded</p>
             </div>
         `;
 
