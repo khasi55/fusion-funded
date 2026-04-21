@@ -10,6 +10,25 @@ export class CertificateService {
     private static PAYOUT_TEMPLATE = path.join(__dirname, '../assets/certificates/payout_template.jpg');
 
     /**
+     * Checks if a template exists and provides helpful error logging
+     */
+    private static async validateTemplate(templatePath: string): Promise<boolean> {
+        try {
+            const fs = require('fs');
+            if (!fs.existsSync(templatePath)) {
+                console.error(`CRITICAL ERROR: Certificate template missing at ${templatePath}`);
+                console.error(`Current directory: ${process.cwd()}`);
+                console.error(`__dirname: ${__dirname}`);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Error validating template path:', error);
+            return false;
+        }
+    }
+
+    /**
      * Generates an Allocation (Pass) Certificate
      * Returns the PDF Buffer for email attachment.
      */
@@ -20,6 +39,11 @@ export class CertificateService {
     ): Promise<Buffer | null> {
         try {
             console.log(`Generating Allocation Certificate for ${name}...`);
+            
+            if (!await this.validateTemplate(this.ALLOCATION_TEMPLATE)) {
+                return null;
+            }
+
             const img = await loadImage(this.ALLOCATION_TEMPLATE);
             const canvas = new Canvas(img.width, img.height);
             const ctx = canvas.getContext('2d');
@@ -71,6 +95,11 @@ export class CertificateService {
     ): Promise<Buffer | null> {
         try {
             console.log(`Generating Payout Certificate for ${name}...`);
+
+            if (!await this.validateTemplate(this.PAYOUT_TEMPLATE)) {
+                return null;
+            }
+
             const img = await loadImage(this.PAYOUT_TEMPLATE);
             const canvas = new Canvas(img.width, img.height);
             const ctx = canvas.getContext('2d');
