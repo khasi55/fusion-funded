@@ -8,6 +8,32 @@ export class CertificateService {
     // Template paths
     private static ALLOCATION_TEMPLATE = path.join(__dirname, '../assets/certificates/allocation_template.jpg');
     private static PAYOUT_TEMPLATE = path.join(__dirname, '../assets/certificates/payout_template.jpg');
+    private static BOLD_FONT = path.join(__dirname, '../assets/fonts/Arial-Bold.ttf');
+
+    static {
+        try {
+            // Register bundled font to avoid Fontconfig dependency issues on Linux
+            const fontPath = path.join(__dirname, '../src/assets/fonts/Arial-Bold.ttf');
+            // We use a more robust fallback path for both src and dist contexts
+            const possiblePaths = [
+                path.join(__dirname, '../assets/fonts/Arial-Bold.ttf'),
+                path.join(__dirname, '../../src/assets/fonts/Arial-Bold.ttf'),
+                path.resolve(process.cwd(), 'src/assets/fonts/Arial-Bold.ttf'),
+                path.resolve(process.cwd(), 'dist/assets/fonts/Arial-Bold.ttf')
+            ];
+
+            for (const p of possiblePaths) {
+                const fs = require('fs');
+                if (fs.existsSync(p)) {
+                    registerFont(p, { family: 'CustomArial', weight: 'bold' });
+                    console.log(`Successfully registered certificate font from: ${p}`);
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error('Error registering font:', error);
+        }
+    }
 
     /**
      * Checks if a template exists and provides helpful error logging
@@ -52,20 +78,20 @@ export class CertificateService {
             ctx.drawImage(img, 0, 0);
 
             // Draw Name (Center)
-            ctx.font = 'bold 44px Arial';
+            ctx.font = 'bold 44px CustomArial';
             ctx.fillStyle = '#1A1A1A';
             ctx.textAlign = 'center';
             ctx.fillText(name.toUpperCase(), img.width / 2, img.height * 0.50);
-
+ 
             // Draw Account Size
-            ctx.font = 'bold 28px Arial';
+            ctx.font = 'bold 28px CustomArial';
             ctx.fillStyle = '#1A1A1A';
             ctx.textAlign = 'center';
             ctx.fillText(`$${accountSize.toLocaleString()}`, img.width * 0.30, img.height * 0.76);
-
+ 
             // Draw Date
             const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 24px CustomArial';
             ctx.fillText(today, img.width * 0.73, img.height * 0.76);
 
             // 1. Get JPEG Buffer
@@ -108,19 +134,19 @@ export class CertificateService {
             ctx.drawImage(img, 0, 0);
 
             // Draw Name
-            ctx.font = 'bold 40px Arial';
+            ctx.font = 'bold 40px CustomArial';
             ctx.fillStyle = '#FFFFFF';
             ctx.textAlign = 'center';
             ctx.fillText(name.toUpperCase(), img.width / 2, img.height * 0.33);
-
+ 
             // Draw Payout Amount
-            ctx.font = 'bold 56px Arial';
+            ctx.font = 'bold 56px CustomArial';
             ctx.fillStyle = '#FFFFFF';
             ctx.fillText(`$${payoutAmount.toLocaleString()}`, img.width / 2, img.height * 0.56);
-
+ 
             // Draw Date
             const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 24px CustomArial';
             ctx.textAlign = 'center';
             ctx.fillText(today, img.width * 0.22, img.height * 0.765);
 
