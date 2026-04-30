@@ -17,7 +17,8 @@ import {
     LogOut,
     ChevronLeft,
     Swords,
-    Sparkles
+    Sparkles,
+    Download
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -38,6 +39,7 @@ const menuItems: { icon: any, label: string, href: string }[] = [
     { icon: Wallet, label: "Payouts", href: "/payouts" },
     { icon: Users, label: "Affiliate", href: "/affiliate" },
     { icon: Sparkles, label: "Zenvestt", href: "/zenvestt" },
+    { icon: Download, label: "Platforms", href: "/platforms" },
     { icon: Settings, label: "Settings", href: "/settings" },
 ];
 

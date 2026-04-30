@@ -9,7 +9,8 @@ import {
     Shield,
     HelpCircle,
     Home,
-    Phone
+    Phone,
+    Download
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,6 +21,7 @@ import { motion } from "framer-motion";
 const menuItems = [
     // { icon: Home, label: "Home", href: "/" },
     { icon: CreditCard, label: "Plans", href: "/checkoutpage" },
+    { icon: Download, label: "Platforms", href: "/platforms" },
     // { icon: Shield, label: "Features", href: "/features" },
     // { icon: HelpCircle, label: "FAQ", href: "/faq" },
     // { icon: Phone, label: "Contact", href: "/contact" },

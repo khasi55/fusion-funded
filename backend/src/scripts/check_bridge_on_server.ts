@@ -13,7 +13,7 @@ async function checkBridge() {
     const testParams = {
         name: 'Server Test',
         email: 'server_test@example.com',
-        group: 'AUS\\contest\\7401\\grp2',
+        group: 'AUS\\Live\\7401\\grp2',
         leverage: 100,
         balance: 1000,
     };

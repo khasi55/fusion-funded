@@ -125,11 +125,11 @@ export default function AccountAssignmentForm({ users = [] }: AccountAssignmentF
 
     // 1. Get MT5 Group String
     const getMt5Group = () => {
-        if (category === 'funded') return "AUS\\contest\\7401\\grp4";
+        if (category === 'funded') return "AUS\\Live\\7401\\grp4";
         if (category === 'direct_funded') return "demo\\S\\0-Direct-SF";
         if (category === 'competition') return "demo\\SF\\0-Demo\\comp";
 
-        return "AUS\\contest\\7401\\grp3"; // Default HFT Challenge Group
+        return "AUS\\Live\\7401\\grp3"; // Default HFT Challenge Group
     };
 
     // 2. Get Plan Type Display Name

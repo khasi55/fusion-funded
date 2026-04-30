@@ -220,7 +220,7 @@ export class PaymentService {
 
         // MT5 Group Resolution (Enforced: only this group exists in current setup)
         // MT5 Group Resolution
-        let mt5Group = order.metadata?.group || 'AUS\\contest\\7401\\grp3';
+        let mt5Group = order.metadata?.group || 'AUS\\Live\\7401\\grp3';
         let leverage = 100;
 
         console.log(`[PaymentService] Creating MT5 account for ${email} in group ${mt5Group} with size ${order.account_size}...`);

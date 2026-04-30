@@ -585,7 +585,7 @@ export default function ChallengeConfigurator() {
                 return;
             }
 
-            const mt5Group = 'AUS\\contest\\7401\\grp3';
+            const mt5Group = 'AUS\\Live\\7401\\grp3';
             const isBrowser = typeof window !== 'undefined';
             const backendUrl = isBrowser ? "" : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.fusionfunded.co');
             const orderId = `FF${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

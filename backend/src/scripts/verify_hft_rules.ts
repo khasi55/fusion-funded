@@ -4,13 +4,13 @@ async function verify() {
     console.log('🔍 Testing HFT Rule Resolution...');
     
     // Case 1: GRP3 (Phase 1) with generic "Phase 1" type
-    const rules1 = await RulesService.getRules('AUS\\contest\\7401\\grp3', 'Phase 1');
+    const rules1 = await RulesService.getRules('AUS\\Live\\7401\\grp3', 'Phase 1');
     console.log('\n--- Case 1: GRP3 + "Phase 1" ---');
     console.log('Daily Loss %:', rules1.max_daily_loss_percent);
     console.log('Expected: 7');
     
     // Case 2: GRP4 (Funded) with generic "Phase 1" type
-    const rules2 = await RulesService.getRules('AUS\\contest\\7401\\grp4', 'Phase 1');
+    const rules2 = await RulesService.getRules('AUS\\Live\\7401\\grp4', 'Phase 1');
     console.log('\n--- Case 2: GRP4 + "Phase 1" ---');
     console.log('Daily Loss %:', rules2.max_daily_loss_percent);
     console.log('Expected: 7');

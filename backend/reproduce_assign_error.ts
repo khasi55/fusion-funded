@@ -14,7 +14,7 @@ async function reproduce() {
     // We'll mimic the POST /api/mt5/assign request
     const payload = {
         email: 'khasireddy3@gmail.com',
-        mt5Group: 'AUS\\contest\\7401\\grp2',
+        mt5Group: 'AUS\\Live\\7401\\grp2',
         accountSize: 100000,
         planType: 'HFT 2.0 Phase 1 (grp2)'
     };

@@ -239,7 +239,7 @@ function CheckoutContent() {
             
             // HFT Branding (Specific requirement grp3)
             if (type === 'hft') {
-                mt5Group = 'AUS\\contest\\7401\\grp3';
+                mt5Group = 'AUS\\Live\\7401\\grp3';
             }
             // Lite (S folders)
             else if (model === 'lite') {

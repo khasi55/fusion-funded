@@ -15,17 +15,17 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const updates = {
-    "AUS\\contest\\7401\\grp2": {
+    "AUS\\Live\\7401\\grp2": {
         "max_drawdown_percent": 10.0,
         "daily_drawdown_percent": 7.0,
         "reset_hour_gmt": 22
     },
-    "AUS\\contest\\7401\\grp3": {
+    "AUS\\Live\\7401\\grp3": {
         "max_drawdown_percent": 10.0,
         "daily_drawdown_percent": 7.0,
         "reset_hour_gmt": 22
     },
-    "AUS\\contest\\7401\\grp4": {
+    "AUS\\Live\\7401\\grp4": {
         "max_drawdown_percent": 10.0,
         "daily_drawdown_percent": 7.0,
         "reset_hour_gmt": 22

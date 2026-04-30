@@ -202,8 +202,8 @@ export function AccountsTable({ accounts, currentPage, totalPages, groups, curre
                     >
                         <option value="">Server Group: All</option>
 
-                        <option value="AUS\contest\7401\grp3">HFT Phase 1</option>
-                        <option value="AUS\contest\7401\grp4">HFT Funded</option>
+                        <option value="AUS\Live\7401\grp3">HFT Phase 1</option>
+                        <option value="AUS\Live\7401\grp4">HFT Funded</option>
                     </select>
 
                     <select

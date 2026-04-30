@@ -11,9 +11,9 @@ const MT5_GROUPS = {
     "Prime Instant Funding": "demo\\SF\\0-Pro",
     "Prime 1-Step Challenge": "demo\\SF\\1-Pro",
     "Prime 2-Step Challenge": "demo\\SF\\2-Pro",
-    "HFT 2.0 Phase 1 (grp2)": "AUS\\contest\\7401\\grp2",
-    "HFT 2.0 Phase 2 (grp3)": "AUS\\contest\\7401\\grp3",
-    "HFT 2.0 Funded (grp4)": "AUS\\contest\\7401\\grp4",
+    "HFT 2.0 Phase 1 (grp2)": "AUS\\Live\\7401\\grp2",
+    "HFT 2.0 Phase 2 (grp3)": "AUS\\Live\\7401\\grp3",
+    "HFT 2.0 Funded (grp4)": "AUS\\Live\\7401\\grp4",
     "Funded Live Account": "SF Funded Live",
     "Competition Account": "demo\\SF\\0-Demo\\comp",
 };
