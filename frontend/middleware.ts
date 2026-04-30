@@ -37,6 +37,6 @@ export const config = {
          * - api (backend routes)
          * - auth (supabase auth callback)
          */
-        '/((?!_next/static|_next/data|_next/image|favicon.ico|checkoutpage|login|api|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/data|_next/image|favicon.ico|checkoutpage|login|api|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp|exe|apk)$).*)',
     ],
 }
